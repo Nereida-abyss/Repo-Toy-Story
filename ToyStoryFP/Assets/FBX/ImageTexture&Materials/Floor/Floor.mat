@@ -59,7 +59,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 5
-    - _Parallax: 0.024
+    - _Parallax: 0.0481
     - _Smoothness: 0.5
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
