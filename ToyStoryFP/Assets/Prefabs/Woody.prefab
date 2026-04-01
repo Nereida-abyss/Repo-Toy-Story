@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Woody
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: c1fe6f1bf53c1ff4882f318bc91b1716, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 6af3c838e07de634a976766dada23555, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
