@@ -1375,6 +1375,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1017822263 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3372253933989874752, guid: f81a6624060cdbf4cac630d3c6a239c3, type: 3}
+  m_PrefabInstance: {fileID: 1418183042}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1017822266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017822263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1b84675b4398484899766166b644a8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationTest
+  horizontal: 0
+  vertical: 0
 --- !u!1001 &1020377054
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1711,7 +1730,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2230486898179339370, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1441259861}
   m_SourcePrefab: {fileID: 100100000, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
 --- !u!1001 &1418183042
 PrefabInstance:
@@ -3156,8 +3178,30 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3372253933989874752, guid: f81a6624060cdbf4cac630d3c6a239c3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1017822266}
   m_SourcePrefab: {fileID: 100100000, guid: f81a6624060cdbf4cac630d3c6a239c3, type: 3}
+--- !u!1 &1441259858 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2230486898179339370, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
+  m_PrefabInstance: {fileID: 1410411908}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1441259861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441259858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1b84675b4398484899766166b644a8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationTest
+  horizontal: 0
+  vertical: 0
 --- !u!1 &1442020141
 GameObject:
   m_ObjectHideFlags: 0
