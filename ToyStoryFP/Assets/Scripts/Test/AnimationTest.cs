@@ -10,6 +10,8 @@ public class AnimationTest : MonoBehaviour
 
     private Animator animator; 
 
+    public bool Jump;
+
 
 
     void Start()
@@ -22,5 +24,11 @@ public class AnimationTest : MonoBehaviour
     {
         animator.SetFloat("Horizontal", horizontal);
         animator.SetFloat("Vertical", vertical);
+
+        if (Jump)
+        {
+            Jump = false;
+            animator.SetTrigger("Jump");
+        }
     }
 }
