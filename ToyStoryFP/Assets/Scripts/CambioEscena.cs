@@ -9,8 +9,42 @@ public class CambioEscena : MonoBehaviour
         SceneManager.LoadScene("Gameplay");
     }
 
+    public void VolverAlMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+        Time.timeScale = 1f;
+    }
+
+    public void RestartGamePlay()
+    {
+        string escenaActual = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene(escenaActual);
+        Time.timeScale = 1f;
+    }
+
+    public void NextScene()
+    {
+        int siguiente = SceneManager.GetActiveScene().buildIndex + 1;
+        if (siguiente < SceneManager.sceneCountInBuildSettings)
+        {
+            SceneManager.LoadScene(siguiente);
+        }
+    }
+
+    public void GoToCredits()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Credits");
+    }
+
     public void ExitGame()
     {
-         Application.Quit();
+        Debug.Log("Has cerrado el juego");
+
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
     }
 }
