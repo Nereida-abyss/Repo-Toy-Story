@@ -29,7 +29,4 @@ public class UIManager : MonoBehaviour
         panelDerrota.SetActive(true);
         Time.timeScale = 0f;
     }
-
-
-
 }
