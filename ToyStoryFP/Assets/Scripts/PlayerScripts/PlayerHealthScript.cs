@@ -2,15 +2,16 @@ using UnityEngine;
 
 public class PlayerHealthScript : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public int health;
 
-    // Update is called once per frame
-    void Update()
+    public void TakeDamage(int _damage)
     {
-        
+        health -= _damage;
+
+
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }
