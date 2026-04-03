@@ -13065,7 +13065,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "T\xEDtulo del juego"
+  m_text: "Andy\u2019s Room: No Escape"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4ec3713a44b227b49874cb88afcd4373, type: 2}
   m_sharedMaterial: {fileID: 8269703038248395448, guid: 4ec3713a44b227b49874cb88afcd4373, type: 2}
@@ -13092,14 +13092,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 72
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_fontStyle: 16
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
