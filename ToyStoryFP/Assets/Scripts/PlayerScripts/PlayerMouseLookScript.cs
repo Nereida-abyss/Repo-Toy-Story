@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class MouseLook : MonoBehaviour
+public class MouseLookScript : MonoBehaviour
 {
-    public static MouseLook instance;
+    public static MouseLookScript instance;
 
     [Header("Mouse Look Settings")]
     public Vector2 clampInDegrees = new Vector2(360, 180);

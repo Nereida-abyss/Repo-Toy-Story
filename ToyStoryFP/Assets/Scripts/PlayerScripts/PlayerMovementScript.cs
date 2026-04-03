@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 
-public class MovementScript : MonoBehaviour
+public class PlayerMovementScript : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float WalkSpeed = 5f;
