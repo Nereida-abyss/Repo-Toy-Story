@@ -15,6 +15,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (UIManager.Instance != null && UIManager.Instance.IsPaused)
+        {
+            movementScript.SetMoveInput(Vector2.zero);
+            return;
+        }
+
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         movementScript.SetMoveInput(moveInput);
 

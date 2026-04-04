@@ -24,6 +24,10 @@ public class PlayerAudioController : MonoBehaviour
     [SerializeField] private AudioClip weaponSwitchClip;
     [SerializeField] [Range(0f, 1f)] private float weaponSwitchVolume = 0.28f;
 
+    [Header("Kill Confirm")]
+    [SerializeField] private AudioClip killConfirmClip;
+    [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
+
     private float footstepTimer;
 
     void Awake()
@@ -44,6 +48,13 @@ public class PlayerAudioController : MonoBehaviour
     public void PlayWeaponSwitch()
     {
         PlayOneShot(generalSource, weaponSwitchClip, weaponSwitchVolume);
+    }
+
+    public void PlayKillConfirm()
+    {
+        AudioClip clipToPlay = killConfirmClip != null ? killConfirmClip : weaponSwitchClip;
+        float volumeToPlay = killConfirmClip != null ? killConfirmVolume : Mathf.Max(weaponSwitchVolume, killConfirmVolume);
+        PlayOneShot(generalSource, clipToPlay, volumeToPlay);
     }
 
     public void PlayWeaponFire(AudioClip clip, float volume, float pitchRandomness = 0.02f)

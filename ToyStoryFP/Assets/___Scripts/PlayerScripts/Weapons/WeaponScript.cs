@@ -263,7 +263,8 @@ public class WeaponScript : MonoBehaviour
 
             if (damageable != null)
             {
-                damageable.TakeDamage(damagePerShot);
+                DamageResult damageResult = damageable.TakeDamage(damagePerShot);
+                HandleDamageFeedback(damageResult);
             }
         }
 
@@ -446,6 +447,24 @@ public class WeaponScript : MonoBehaviour
 
         ResolvePlayerAudio();
         playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
+    }
+
+    private void HandleDamageFeedback(DamageResult damageResult)
+    {
+        if (!playerOwnedWeapon || !damageResult.WasDamaged)
+        {
+            return;
+        }
+
+        if (damageResult.WasKilled)
+        {
+            CrosshairFeedbackController.Instance?.PlayDeathMarker();
+            ResolvePlayerAudio();
+            playerAudio?.PlayKillConfirm();
+            return;
+        }
+
+        CrosshairFeedbackController.Instance?.PlayHitMarker();
     }
 
     private void ApplyCurrentPose()

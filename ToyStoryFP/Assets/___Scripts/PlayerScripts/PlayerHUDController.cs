@@ -14,7 +14,11 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField] private TMP_Text ammoText;
     [SerializeField] private TMP_Text reloadText;
 
+    [Header("Currency UI")]
+    [SerializeField] private TMP_Text coinsText;
+
     private PlayerHealthScript playerHealth;
+    private PlayerCurrencyController playerCurrency;
     private WeaponLoadoutScript weaponLoadout;
     private WeaponScript observedWeapon;
 
@@ -25,6 +29,8 @@ public class PlayerHUDController : MonoBehaviour
     {
         ResolveReferences();
         ResolveUiReferences();
+        EnsureCrosshairFeedback();
+        WarnIfUiReferencesAreMissing();
         BindEvents();
         RefreshAllImmediate();
     }
@@ -59,6 +65,12 @@ public class PlayerHUDController : MonoBehaviour
         if (playerController != null)
         {
             weaponLoadout = playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
+            playerCurrency = playerController.GetComponent<PlayerCurrencyController>();
+
+            if (playerCurrency == null)
+            {
+                playerCurrency = playerController.gameObject.AddComponent<PlayerCurrencyController>();
+            }
         }
     }
 
@@ -104,7 +116,15 @@ public class PlayerHUDController : MonoBehaviour
             }
         }
 
-        WarnIfUiReferencesAreMissing();
+        if (coinsText == null)
+        {
+            Transform text = transform.Find("CoinsText");
+
+            if (text != null)
+            {
+                coinsText = text.GetComponent<TMP_Text>();
+            }
+        }
     }
 
     private void WarnIfUiReferencesAreMissing()
@@ -136,6 +156,11 @@ public class PlayerHUDController : MonoBehaviour
             missingReferences += "ReloadText, ";
         }
 
+        if (coinsText == null)
+        {
+            missingReferences += "CoinsText, ";
+        }
+
         if (string.IsNullOrEmpty(missingReferences))
         {
             return;
@@ -155,6 +180,11 @@ public class PlayerHUDController : MonoBehaviour
             playerHealth.HealthChanged += HandleHealthChanged;
         }
 
+        if (playerCurrency != null)
+        {
+            playerCurrency.CoinsChanged += HandleCoinsChanged;
+        }
+
         if (weaponLoadout != null)
         {
             weaponLoadout.CurrentWeaponChanged += HandleCurrentWeaponChanged;
@@ -172,6 +202,11 @@ public class PlayerHUDController : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.HealthChanged -= HandleHealthChanged;
+        }
+
+        if (playerCurrency != null)
+        {
+            playerCurrency.CoinsChanged -= HandleCoinsChanged;
         }
 
         if (weaponLoadout != null)
@@ -208,6 +243,11 @@ public class PlayerHUDController : MonoBehaviour
         RefreshAmmo();
     }
 
+    private void HandleCoinsChanged(PlayerCurrencyController currency)
+    {
+        RefreshCoins();
+    }
+
     private void HandleWeaponStateChanged(WeaponScript weapon)
     {
         RefreshAmmo();
@@ -224,6 +264,7 @@ public class PlayerHUDController : MonoBehaviour
 
         RefreshHealthText();
         RefreshAmmo();
+        RefreshCoins();
     }
 
     private void UpdateHealthAnimation()
@@ -294,4 +335,31 @@ public class PlayerHUDController : MonoBehaviour
         ammoText.text = $"{currentWeapon.CurrentAmmoInMagazine} / {reserveText}";
         reloadText.text = currentWeapon.IsReloading ? "RELOADING" : string.Empty;
     }
+
+    private void RefreshCoins()
+    {
+        if (coinsText == null)
+        {
+            return;
+        }
+
+        int currentCoins = playerCurrency != null ? playerCurrency.CurrentCoins : 0;
+        coinsText.text = $"COINS {currentCoins}";
+    }
+
+    private void EnsureCrosshairFeedback()
+    {
+        if (!Application.isPlaying)
+        {
+            return;
+        }
+
+        Transform crosshair = transform.Find("Crosshair");
+
+        if (crosshair != null)
+        {
+            CrosshairFeedbackController.EnsureOnCrosshair(crosshair);
+        }
+    }
+
 }
