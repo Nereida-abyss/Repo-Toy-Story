@@ -32,6 +32,7 @@ public class AudioManager : MonoBehaviour
     {
         if (musicList.Length > 0)
         {
+            musicSource.volume = 0.05f;
             PlayMusic(0);
         }
     }
