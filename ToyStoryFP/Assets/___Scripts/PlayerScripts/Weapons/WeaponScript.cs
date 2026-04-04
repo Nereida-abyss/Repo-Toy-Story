@@ -59,6 +59,7 @@ public class WeaponScript : MonoBehaviour
     private Vector3 equipPositionOffset;
     private Vector3 equipRotationOffset;
     private PlayerAudioController playerAudio;
+    private EnemyAudioController enemyAudio;
 
     public event Action<WeaponScript> StateChanged;
 
@@ -400,17 +401,29 @@ public class WeaponScript : MonoBehaviour
         {
             playerAudio = GetComponentInParent<PlayerAudioController>();
         }
+
+        if (enemyAudio == null)
+        {
+            enemyAudio = GetComponentInParent<EnemyAudioController>();
+        }
     }
 
     private void PlayFireAudio()
     {
-        if (!playerOwnedWeapon || fireSound == null)
+        if (fireSound == null)
         {
             return;
         }
 
         ResolvePlayerAudio();
-        playerAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
+
+        if (playerOwnedWeapon)
+        {
+            playerAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
+            return;
+        }
+
+        enemyAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
     }
 
     private void PlayDryFireAudio()

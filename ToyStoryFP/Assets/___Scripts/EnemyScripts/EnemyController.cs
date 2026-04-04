@@ -32,6 +32,7 @@ public class EnemyController : MonoBehaviour
     private MovementScript movementScript;
     private WeaponScript weaponScript;
     private EnemyAlertIndicator alertIndicator;
+    private EnemyAudioController enemyAudio;
     private PlayerHealthScript cachedTargetHealth;
     private float attackWarmupTimer;
     private float loseSightTimer;
@@ -41,6 +42,7 @@ public class EnemyController : MonoBehaviour
     {
         movementScript = GetComponent<MovementScript>();
         weaponScript = GetComponentInChildren<WeaponScript>(true);
+        enemyAudio = GetComponent<EnemyAudioController>();
         CacheTargetHealth();
         ResolveAlertIndicator();
         ResetAttackWarmup();
@@ -215,12 +217,17 @@ public class EnemyController : MonoBehaviour
 
     private void SetAlerted(bool alerted, bool playPulse)
     {
+        bool wasAlerted = isAlerted;
         isAlerted = alerted;
 
         if (!alerted)
         {
             loseSightTimer = 0f;
             ResetAttackWarmup();
+        }
+        else if (!wasAlerted)
+        {
+            enemyAudio?.PlayAlert();
         }
 
         if (alertIndicator != null)
