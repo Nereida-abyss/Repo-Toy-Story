@@ -4,29 +4,40 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [Header("Paneles")]
-    public GameObject panelPausa;
-    public GameObject panelVictoria;
-    public GameObject panelDerrota;
-
-    [Header("Referencia")]
-
-    public CambioEscena cambioEscena;
+    public GameObject panelPause;
+    public GameObject panelUI;
 
     public void AbrirPausa()
     {
-        panelPausa.SetActive(true);
+        panelPause.SetActive(true);
+        panelUI.SetActive(false);
         Time.timeScale = 0f;
     }
 
-    public void MostrarVictoria()
+    public void CerrarPausa()
     {
-        panelVictoria.SetActive(true);
-        Time.timeScale = 0f;
+        panelPause.SetActive(false);
+        panelUI.SetActive(true);
+        Time.timeScale = 1f;
     }
 
-    public void MostrarDerrota()
+    void Update()
     {
-        panelDerrota.SetActive(true);
-        Time.timeScale = 0f;
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(panelPause.activeSelf)
+            {
+                panelPause.SetActive(false);
+                panelUI.SetActive(true);
+                Time.timeScale = 1f;
+            }
+
+            else 
+            {
+                panelPause.SetActive(true);
+                panelUI.SetActive(false);
+                Time.timeScale = 0f;
+            }
+        }
     }
 }
