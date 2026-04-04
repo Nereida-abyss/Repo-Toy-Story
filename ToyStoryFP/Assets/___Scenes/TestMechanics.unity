@@ -1265,11 +1265,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   target: {fileID: 1216748221}
   targetAimHeight: 0.15
+  detectionRange: 1
+  loseSightGraceTime: 0.6
+  eyeOrigin: {fileID: 0}
+  eyeHeight: 1.4
+  visionBlockLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  alertAnchor: {fileID: 0}
+  alertHeightOffset: 0.45
   stoppingDistance: 4.5
-  attackRange: 0.5
+  attackRange: 0.8
   turnSpeed: 360
   attackWarmup: 0.65
-  attackAimDotThreshold: 0.92
+  attackAimDotThreshold: 0.877
 --- !u!1 &753350268
 GameObject:
   m_ObjectHideFlags: 0
