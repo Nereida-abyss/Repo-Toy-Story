@@ -1467,6 +1467,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5746539339244064907, guid: c1fe6f1bf53c1ff4882f318bc91b1716, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1680279678557472795}
+    - targetCorrespondingSourceObject: {fileID: 5746539339244064907, guid: c1fe6f1bf53c1ff4882f318bc91b1716, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 820000000000000001}
   m_SourcePrefab: {fileID: 100100000, guid: c1fe6f1bf53c1ff4882f318bc91b1716, type: 3}
 --- !u!1 &7904382300742164890 stripped
 GameObject:
@@ -1495,3 +1498,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &820000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7904382300742164890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4d7d13b2af4b86b8e2f9c1a7d5ef40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WoodyWeaponIKScript
+  weaponPath: FPCamara/AssaultRifle
+  leftGripName: LeftHandGrip
+  rightGripName: RightHandGrip
+  leftHintName: LeftElbowHint
+  rightHintName: RightElbowHint
+  leftHandWeight: 1
+  rightHandWeight: 0.75
+  leftHintWeight: 0.75
+  rightHintWeight: 0.5
+  airborneWeightMultiplier: 0.85

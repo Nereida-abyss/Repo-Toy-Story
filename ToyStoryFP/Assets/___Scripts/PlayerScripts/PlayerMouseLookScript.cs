@@ -22,6 +22,7 @@ public class MouseLookScript : MonoBehaviour
     private Vector2 _smoothMouse;
 
     private Vector2 mouseDelta;
+    private float jumpPreparationPitchOffset;
 
     [HideInInspector]
     public bool scoped;
@@ -71,7 +72,8 @@ public class MouseLookScript : MonoBehaviour
         if (clampInDegrees.y < 360)
             _mouseAbsolute.y = Mathf.Clamp(_mouseAbsolute.y, -clampInDegrees.y * 0.5f, clampInDegrees.y * 0.5f);
 
-        transform.localRotation = Quaternion.AngleAxis(-_mouseAbsolute.y, targetOrientation * Vector3.right) * targetOrientation;
+        float combinedPitch = _mouseAbsolute.y + jumpPreparationPitchOffset;
+        transform.localRotation = Quaternion.AngleAxis(-combinedPitch, targetOrientation * Vector3.right) * targetOrientation;
 
         if (characterBody)
         {
@@ -85,6 +87,24 @@ public class MouseLookScript : MonoBehaviour
             transform.localRotation *= yRotation;
         }
 
+    }
+
+    public void PlayJumpPreparationDip(float downwardAngle, float duration)
+    {
+        if (duration <= 0f)
+        {
+            jumpPreparationPitchOffset = 0f;
+            return;
+        }
+
+        CancelInvoke(nameof(ResetJumpPreparationDip));
+        jumpPreparationPitchOffset = downwardAngle;
+        Invoke(nameof(ResetJumpPreparationDip), duration);
+    }
+
+    private void ResetJumpPreparationDip()
+    {
+        jumpPreparationPitchOffset = 0f;
     }
     
 }
