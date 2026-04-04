@@ -21,6 +21,14 @@ public class WeaponScript : MonoBehaviour
     [Header("Weapon Effects")]
     public GameObject muzzleFlashPrefab;
     public AudioClip fireSound;
+    [SerializeField] private AudioClip dryFireSound;
+    [SerializeField] private AudioClip reloadSound;
+    [SerializeField] [Range(0f, 1f)] private float fireVolume = 0.8f;
+    [SerializeField] [Range(0f, 1f)] private float dryFireVolume = 0.35f;
+    [SerializeField] [Range(0f, 1f)] private float reloadVolume = 0.5f;
+    [SerializeField] private float firePitchRandomness = 0.02f;
+    [SerializeField] private float dryFirePitchRandomness = 0.01f;
+    [SerializeField] private float reloadPitchRandomness = 0.015f;
 
     [Header("Camera Recoil")]
     [SerializeField] private float cameraRecoilPitch = 1.1f;
@@ -43,6 +51,7 @@ public class WeaponScript : MonoBehaviour
     private Vector3 recoilRotationOffset;
     private Vector3 recoilPositionVelocity;
     private Vector3 recoilRotationVelocity;
+    private PlayerAudioController playerAudio;
 
     public event Action<WeaponScript> StateChanged;
 
@@ -55,6 +64,7 @@ public class WeaponScript : MonoBehaviour
     void Awake()
     {
         CacheBasePose();
+        ResolvePlayerAudio();
         TryInitializeAmmo();
     }
 
@@ -63,6 +73,7 @@ public class WeaponScript : MonoBehaviour
         CacheBasePose();
         ResetVisualRecoil();
 
+        ResolvePlayerAudio();
         TryInitializeAmmo();
     }
 
@@ -120,6 +131,7 @@ public class WeaponScript : MonoBehaviour
 
         isReloading = true;
         reloadTimer = reloadDuration;
+        PlayReloadAudio();
         NotifyStateChanged();
         return true;
     }
@@ -179,8 +191,9 @@ public class WeaponScript : MonoBehaviour
 
         nextAllowedDryFireTime = Time.time + dryFireCooldown;
         nextAllowedShotTime = nextAllowedDryFireTime;
+        PlayDryFireAudio();
         NotifyStateChanged();
-        return Time.time >= nextAllowedShotTime;
+        return false;
     }
 
     private Transform ResolveShotTransform()
@@ -201,6 +214,8 @@ public class WeaponScript : MonoBehaviour
         {
             currentAmmoInMagazine = Mathf.Max(0, currentAmmoInMagazine - 1);
         }
+
+        PlayFireAudio();
 
         Vector3 normalizedDirection = direction.normalized;
         Vector3 rayOrigin = origin + normalizedDirection * 0.05f;
@@ -340,5 +355,46 @@ public class WeaponScript : MonoBehaviour
     private void NotifyStateChanged()
     {
         StateChanged?.Invoke(this);
+    }
+
+    private void ResolvePlayerAudio()
+    {
+        if (playerAudio == null)
+        {
+            playerAudio = GetComponentInParent<PlayerAudioController>();
+        }
+    }
+
+    private void PlayFireAudio()
+    {
+        if (!playerOwnedWeapon || fireSound == null)
+        {
+            return;
+        }
+
+        ResolvePlayerAudio();
+        playerAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
+    }
+
+    private void PlayDryFireAudio()
+    {
+        if (!playerOwnedWeapon || dryFireSound == null)
+        {
+            return;
+        }
+
+        ResolvePlayerAudio();
+        playerAudio?.PlayDryFire(dryFireSound, dryFireVolume, dryFirePitchRandomness);
+    }
+
+    private void PlayReloadAudio()
+    {
+        if (!playerOwnedWeapon || reloadSound == null)
+        {
+            return;
+        }
+
+        ResolvePlayerAudio();
+        playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
     }
 }

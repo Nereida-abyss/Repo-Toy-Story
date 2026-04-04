@@ -31,6 +31,7 @@ public class MovementScript : MonoBehaviour
     private Vector2 input;
     private Rigidbody rb;
     private MouseLookScript mouseLook;
+    private PlayerAudioController playerAudio;
     private bool isGrounded;
     private bool ignoreGroundingWhileAscending;
     private bool jumpQueued;
@@ -49,6 +50,7 @@ public class MovementScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         mouseLook = GetComponentInChildren<MouseLookScript>(true);
+        playerAudio = GetComponent<PlayerAudioController>();
         ResolveVisualReferences();
     }
 
@@ -82,6 +84,7 @@ public class MovementScript : MonoBehaviour
         }
 
         UpdateMovementAnimation(groundedAtFrameStart);
+        UpdateFootstepAudio();
     }
 
     void FixedUpdate()
@@ -264,6 +267,7 @@ public class MovementScript : MonoBehaviour
         groundedLockTimer = jumpGroundLockTime;
         ignoreGroundingWhileAscending = true;
         PlayJumpCameraLift();
+        PlayJumpAudio();
         rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
     }
 
@@ -353,6 +357,41 @@ public class MovementScript : MonoBehaviour
         }
 
         mouseLook.PlayJumpAnticipationDrop(jumpDelay);
+    }
+
+    private void PlayJumpAudio()
+    {
+        if (playerAudio == null)
+        {
+            playerAudio = GetComponent<PlayerAudioController>();
+        }
+
+        if (playerAudio == null)
+        {
+            return;
+        }
+
+        playerAudio.PlayJump();
+    }
+
+    private void UpdateFootstepAudio()
+    {
+        if (playerAudio == null)
+        {
+            playerAudio = GetComponent<PlayerAudioController>();
+        }
+
+        if (playerAudio == null || rb == null)
+        {
+            return;
+        }
+
+        Vector3 planarVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
+        float speedNormalized = WalkSpeed > 0.01f
+            ? Mathf.Clamp01(planarVelocity.magnitude / WalkSpeed)
+            : 0f;
+
+        playerAudio.UpdateFootsteps(isGrounded && !jumpQueued, input.magnitude, speedNormalized);
     }
 
     void OnCollisionExit(Collision collision)

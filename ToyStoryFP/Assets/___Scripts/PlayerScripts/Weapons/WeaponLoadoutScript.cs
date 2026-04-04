@@ -11,6 +11,7 @@ public class WeaponLoadoutScript : MonoBehaviour
     private int currentWeaponIndex = -1;
     private int pendingWeaponIndex = -1;
     private float weaponSwitchTimer;
+    private PlayerAudioController playerAudio;
 
     public event Action<WeaponScript> CurrentWeaponChanged;
 
@@ -28,6 +29,7 @@ public class WeaponLoadoutScript : MonoBehaviour
             weaponCamera = GetComponent<Camera>();
         }
 
+        playerAudio = GetComponentInParent<PlayerAudioController>();
         RefreshWeapons();
     }
 
@@ -102,6 +104,12 @@ public class WeaponLoadoutScript : MonoBehaviour
         pendingWeaponIndex = Mathf.Clamp(nextIndex, 0, weapons.Length - 1);
         weaponSwitchTimer = Mathf.Max(0.01f, weaponSwitchDuration);
 
+        if (playerAudio == null)
+        {
+            playerAudio = GetComponentInParent<PlayerAudioController>();
+        }
+
+        playerAudio?.PlayWeaponSwitch();
         CurrentWeapon?.CancelReload();
         SetAllWeaponsActive(false);
         currentWeaponIndex = -1;
