@@ -2,6 +2,15 @@ using UnityEngine;
 
 public class MouseLookScript : MonoBehaviour
 {
+    private enum JumpCameraPhase
+    {
+        None,
+        Rise,
+        Fall,
+        BounceDrop,
+        BounceRecover
+    }
+
     public static MouseLookScript instance;
 
     [Header("Mouse Look Settings")]
@@ -20,16 +29,14 @@ public class MouseLookScript : MonoBehaviour
     [SerializeField] private float jumpLiftUpDuration = 0.1f;
     [SerializeField] private float jumpLiftDownDuration = 0.16f;
 
+    [Header("Jump Camera Bounce")]
+    [SerializeField] private float jumpBounceDropHeight = 0.025f;
+    [SerializeField] private float jumpBounceDropDuration = 0.04f;
+    [SerializeField] private float jumpBounceRecoverDuration = 0.06f;
+
     [Header("Jump Camera Anticipation")]
     [SerializeField] private float anticipationDropHeight = 0.025f;
     [SerializeField] private float anticipationDropReturnDuration = 0.06f;
-
-    [Header("Landing Camera Bounce")]
-    [SerializeField] private float landingBounceDropHeight = 0.015f;
-    [SerializeField] private float landingBounceDropDuration = 0.05f;
-    [SerializeField] private float landingBounceRecoverHeight = 0.008f;
-    [SerializeField] private float landingBounceRiseDuration = 0.025f;
-    [SerializeField] private float landingBounceRecoverDuration = 0.08f;
 
     private Vector2 targetDirection;
     private Vector2 targetCharacterDirection;
@@ -40,21 +47,13 @@ public class MouseLookScript : MonoBehaviour
     private Vector2 mouseDelta;
     private float jumpPreparationPitchOffset;
     private Vector3 baseLocalPosition;
-    private float jumpLiftOffset;
-    private float jumpLiftVelocity;
-    private float jumpLiftTarget;
-    private float jumpLiftSmoothTime = 0.1f;
     private float anticipationDropOffset;
     private float anticipationDropVelocity;
     private float anticipationDropTarget;
     private float anticipationDropSmoothTime = 0.1f;
-    private float landingBounceOffset;
-    private float landingBounceImpactStrength = 1f;
-    private bool jumpLiftReturning;
-    private bool landingBounceQueued;
-    private float queuedLandingBounceImpactStrength = 1f;
-    private int landingBouncePhase;
-    private float landingBouncePhaseTimer;
+    private float jumpCameraOffset;
+    private JumpCameraPhase jumpCameraPhase;
+    private float jumpCameraPhaseTimer;
 
     [HideInInspector]
     public bool scoped;
@@ -135,15 +134,17 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(ResetJumpPreparationDip), duration);
     }
 
+    public void PlayJumpCameraSequence()
+    {
+        ReleaseJumpAnticipationDrop();
+        jumpCameraPhase = JumpCameraPhase.Rise;
+        jumpCameraPhaseTimer = 0f;
+        jumpCameraOffset = 0f;
+    }
+
     public void PlayJumpLift()
     {
-        CancelInvoke(nameof(BeginJumpLiftReturn));
-        ReleaseJumpAnticipationDrop();
-        jumpLiftReturning = false;
-
-        jumpLiftTarget = jumpLiftHeight;
-        jumpLiftSmoothTime = Mathf.Max(0.01f, jumpLiftUpDuration);
-        Invoke(nameof(BeginJumpLiftReturn), jumpLiftUpDuration);
+        PlayJumpCameraSequence();
     }
 
     public void PlayJumpAnticipationDrop(float anticipationDuration)
@@ -166,43 +167,9 @@ public class MouseLookScript : MonoBehaviour
         BeginAnticipationDropReturn();
     }
 
-    public void PlayLandingBounce(float impactStrength = 1f)
-    {
-        if (landingBounceDropHeight <= 0f)
-        {
-            return;
-        }
-
-        float clampedImpactStrength = Mathf.Max(0f, impactStrength);
-
-        if (jumpLiftReturning && jumpLiftOffset > 0.001f)
-        {
-            landingBounceQueued = true;
-            queuedLandingBounceImpactStrength = clampedImpactStrength;
-            return;
-        }
-
-        StartLandingBounce(clampedImpactStrength);
-    }
-
-    private void StartLandingBounce(float impactStrength)
-    {
-        landingBounceImpactStrength = impactStrength;
-        landingBouncePhase = 1;
-        landingBouncePhaseTimer = 0f;
-        landingBounceOffset = 0f;
-    }
-
     private void ResetJumpPreparationDip()
     {
         jumpPreparationPitchOffset = 0f;
-    }
-
-    private void BeginJumpLiftReturn()
-    {
-        jumpLiftReturning = true;
-        jumpLiftTarget = 0f;
-        jumpLiftSmoothTime = Mathf.Max(0.01f, jumpLiftDownDuration);
     }
 
     private void BeginAnticipationDropReturn()
@@ -213,91 +180,92 @@ public class MouseLookScript : MonoBehaviour
 
     private void UpdateCameraVerticalOffsets()
     {
-        jumpLiftOffset = Mathf.SmoothDamp(
-            jumpLiftOffset,
-            jumpLiftTarget,
-            ref jumpLiftVelocity,
-            jumpLiftSmoothTime);
-
         anticipationDropOffset = Mathf.SmoothDamp(
             anticipationDropOffset,
             anticipationDropTarget,
             ref anticipationDropVelocity,
             anticipationDropSmoothTime);
 
-        UpdateLandingBounceOffset();
+        UpdateJumpCameraOffset();
 
-        if (jumpLiftReturning && jumpLiftTarget == 0f && jumpLiftOffset <= 0.001f)
-        {
-            jumpLiftReturning = false;
-            jumpLiftVelocity = 0f;
-            jumpLiftOffset = 0f;
-
-            if (landingBounceQueued)
-            {
-                landingBounceQueued = false;
-                StartLandingBounce(queuedLandingBounceImpactStrength);
-            }
-        }
-
-        float combinedOffset = jumpLiftOffset - anticipationDropOffset + landingBounceOffset;
+        float combinedOffset = jumpCameraOffset - anticipationDropOffset;
         Vector3 desiredPosition = baseLocalPosition + Vector3.up * combinedOffset;
         transform.localPosition = desiredPosition;
     }
 
-    private void UpdateLandingBounceOffset()
+    private void UpdateJumpCameraOffset()
     {
-        if (landingBouncePhase == 0)
+        if (jumpCameraPhase == JumpCameraPhase.None)
         {
-            landingBounceOffset = 0f;
+            jumpCameraOffset = 0f;
             return;
         }
 
-        landingBouncePhaseTimer += Time.deltaTime;
+        jumpCameraPhaseTimer += Time.deltaTime;
 
-        float fullDrop = landingBounceDropHeight * landingBounceImpactStrength;
-        float partialDrop = Mathf.Max(0f, landingBounceDropHeight - landingBounceRecoverHeight) * landingBounceImpactStrength;
-
-        if (landingBouncePhase == 1)
+        if (jumpCameraPhase == JumpCameraPhase.Rise)
         {
-            float duration = Mathf.Max(0.001f, landingBounceDropDuration);
-            float t = Mathf.Clamp01(landingBouncePhaseTimer / duration);
-            landingBounceOffset = Mathf.Lerp(0f, -fullDrop, t);
+            float duration = Mathf.Max(0.001f, jumpLiftUpDuration);
+            float t = Mathf.Clamp01(jumpCameraPhaseTimer / duration);
+            jumpCameraOffset = Mathf.Lerp(0f, jumpLiftHeight, t);
 
             if (t >= 1f)
             {
-                landingBouncePhase = 2;
-                landingBouncePhaseTimer = 0f;
+                jumpCameraPhase = JumpCameraPhase.Fall;
+                jumpCameraPhaseTimer = 0f;
             }
 
             return;
         }
 
-        if (landingBouncePhase == 2)
+        if (jumpCameraPhase == JumpCameraPhase.Fall)
         {
-            float duration = Mathf.Max(0.001f, landingBounceRiseDuration);
-            float t = Mathf.Clamp01(landingBouncePhaseTimer / duration);
-            landingBounceOffset = Mathf.Lerp(-fullDrop, -partialDrop, t);
+            float duration = Mathf.Max(0.001f, jumpLiftDownDuration);
+            float t = Mathf.Clamp01(jumpCameraPhaseTimer / duration);
+            jumpCameraOffset = Mathf.Lerp(jumpLiftHeight, 0f, t);
 
             if (t >= 1f)
             {
-                landingBouncePhase = 3;
-                landingBouncePhaseTimer = 0f;
+                if (jumpBounceDropHeight > 0f && jumpBounceDropDuration > 0f && jumpBounceRecoverDuration > 0f)
+                {
+                    jumpCameraPhase = JumpCameraPhase.BounceDrop;
+                    jumpCameraPhaseTimer = 0f;
+                }
+                else
+                {
+                    jumpCameraPhase = JumpCameraPhase.None;
+                    jumpCameraPhaseTimer = 0f;
+                    jumpCameraOffset = 0f;
+                }
             }
 
             return;
         }
 
-        float settleDuration = Mathf.Max(0.001f, landingBounceRecoverDuration);
-        float settleT = Mathf.Clamp01(landingBouncePhaseTimer / settleDuration);
-        landingBounceOffset = Mathf.Lerp(-partialDrop, 0f, settleT);
-
-        if (settleT >= 1f)
+        if (jumpCameraPhase == JumpCameraPhase.BounceDrop)
         {
-            landingBouncePhase = 0;
-            landingBouncePhaseTimer = 0f;
-            landingBounceOffset = 0f;
+            float duration = Mathf.Max(0.001f, jumpBounceDropDuration);
+            float t = Mathf.Clamp01(jumpCameraPhaseTimer / duration);
+            jumpCameraOffset = Mathf.Lerp(0f, -jumpBounceDropHeight, t);
+
+            if (t >= 1f)
+            {
+                jumpCameraPhase = JumpCameraPhase.BounceRecover;
+                jumpCameraPhaseTimer = 0f;
+            }
+
+            return;
+        }
+
+        float recoverDuration = Mathf.Max(0.001f, jumpBounceRecoverDuration);
+        float recoverT = Mathf.Clamp01(jumpCameraPhaseTimer / recoverDuration);
+        jumpCameraOffset = Mathf.Lerp(-jumpBounceDropHeight, 0f, recoverT);
+
+        if (recoverT >= 1f)
+        {
+            jumpCameraPhase = JumpCameraPhase.None;
+            jumpCameraPhaseTimer = 0f;
+            jumpCameraOffset = 0f;
         }
     }
-    
 }

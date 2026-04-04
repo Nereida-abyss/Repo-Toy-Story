@@ -204,7 +204,6 @@ public class MovementScript : MonoBehaviour
         }
         else if (landedThisFrame)
         {
-            PlayLandingCameraBounce();
             CrossFadeIfNeeded(LocomotionStateHash, locomotionTransitionDuration);
         }
     }
@@ -338,7 +337,7 @@ public class MovementScript : MonoBehaviour
             return;
         }
 
-        mouseLook.PlayJumpLift();
+        mouseLook.PlayJumpCameraSequence();
     }
 
     private void PlayJumpAnticipationDrop()
@@ -354,21 +353,6 @@ public class MovementScript : MonoBehaviour
         }
 
         mouseLook.PlayJumpAnticipationDrop(jumpDelay);
-    }
-
-    private void PlayLandingCameraBounce()
-    {
-        if (mouseLook == null)
-        {
-            mouseLook = GetComponentInChildren<MouseLookScript>(true);
-        }
-
-        if (mouseLook == null)
-        {
-            return;
-        }
-
-        mouseLook.PlayLandingBounce();
     }
 
     void OnCollisionExit(Collision collision)
