@@ -39,18 +39,25 @@ public class WeaponScript : MonoBehaviour
     [SerializeField] private Vector3 weaponRecoilRotation = new Vector3(-6f, 1.25f, 0.5f);
     [SerializeField] private float weaponRecoilReturnTime = 0.08f;
 
+    [Header("Weapon Equip Animation")]
+    [SerializeField] private Vector3 weaponEquipLowerPosition = new Vector3(0.08f, -0.22f, 0.06f);
+    [SerializeField] private Vector3 weaponEquipLowerRotation = new Vector3(18f, -8f, 12f);
+
     private float nextAllowedShotTime;
     private float reloadTimer;
     private float nextAllowedDryFireTime;
     private int currentAmmoInMagazine;
     private bool isReloading;
     private bool ammoInitialized;
+    private bool basePoseCached;
     private Vector3 baseLocalPosition;
     private Vector3 baseLocalEulerAngles;
     private Vector3 recoilPositionOffset;
     private Vector3 recoilRotationOffset;
     private Vector3 recoilPositionVelocity;
     private Vector3 recoilRotationVelocity;
+    private Vector3 equipPositionOffset;
+    private Vector3 equipRotationOffset;
     private PlayerAudioController playerAudio;
 
     public event Action<WeaponScript> StateChanged;
@@ -70,7 +77,6 @@ public class WeaponScript : MonoBehaviour
 
     void OnEnable()
     {
-        CacheBasePose();
         ResetVisualRecoil();
 
         ResolvePlayerAudio();
@@ -160,6 +166,31 @@ public class WeaponScript : MonoBehaviour
         CancelReload();
         ResetVisualRecoil();
         NotifyStateChanged();
+    }
+
+    public void SetEquipAnimationProgress(float progress, bool lowering)
+    {
+        progress = Mathf.Clamp01(progress);
+
+        if (lowering)
+        {
+            equipPositionOffset = Vector3.Lerp(Vector3.zero, weaponEquipLowerPosition, progress);
+            equipRotationOffset = Vector3.Lerp(Vector3.zero, weaponEquipLowerRotation, progress);
+        }
+        else
+        {
+            equipPositionOffset = Vector3.Lerp(weaponEquipLowerPosition, Vector3.zero, progress);
+            equipRotationOffset = Vector3.Lerp(weaponEquipLowerRotation, Vector3.zero, progress);
+        }
+
+        ApplyCurrentPose();
+    }
+
+    public void ResetEquipPose()
+    {
+        equipPositionOffset = Vector3.zero;
+        equipRotationOffset = Vector3.zero;
+        ApplyCurrentPose();
     }
 
     private bool CanFire()
@@ -288,8 +319,14 @@ public class WeaponScript : MonoBehaviour
 
     private void CacheBasePose()
     {
+        if (basePoseCached)
+        {
+            return;
+        }
+
         baseLocalPosition = transform.localPosition;
         baseLocalEulerAngles = transform.localEulerAngles;
+        basePoseCached = true;
     }
 
     private void ResetVisualRecoil()
@@ -298,8 +335,9 @@ public class WeaponScript : MonoBehaviour
         recoilRotationOffset = Vector3.zero;
         recoilPositionVelocity = Vector3.zero;
         recoilRotationVelocity = Vector3.zero;
-        transform.localPosition = baseLocalPosition;
-        transform.localRotation = Quaternion.Euler(baseLocalEulerAngles);
+        equipPositionOffset = Vector3.zero;
+        equipRotationOffset = Vector3.zero;
+        ApplyCurrentPose();
     }
 
     private void UpdateVisualRecoil()
@@ -316,8 +354,7 @@ public class WeaponScript : MonoBehaviour
             ref recoilRotationVelocity,
             Mathf.Max(0.01f, weaponRecoilReturnTime));
 
-        transform.localPosition = baseLocalPosition + recoilPositionOffset;
-        transform.localRotation = Quaternion.Euler(baseLocalEulerAngles + recoilRotationOffset);
+        ApplyCurrentPose();
     }
 
     private void ApplyCameraRecoil()
@@ -396,5 +433,11 @@ public class WeaponScript : MonoBehaviour
 
         ResolvePlayerAudio();
         playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
+    }
+
+    private void ApplyCurrentPose()
+    {
+        transform.localPosition = baseLocalPosition + equipPositionOffset + recoilPositionOffset;
+        transform.localRotation = Quaternion.Euler(baseLocalEulerAngles + equipRotationOffset + recoilRotationOffset);
     }
 }

@@ -1801,8 +1801,8 @@ MonoBehaviour:
   footstepMaxInterval: 0.5
   footstepMinMoveAmount: 0.2
   footstepPitchRandomness: 0.03
-  weaponSwitchClip: {fileID: 8300000, guid: 91b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
-  weaponSwitchVolume: 0.16
+  weaponSwitchClip: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+  weaponSwitchVolume: 0.12
 --- !u!1 &1216748230
 GameObject:
   m_ObjectHideFlags: 0
@@ -2402,36 +2402,36 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
-      propertyPath: dryFireSound
-      value: 
-      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+      propertyPath: fireVolume
+      value: 0.42
+      objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: reloadSound
       value: 
       objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
-      propertyPath: fireVolume
-      value: 0.42
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: reloadVolume
+      value: 0.26
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: dryFireVolume
       value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
-      propertyPath: reloadVolume
-      value: 0.26
-      objectReference: {fileID: 0}
-    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: firePitchRandomness
       value: 0.008
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
-      propertyPath: dryFirePitchRandomness
-      value: 0.005
-      objectReference: {fileID: 0}
-    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: reloadPitchRandomness
       value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: dryFirePitchRandomness
+      value: 0.005
       objectReference: {fileID: 0}
     - target: {fileID: 8253375852863079894, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: m_LocalScale.x
@@ -2759,53 +2759,53 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: fireRate
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: fireSound
       value: 
       objectReference: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: dryFireSound
-      value: 
-      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: reloadSound
-      value: 
-      objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: fireVolume
       value: 0.42
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: dryFireVolume
-      value: 0.2
-      objectReference: {fileID: 0}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: reloadVolume
       value: 0.26
-      objectReference: {fileID: 0}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: firePitchRandomness
-      value: 0.008
-      objectReference: {fileID: 0}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: dryFirePitchRandomness
-      value: 0.005
-      objectReference: {fileID: 0}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: reloadPitchRandomness
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: fireRate
-      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: damagePerShot
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: dryFireVolume
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: muzzleFlashPrefab
       value: 
       objectReference: {fileID: 4367466542359643468, guid: c92836c3a8e05ad4494f15363d4534b8, type: 3}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: firePitchRandomness
+      value: 0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: reloadPitchRandomness
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: dryFirePitchRandomness
+      value: 0.005
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2996,7 +2996,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponLoadoutScript
   weaponCamera: {fileID: 1404152050}
-  weaponSwitchDuration: 0.35
+  weaponSwitchDuration: 0.33
+  weaponSwitchLowerRatio: 0.45
+  weaponSwitchRaiseRatio: 0.45
 --- !u!1 &1407662471
 GameObject:
   m_ObjectHideFlags: 0
@@ -3856,41 +3858,41 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: dryFireSound
-      value: 
-      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+      propertyPath: fireVolume
+      value: 0.42
+      objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: reloadSound
       value: 
       objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: fireVolume
-      value: 0.42
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: reloadVolume
+      value: 0.26
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: dryFireVolume
       value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: reloadVolume
-      value: 0.26
-      objectReference: {fileID: 0}
+      propertyPath: muzzleFlashPrefab
+      value: 
+      objectReference: {fileID: 4367466542359643468, guid: c92836c3a8e05ad4494f15363d4534b8, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: firePitchRandomness
       value: 0.008
-      objectReference: {fileID: 0}
-    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: dryFirePitchRandomness
-      value: 0.005
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: reloadPitchRandomness
       value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-      propertyPath: muzzleFlashPrefab
-      value: 
-      objectReference: {fileID: 4367466542359643468, guid: c92836c3a8e05ad4494f15363d4534b8, type: 3}
+      propertyPath: dryFirePitchRandomness
+      value: 0.005
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4933,7 +4935,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 30}
+  m_AnchoredPosition: {x: 8, y: 25}
   m_SizeDelta: {x: 220, y: 18}
   m_Pivot: {x: 0, y: 0}
 --- !u!222 &2100010032
