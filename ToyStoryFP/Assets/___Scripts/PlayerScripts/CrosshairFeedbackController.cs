@@ -38,14 +38,7 @@ public class CrosshairFeedbackController : MonoBehaviour
             return null;
         }
 
-        CrosshairFeedbackController feedback = crosshairTransform.GetComponent<CrosshairFeedbackController>();
-
-        if (feedback == null)
-        {
-            feedback = crosshairTransform.gameObject.AddComponent<CrosshairFeedbackController>();
-        }
-
-        return feedback;
+        return crosshairTransform.GetComponent<CrosshairFeedbackController>();
     }
 
     void Awake()

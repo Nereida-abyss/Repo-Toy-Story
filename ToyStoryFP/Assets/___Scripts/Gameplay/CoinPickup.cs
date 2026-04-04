@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class CoinPickup : MonoBehaviour
 {
+    private static Material sharedCoinMaterial;
+
     [SerializeField] private int coinValue = 1;
     [SerializeField] private float pickupRadius = 1.1f;
     [SerializeField] private float rotationSpeed = 165f;
@@ -154,17 +156,34 @@ public class CoinPickup : MonoBehaviour
 
         if (meshRenderer != null)
         {
-            Shader coinShader =
-                Shader.Find("Universal Render Pipeline/Unlit") ??
-                Shader.Find("Unlit/Color") ??
-                Shader.Find("Sprites/Default");
-
-            if (coinShader != null)
-            {
-                Material coinMaterial = new Material(coinShader);
-                coinMaterial.color = new Color(1f, 0.82f, 0.18f, 1f);
-                meshRenderer.sharedMaterial = coinMaterial;
-            }
+            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            meshRenderer.receiveShadows = false;
+            meshRenderer.sharedMaterial = GetSharedCoinMaterial();
         }
+    }
+
+    private static Material GetSharedCoinMaterial()
+    {
+        if (sharedCoinMaterial != null)
+        {
+            return sharedCoinMaterial;
+        }
+
+        Shader coinShader =
+            Shader.Find("Universal Render Pipeline/Unlit") ??
+            Shader.Find("Unlit/Color") ??
+            Shader.Find("Sprites/Default");
+
+        if (coinShader == null)
+        {
+            return null;
+        }
+
+        sharedCoinMaterial = new Material(coinShader)
+        {
+            color = new Color(1f, 0.82f, 0.18f, 1f)
+        };
+
+        return sharedCoinMaterial;
     }
 }

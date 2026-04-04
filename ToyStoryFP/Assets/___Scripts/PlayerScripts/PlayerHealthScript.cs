@@ -75,11 +75,6 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
             return false;
         }
 
-        if (GetComponentInParent<PlayerController>() != null)
-        {
-            return false;
-        }
-
-        return GetComponentInParent<EnemyController>() != null;
+        return GetComponentInParent<PlayerController>() == null;
     }
 }

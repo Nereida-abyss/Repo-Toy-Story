@@ -29,7 +29,6 @@ public class PlayerHUDController : MonoBehaviour
     {
         ResolveReferences();
         ResolveUiReferences();
-        EnsureCrosshairFeedback();
         WarnIfUiReferencesAreMissing();
         BindEvents();
         RefreshAllImmediate();
@@ -37,6 +36,7 @@ public class PlayerHUDController : MonoBehaviour
 
     void OnEnable()
     {
+        ResolveReferences();
         BindEvents();
         RefreshAllImmediate();
     }
@@ -65,12 +65,7 @@ public class PlayerHUDController : MonoBehaviour
         if (playerController != null)
         {
             weaponLoadout = playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
-            playerCurrency = playerController.GetComponent<PlayerCurrencyController>();
-
-            if (playerCurrency == null)
-            {
-                playerCurrency = playerController.gameObject.AddComponent<PlayerCurrencyController>();
-            }
+            playerCurrency = playerController.Currency ?? playerController.GetComponent<PlayerCurrencyController>();
         }
     }
 
@@ -345,21 +340,6 @@ public class PlayerHUDController : MonoBehaviour
 
         int currentCoins = playerCurrency != null ? playerCurrency.CurrentCoins : 0;
         coinsText.text = $"COINS {currentCoins}";
-    }
-
-    private void EnsureCrosshairFeedback()
-    {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-
-        Transform crosshair = transform.Find("Crosshair");
-
-        if (crosshair != null)
-        {
-            CrosshairFeedbackController.EnsureOnCrosshair(crosshair);
-        }
     }
 
 }

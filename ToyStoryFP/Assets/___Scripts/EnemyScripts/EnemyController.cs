@@ -136,11 +136,9 @@ public class EnemyController : MonoBehaviour
     {
         if (target == null)
         {
-            GameObject playerObject = GameObject.Find("PlayerController");
-
-            if (playerObject != null)
+            if (PlayerController.Instance != null)
             {
-                target = playerObject.transform;
+                target = PlayerController.Instance.transform;
                 CacheTargetHealth();
             }
         }
@@ -160,7 +158,19 @@ public class EnemyController : MonoBehaviour
 
     private void CacheTargetHealth()
     {
-        cachedTargetHealth = target != null ? target.GetComponent<PlayerHealthScript>() : null;
+        if (target == null)
+        {
+            cachedTargetHealth = null;
+            return;
+        }
+
+        if (PlayerController.Instance != null && target == PlayerController.Instance.transform)
+        {
+            cachedTargetHealth = PlayerController.Instance.Health;
+            return;
+        }
+
+        cachedTargetHealth = target.GetComponent<PlayerHealthScript>();
     }
 
     private void ResolveAlertIndicator()
