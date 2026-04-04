@@ -3070,7 +3070,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.9597918, y: 0.92974085}
   m_AnchorMax: {x: 0.9853542, y: 0.9768519}
-  m_AnchoredPosition: {x: 1.2399292, y: 0}
+  m_AnchoredPosition: {x: 1.2399902, y: 0}
   m_SizeDelta: {x: 470, y: 461}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &323600120
@@ -6403,10 +6403,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -11581,10 +11581,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -12584,8 +12584,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f74a65e49bb64844ebc5d1b52b6e3dcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  musicSource: {fileID: 0}
-  sfxSource: {fileID: 0}
+  musicList:
+  - {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
+  sfxList: []
+  musicSource: {fileID: 1606814467}
+  sfxSource: {fileID: 753633370}
 --- !u!4 &1726568291
 Transform:
   m_ObjectHideFlags: 0
@@ -15314,7 +15317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5591667, y: 0.46}
   m_AnchorMax: {x: 0.9597918, y: 0.523}
-  m_AnchoredPosition: {x: -1.5011292, y: -0.53229904}
+  m_AnchoredPosition: {x: -1.5010986, y: -0.53230286}
   m_SizeDelta: {x: -3.5765991, y: 1.2244}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2118152955
