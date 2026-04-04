@@ -23,6 +23,37 @@ public class PlayerController : MonoBehaviour
             movementScript.RequestJump();
         }
 
+        HandleWeaponInput();
+    }
+
+    private void HandleWeaponInput()
+    {
+        if (weaponLoadout == null)
+        {
+            return;
+        }
+
+        float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
+
+        if (scroll > 0f)
+        {
+            weaponLoadout.TryCycleWeapon(1);
+        }
+        else if (scroll < 0f)
+        {
+            weaponLoadout.TryCycleWeapon(-1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            weaponLoadout.CurrentWeapon?.TryReload();
+        }
+
+        if (weaponLoadout.IsSwitchingWeapon)
+        {
+            return;
+        }
+
         if (Input.GetButton("Fire1"))
         {
             weaponLoadout?.CurrentWeapon?.TryFire();

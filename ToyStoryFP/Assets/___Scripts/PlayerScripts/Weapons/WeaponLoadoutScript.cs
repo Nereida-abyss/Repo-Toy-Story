@@ -1,17 +1,25 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class WeaponLoadoutScript : MonoBehaviour
 {
     [SerializeField] private Camera weaponCamera;
+    [SerializeField] private float weaponSwitchDuration = 0.35f;
 
     private WeaponScript[] weapons = System.Array.Empty<WeaponScript>();
     private int currentWeaponIndex = -1;
+    private int pendingWeaponIndex = -1;
+    private float weaponSwitchTimer;
+
+    public event Action<WeaponScript> CurrentWeaponChanged;
 
     public WeaponScript CurrentWeapon =>
         currentWeaponIndex >= 0 && currentWeaponIndex < weapons.Length
             ? weapons[currentWeaponIndex]
             : null;
+
+    public bool IsSwitchingWeapon => weaponSwitchTimer > 0f;
 
     void Awake()
     {
@@ -25,16 +33,19 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     void Update()
     {
-        float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
+        if (!IsSwitchingWeapon)
+        {
+            return;
+        }
 
-        if (scroll > 0f)
+        weaponSwitchTimer -= Time.deltaTime;
+
+        if (weaponSwitchTimer > 0f)
         {
-            SelectNextWeapon(1);
+            return;
         }
-        else if (scroll < 0f)
-        {
-            SelectNextWeapon(-1);
-        }
+
+        CompleteWeaponSwitch();
     }
 
     public void RefreshWeapons()
@@ -56,20 +67,22 @@ public class WeaponLoadoutScript : MonoBehaviour
                 weapons[i]._camera = weaponCamera;
             }
 
+            weapons[i].SetPlayerOwned(true);
+
             if (weapons[i].gameObject.activeSelf)
             {
                 activeIndex = i;
             }
         }
 
-        SetWeaponIndex(activeIndex);
+        SetWeaponIndexImmediate(activeIndex);
     }
 
-    private void SelectNextWeapon(int direction)
+    public bool TryCycleWeapon(int direction)
     {
-        if (weapons.Length <= 1)
+        if (weapons.Length <= 1 || IsSwitchingWeapon)
         {
-            return;
+            return false;
         }
 
         int nextIndex = currentWeaponIndex;
@@ -80,22 +93,57 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
         while (nextIndex == currentWeaponIndex);
 
-        SetWeaponIndex(nextIndex);
+        StartWeaponSwitch(nextIndex);
+        return true;
     }
 
-    private void SetWeaponIndex(int index)
+    private void StartWeaponSwitch(int nextIndex)
+    {
+        pendingWeaponIndex = Mathf.Clamp(nextIndex, 0, weapons.Length - 1);
+        weaponSwitchTimer = Mathf.Max(0.01f, weaponSwitchDuration);
+
+        CurrentWeapon?.CancelReload();
+        SetAllWeaponsActive(false);
+        currentWeaponIndex = -1;
+        CurrentWeaponChanged?.Invoke(null);
+    }
+
+    private void CompleteWeaponSwitch()
+    {
+        weaponSwitchTimer = 0f;
+
+        if (pendingWeaponIndex < 0)
+        {
+            return;
+        }
+
+        SetWeaponIndexImmediate(pendingWeaponIndex);
+        pendingWeaponIndex = -1;
+    }
+
+    private void SetWeaponIndexImmediate(int index)
     {
         if (weapons.Length == 0)
         {
             currentWeaponIndex = -1;
+            CurrentWeaponChanged?.Invoke(null);
             return;
         }
 
         currentWeaponIndex = Mathf.Clamp(index, 0, weapons.Length - 1);
+        SetAllWeaponsActive(false);
 
+        WeaponScript currentWeapon = weapons[currentWeaponIndex];
+        currentWeapon.gameObject.SetActive(true);
+        currentWeapon.NotifyEquipped();
+        CurrentWeaponChanged?.Invoke(currentWeapon);
+    }
+
+    private void SetAllWeaponsActive(bool active)
+    {
         for (int i = 0; i < weapons.Length; i++)
         {
-            weapons[i].gameObject.SetActive(i == currentWeaponIndex);
+            weapons[i].gameObject.SetActive(active);
         }
     }
 }

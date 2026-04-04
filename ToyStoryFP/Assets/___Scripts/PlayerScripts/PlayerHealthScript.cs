@@ -1,10 +1,27 @@
+using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerHealthScript : MonoBehaviour, IDamageable
 {
-    public int health;
+    [FormerlySerializedAs("health")]
+    [SerializeField] private int maxHealth = 100;
 
-    public bool IsAlive => health > 0;
+    private int currentHealth;
+
+    public event Action<PlayerHealthScript> HealthChanged;
+
+    public int MaxHealth => maxHealth;
+    public int CurrentHealth => currentHealth;
+    public float HealthNormalized => maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
+    public bool IsAlive => currentHealth > 0;
+
+    void Awake()
+    {
+        maxHealth = Mathf.Max(1, maxHealth);
+        currentHealth = maxHealth;
+        NotifyHealthChanged();
+    }
 
     public void TakeDamage(int damage)
     {
@@ -13,11 +30,17 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
             return;
         }
 
-        health -= damage;
+        currentHealth = Mathf.Max(0, currentHealth - damage);
+        NotifyHealthChanged();
 
-        if (health <= 0)
+        if (currentHealth <= 0)
         {
             Destroy(gameObject);
         }
+    }
+
+    private void NotifyHealthChanged()
+    {
+        HealthChanged?.Invoke(this);
     }
 }

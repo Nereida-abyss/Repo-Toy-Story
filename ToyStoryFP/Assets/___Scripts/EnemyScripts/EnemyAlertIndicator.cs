@@ -113,7 +113,7 @@ public class EnemyAlertIndicator : MonoBehaviour
         text.fontSize = 42f;
         text.color = alertColor;
         text.raycastTarget = false;
-        text.enableWordWrapping = false;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
         canvasGroup.alpha = 0f;
     }
 

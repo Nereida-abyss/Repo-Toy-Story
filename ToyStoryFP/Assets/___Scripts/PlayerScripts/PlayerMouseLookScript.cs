@@ -24,6 +24,9 @@ public class MouseLookScript : MonoBehaviour
     [Header("First Person")]
     public GameObject characterBody;
 
+    [Header("Recoil")]
+    [SerializeField] private float recoilReturnTime = 0.08f;
+
     [Header("Jump Camera Lift")]
     [SerializeField] private float jumpLiftHeight = 0.04f;
     [SerializeField] private float jumpLiftUpDuration = 0.1f;
@@ -47,6 +50,10 @@ public class MouseLookScript : MonoBehaviour
     private Vector2 mouseDelta;
     private float jumpPreparationPitchOffset;
     private Vector3 baseLocalPosition;
+    private float recoilPitchOffset;
+    private float recoilPitchVelocity;
+    private float recoilYawOffset;
+    private float recoilYawVelocity;
     private float anticipationDropOffset;
     private float anticipationDropVelocity;
     private float anticipationDropTarget;
@@ -103,8 +110,13 @@ public class MouseLookScript : MonoBehaviour
         if (clampInDegrees.y < 360)
             _mouseAbsolute.y = Mathf.Clamp(_mouseAbsolute.y, -clampInDegrees.y * 0.5f, clampInDegrees.y * 0.5f);
 
-        float combinedPitch = _mouseAbsolute.y + jumpPreparationPitchOffset;
-        transform.localRotation = Quaternion.AngleAxis(-combinedPitch, targetOrientation * Vector3.right) * targetOrientation;
+        recoilPitchOffset = Mathf.SmoothDamp(recoilPitchOffset, 0f, ref recoilPitchVelocity, Mathf.Max(0.01f, recoilReturnTime));
+        recoilYawOffset = Mathf.SmoothDamp(recoilYawOffset, 0f, ref recoilYawVelocity, Mathf.Max(0.01f, recoilReturnTime));
+
+        float combinedPitch = _mouseAbsolute.y + jumpPreparationPitchOffset + recoilPitchOffset;
+        Quaternion pitchRotation = Quaternion.AngleAxis(-combinedPitch, targetOrientation * Vector3.right) * targetOrientation;
+        Quaternion yawRecoilRotation = Quaternion.AngleAxis(recoilYawOffset, targetOrientation * Vector3.up);
+        transform.localRotation = yawRecoilRotation * pitchRotation;
         UpdateCameraVerticalOffsets();
 
         if (characterBody)
@@ -165,6 +177,12 @@ public class MouseLookScript : MonoBehaviour
     {
         CancelInvoke(nameof(BeginAnticipationDropReturn));
         BeginAnticipationDropReturn();
+    }
+
+    public void ApplyRecoil(float pitchKick, float yawKick)
+    {
+        recoilPitchOffset += pitchKick;
+        recoilYawOffset += yawKick;
     }
 
     private void ResetJumpPreparationDip()
