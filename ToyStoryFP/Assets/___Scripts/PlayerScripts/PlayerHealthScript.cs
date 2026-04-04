@@ -1,13 +1,19 @@
 using UnityEngine;
 
-public class PlayerHealthScript : MonoBehaviour
+public class PlayerHealthScript : MonoBehaviour, IDamageable
 {
     public int health;
 
-    public void TakeDamage(int _damage)
-    {
-        health -= _damage;
+    public bool IsAlive => health > 0;
 
+    public void TakeDamage(int damage)
+    {
+        if (!IsAlive)
+        {
+            return;
+        }
+
+        health -= damage;
 
         if (health <= 0)
         {

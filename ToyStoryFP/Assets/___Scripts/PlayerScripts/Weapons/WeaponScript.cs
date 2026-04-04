@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class WeaponScript : MonoBehaviour
 {
-
     [Header("Weapon Setup")]
     public Camera _camera;
+    [SerializeField] private Transform fireOrigin;
+    [SerializeField] private float maxRange = 100f;
 
     [Header("Weapon Stats")]
     public float fireRate = 10f;
@@ -15,42 +16,74 @@ public class WeaponScript : MonoBehaviour
     public GameObject muzzleFlashPrefab;
     public AudioClip fireSound;
 
-    private float timeUntilAllowNextShot;
+    private float nextAllowedShotTime;
 
-    void Start()
+    public bool TryFire()
     {
-        
-    }
-
-    void Update()
-    {
-
-        timeUntilAllowNextShot = Mathf.Max(0, timeUntilAllowNextShot - Time.deltaTime);
-
-        if (Input.GetButton("Fire1") && timeUntilAllowNextShot <= 0)
+        if (!CanFire())
         {
-            HitScanShoot();
-            timeUntilAllowNextShot = 1 / fireRate;
+            return false;
         }
+
+        Transform shotTransform = ResolveShotTransform();
+        return FireRay(shotTransform.position, shotTransform.forward);
     }
 
-    void HitScanShoot()
+    public bool TryFire(Vector3 targetPoint)
     {
-        Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
+        if (!CanFire())
+        {
+            return false;
+        }
 
-        RaycastHit hit;
+        Transform shotTransform = ResolveShotTransform();
+        Vector3 direction = (targetPoint - shotTransform.position).normalized;
 
-        if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
+        if (direction.sqrMagnitude <= 0.0001f)
+        {
+            direction = shotTransform.forward;
+        }
+
+        return FireRay(shotTransform.position, direction);
+    }
+
+    private bool CanFire()
+    {
+        return Time.time >= nextAllowedShotTime;
+    }
+
+    private Transform ResolveShotTransform()
+    {
+        if (_camera != null)
+        {
+            return _camera.transform;
+        }
+
+        return fireOrigin != null ? fireOrigin : transform;
+    }
+
+    private bool FireRay(Vector3 origin, Vector3 direction)
+    {
+        nextAllowedShotTime = Time.time + (1f / fireRate);
+
+        Vector3 normalizedDirection = direction.normalized;
+        Vector3 rayOrigin = origin + normalizedDirection * 0.05f;
+
+        if (Physics.Raycast(rayOrigin, normalizedDirection, out RaycastHit hit, maxRange))
         {
             if (muzzleFlashPrefab != null)
             {
                 Instantiate(muzzleFlashPrefab, hit.point, Quaternion.identity);
             }
 
-            if (hit.transform.gameObject.GetComponent<PlayerHealthScript>() != null)
+            IDamageable damageable = hit.transform.GetComponentInParent<IDamageable>();
+
+            if (damageable != null)
             {
-                hit.transform.gameObject.GetComponent<PlayerHealthScript>().TakeDamage(damagePerShot);
+                damageable.TakeDamage(damagePerShot);
             }
         }
+
+        return true;
     }
 }

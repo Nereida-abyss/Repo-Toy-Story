@@ -15,6 +15,22 @@ public class MouseLookScript : MonoBehaviour
     [Header("First Person")]
     public GameObject characterBody;
 
+    [Header("Jump Camera Lift")]
+    [SerializeField] private float jumpLiftHeight = 0.04f;
+    [SerializeField] private float jumpLiftUpDuration = 0.1f;
+    [SerializeField] private float jumpLiftDownDuration = 0.16f;
+
+    [Header("Jump Camera Anticipation")]
+    [SerializeField] private float anticipationDropHeight = 0.025f;
+    [SerializeField] private float anticipationDropReturnDuration = 0.06f;
+
+    [Header("Landing Camera Bounce")]
+    [SerializeField] private float landingBounceDropHeight = 0.015f;
+    [SerializeField] private float landingBounceDropDuration = 0.05f;
+    [SerializeField] private float landingBounceRecoverHeight = 0.008f;
+    [SerializeField] private float landingBounceRiseDuration = 0.025f;
+    [SerializeField] private float landingBounceRecoverDuration = 0.08f;
+
     private Vector2 targetDirection;
     private Vector2 targetCharacterDirection;
 
@@ -23,6 +39,22 @@ public class MouseLookScript : MonoBehaviour
 
     private Vector2 mouseDelta;
     private float jumpPreparationPitchOffset;
+    private Vector3 baseLocalPosition;
+    private float jumpLiftOffset;
+    private float jumpLiftVelocity;
+    private float jumpLiftTarget;
+    private float jumpLiftSmoothTime = 0.1f;
+    private float anticipationDropOffset;
+    private float anticipationDropVelocity;
+    private float anticipationDropTarget;
+    private float anticipationDropSmoothTime = 0.1f;
+    private float landingBounceOffset;
+    private float landingBounceImpactStrength = 1f;
+    private bool jumpLiftReturning;
+    private bool landingBounceQueued;
+    private float queuedLandingBounceImpactStrength = 1f;
+    private int landingBouncePhase;
+    private float landingBouncePhaseTimer;
 
     [HideInInspector]
     public bool scoped;
@@ -30,7 +62,7 @@ public class MouseLookScript : MonoBehaviour
     void Start()
     {
         instance = this;
-        
+        baseLocalPosition = transform.localPosition;
 
         targetDirection = transform.localRotation.eulerAngles;
 
@@ -74,6 +106,7 @@ public class MouseLookScript : MonoBehaviour
 
         float combinedPitch = _mouseAbsolute.y + jumpPreparationPitchOffset;
         transform.localRotation = Quaternion.AngleAxis(-combinedPitch, targetOrientation * Vector3.right) * targetOrientation;
+        UpdateCameraVerticalOffsets();
 
         if (characterBody)
         {
@@ -102,9 +135,169 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(ResetJumpPreparationDip), duration);
     }
 
+    public void PlayJumpLift()
+    {
+        CancelInvoke(nameof(BeginJumpLiftReturn));
+        ReleaseJumpAnticipationDrop();
+        jumpLiftReturning = false;
+
+        jumpLiftTarget = jumpLiftHeight;
+        jumpLiftSmoothTime = Mathf.Max(0.01f, jumpLiftUpDuration);
+        Invoke(nameof(BeginJumpLiftReturn), jumpLiftUpDuration);
+    }
+
+    public void PlayJumpAnticipationDrop(float anticipationDuration)
+    {
+        if (anticipationDuration <= 0f || anticipationDropHeight <= 0f)
+        {
+            ReleaseJumpAnticipationDrop();
+            return;
+        }
+
+        CancelInvoke(nameof(BeginAnticipationDropReturn));
+        anticipationDropTarget = anticipationDropHeight;
+        anticipationDropSmoothTime = Mathf.Max(0.01f, anticipationDuration);
+        Invoke(nameof(BeginAnticipationDropReturn), anticipationDuration);
+    }
+
+    public void ReleaseJumpAnticipationDrop()
+    {
+        CancelInvoke(nameof(BeginAnticipationDropReturn));
+        BeginAnticipationDropReturn();
+    }
+
+    public void PlayLandingBounce(float impactStrength = 1f)
+    {
+        if (landingBounceDropHeight <= 0f)
+        {
+            return;
+        }
+
+        float clampedImpactStrength = Mathf.Max(0f, impactStrength);
+
+        if (jumpLiftReturning && jumpLiftOffset > 0.001f)
+        {
+            landingBounceQueued = true;
+            queuedLandingBounceImpactStrength = clampedImpactStrength;
+            return;
+        }
+
+        StartLandingBounce(clampedImpactStrength);
+    }
+
+    private void StartLandingBounce(float impactStrength)
+    {
+        landingBounceImpactStrength = impactStrength;
+        landingBouncePhase = 1;
+        landingBouncePhaseTimer = 0f;
+        landingBounceOffset = 0f;
+    }
+
     private void ResetJumpPreparationDip()
     {
         jumpPreparationPitchOffset = 0f;
+    }
+
+    private void BeginJumpLiftReturn()
+    {
+        jumpLiftReturning = true;
+        jumpLiftTarget = 0f;
+        jumpLiftSmoothTime = Mathf.Max(0.01f, jumpLiftDownDuration);
+    }
+
+    private void BeginAnticipationDropReturn()
+    {
+        anticipationDropTarget = 0f;
+        anticipationDropSmoothTime = Mathf.Max(0.01f, anticipationDropReturnDuration);
+    }
+
+    private void UpdateCameraVerticalOffsets()
+    {
+        jumpLiftOffset = Mathf.SmoothDamp(
+            jumpLiftOffset,
+            jumpLiftTarget,
+            ref jumpLiftVelocity,
+            jumpLiftSmoothTime);
+
+        anticipationDropOffset = Mathf.SmoothDamp(
+            anticipationDropOffset,
+            anticipationDropTarget,
+            ref anticipationDropVelocity,
+            anticipationDropSmoothTime);
+
+        UpdateLandingBounceOffset();
+
+        if (jumpLiftReturning && jumpLiftTarget == 0f && jumpLiftOffset <= 0.001f)
+        {
+            jumpLiftReturning = false;
+            jumpLiftVelocity = 0f;
+            jumpLiftOffset = 0f;
+
+            if (landingBounceQueued)
+            {
+                landingBounceQueued = false;
+                StartLandingBounce(queuedLandingBounceImpactStrength);
+            }
+        }
+
+        float combinedOffset = jumpLiftOffset - anticipationDropOffset + landingBounceOffset;
+        Vector3 desiredPosition = baseLocalPosition + Vector3.up * combinedOffset;
+        transform.localPosition = desiredPosition;
+    }
+
+    private void UpdateLandingBounceOffset()
+    {
+        if (landingBouncePhase == 0)
+        {
+            landingBounceOffset = 0f;
+            return;
+        }
+
+        landingBouncePhaseTimer += Time.deltaTime;
+
+        float fullDrop = landingBounceDropHeight * landingBounceImpactStrength;
+        float partialDrop = Mathf.Max(0f, landingBounceDropHeight - landingBounceRecoverHeight) * landingBounceImpactStrength;
+
+        if (landingBouncePhase == 1)
+        {
+            float duration = Mathf.Max(0.001f, landingBounceDropDuration);
+            float t = Mathf.Clamp01(landingBouncePhaseTimer / duration);
+            landingBounceOffset = Mathf.Lerp(0f, -fullDrop, t);
+
+            if (t >= 1f)
+            {
+                landingBouncePhase = 2;
+                landingBouncePhaseTimer = 0f;
+            }
+
+            return;
+        }
+
+        if (landingBouncePhase == 2)
+        {
+            float duration = Mathf.Max(0.001f, landingBounceRiseDuration);
+            float t = Mathf.Clamp01(landingBouncePhaseTimer / duration);
+            landingBounceOffset = Mathf.Lerp(-fullDrop, -partialDrop, t);
+
+            if (t >= 1f)
+            {
+                landingBouncePhase = 3;
+                landingBouncePhaseTimer = 0f;
+            }
+
+            return;
+        }
+
+        float settleDuration = Mathf.Max(0.001f, landingBounceRecoverDuration);
+        float settleT = Mathf.Clamp01(landingBouncePhaseTimer / settleDuration);
+        landingBounceOffset = Mathf.Lerp(-partialDrop, 0f, settleT);
+
+        if (settleT >= 1f)
+        {
+            landingBouncePhase = 0;
+            landingBouncePhaseTimer = 0f;
+            landingBounceOffset = 0f;
+        }
     }
     
 }

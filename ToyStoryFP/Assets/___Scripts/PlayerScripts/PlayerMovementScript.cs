@@ -13,6 +13,7 @@ public class MovementScript : MonoBehaviour
     [Header("Movement Settings")]
     public float WalkSpeed = 5f;
     public float maxVelocityChange = 10f;
+    [SerializeField] private float turnSpeed = 360f;
 
     [Header("Jump Settings")]
     public float JumpForce = 5f;
@@ -55,12 +56,6 @@ public class MovementScript : MonoBehaviour
     {
         jumpAnimationTriggeredThisFrame = false;
         bool groundedAtFrameStart = isGrounded;
-        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            jumpBufferTimer = jumpInputBuffer;
-        }
 
         if (jumpBufferTimer > 0f)
         {
@@ -100,6 +95,30 @@ public class MovementScript : MonoBehaviour
         {
             visualModelRoot = transform.Find("PlayerModelo");
         }
+    }
+
+    public void SetMoveInput(Vector2 newInput)
+    {
+        input = Vector2.ClampMagnitude(newInput, 1f);
+    }
+
+    public void RequestJump()
+    {
+        jumpBufferTimer = jumpInputBuffer;
+    }
+
+    public void FaceDirection(Vector3 worldDirection, float overrideTurnSpeed = -1f)
+    {
+        Vector3 flattenedDirection = Vector3.ProjectOnPlane(worldDirection, Vector3.up);
+
+        if (flattenedDirection.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
+        float appliedTurnSpeed = overrideTurnSpeed > 0f ? overrideTurnSpeed : turnSpeed;
+        Quaternion targetRotation = Quaternion.LookRotation(flattenedDirection.normalized, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, appliedTurnSpeed * Time.deltaTime);
     }
 
     Vector3 CalculateMovement()
@@ -185,6 +204,7 @@ public class MovementScript : MonoBehaviour
         }
         else if (landedThisFrame)
         {
+            PlayLandingCameraBounce();
             CrossFadeIfNeeded(LocomotionStateHash, locomotionTransitionDuration);
         }
     }
@@ -221,10 +241,15 @@ public class MovementScript : MonoBehaviour
         }
 
         jumpQueued = true;
-        jumpDelayTimer = jumpDelay;
+        jumpDelayTimer = Mathf.Max(0f, jumpDelay);
         jumpBufferTimer = 0f;
         TriggerJumpAnimation();
-        PlayJumpPreparationDip();
+        PlayJumpAnticipationDrop();
+
+        if (jumpDelayTimer <= 0f)
+        {
+            ExecuteQueuedJump();
+        }
     }
 
     private void ExecuteQueuedJump()
@@ -239,6 +264,7 @@ public class MovementScript : MonoBehaviour
         isGrounded = false;
         groundedLockTimer = jumpGroundLockTime;
         ignoreGroundingWhileAscending = true;
+        PlayJumpCameraLift();
         rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
     }
 
@@ -298,6 +324,51 @@ public class MovementScript : MonoBehaviour
         }
 
         mouseLook.PlayJumpPreparationDip(jumpPreparationCameraDip, jumpDelay);
+    }
+
+    private void PlayJumpCameraLift()
+    {
+        if (mouseLook == null)
+        {
+            mouseLook = GetComponentInChildren<MouseLookScript>(true);
+        }
+
+        if (mouseLook == null)
+        {
+            return;
+        }
+
+        mouseLook.PlayJumpLift();
+    }
+
+    private void PlayJumpAnticipationDrop()
+    {
+        if (mouseLook == null)
+        {
+            mouseLook = GetComponentInChildren<MouseLookScript>(true);
+        }
+
+        if (mouseLook == null)
+        {
+            return;
+        }
+
+        mouseLook.PlayJumpAnticipationDrop(jumpDelay);
+    }
+
+    private void PlayLandingCameraBounce()
+    {
+        if (mouseLook == null)
+        {
+            mouseLook = GetComponentInChildren<MouseLookScript>(true);
+        }
+
+        if (mouseLook == null)
+        {
+            return;
+        }
+
+        mouseLook.PlayLandingBounce();
     }
 
     void OnCollisionExit(Collision collision)
