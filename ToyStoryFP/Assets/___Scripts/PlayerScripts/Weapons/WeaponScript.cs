@@ -253,7 +253,13 @@ public class WeaponScript : MonoBehaviour
         Vector3 normalizedDirection = direction.normalized;
         Vector3 rayOrigin = origin + normalizedDirection * 0.05f;
 
-        if (Physics.Raycast(rayOrigin, normalizedDirection, out RaycastHit hit, maxRange))
+        if (Physics.Raycast(
+            rayOrigin,
+            normalizedDirection,
+            out RaycastHit hit,
+            maxRange,
+            Physics.DefaultRaycastLayers,
+            QueryTriggerInteraction.Ignore))
         {
             if (muzzleFlashPrefab != null)
             {

@@ -2525,8 +2525,11 @@ MonoBehaviour:
   footstepPitchRandomness: 0.03
   weaponSwitchClip: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
   weaponSwitchVolume: 0.12
-  killConfirmClip: {fileID: 8300000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f91, type: 3}
-  killConfirmVolume: 0.2
+  coinPickupClip: {fileID: 8300000, guid: 5f4a2b7c9d014936b3f0c2e7a18d4b6f, type: 3}
+  coinPickupVolume: 0.24
+  coinPickupPitchRandomness: 0.04
+  killConfirmClip: {fileID: 8300000, guid: 2a8e1d4f6b7c49a3b5d0e2f18496c3ab, type: 3}
+  killConfirmVolume: 0.3
 --- !u!114 &6571116937149603781
 MonoBehaviour:
   m_ObjectHideFlags: 0

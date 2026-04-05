@@ -24,6 +24,11 @@ public class PlayerAudioController : MonoBehaviour
     [SerializeField] private AudioClip weaponSwitchClip;
     [SerializeField] [Range(0f, 1f)] private float weaponSwitchVolume = 0.28f;
 
+    [Header("Coin Pickup")]
+    [SerializeField] private AudioClip coinPickupClip;
+    [SerializeField] [Range(0f, 1f)] private float coinPickupVolume = 0.24f;
+    [SerializeField] private float coinPickupPitchRandomness = 0.04f;
+
     [Header("Kill Confirm")]
     [SerializeField] private AudioClip killConfirmClip;
     [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
@@ -48,6 +53,11 @@ public class PlayerAudioController : MonoBehaviour
     public void PlayWeaponSwitch()
     {
         PlayOneShot(generalSource, weaponSwitchClip, weaponSwitchVolume);
+    }
+
+    public void PlayCoinPickup()
+    {
+        PlayOneShot(generalSource, coinPickupClip, coinPickupVolume, coinPickupPitchRandomness);
     }
 
     public void PlayKillConfirm()

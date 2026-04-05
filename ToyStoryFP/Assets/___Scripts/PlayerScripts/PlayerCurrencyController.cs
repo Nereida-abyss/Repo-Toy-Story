@@ -7,6 +7,7 @@ public class PlayerCurrencyController : MonoBehaviour
     [SerializeField] private int startingCoins;
 
     private int currentCoins;
+    private PlayerAudioController playerAudio;
 
     public event Action<PlayerCurrencyController> CoinsChanged;
 
@@ -14,6 +15,7 @@ public class PlayerCurrencyController : MonoBehaviour
 
     void Awake()
     {
+        playerAudio = GetComponent<PlayerAudioController>();
         currentCoins = Mathf.Max(0, startingCoins);
         NotifyCoinsChanged();
     }
@@ -26,6 +28,7 @@ public class PlayerCurrencyController : MonoBehaviour
         }
 
         currentCoins += amount;
+        playerAudio?.PlayCoinPickup();
         NotifyCoinsChanged();
     }
 

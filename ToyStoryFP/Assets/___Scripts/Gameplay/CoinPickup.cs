@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class CoinPickup : MonoBehaviour
 {
+    private const string IgnoreRaycastLayerName = "Ignore Raycast";
+
     private static Material sharedCoinMaterial;
 
     [SerializeField] private int coinValue = 1;
@@ -68,6 +70,7 @@ public class CoinPickup : MonoBehaviour
     private void ConfigureRuntimeCoin()
     {
         basePosition = transform.position;
+        ApplyIgnoreRaycastLayer(gameObject);
 
         foreach (Collider existingCollider in GetComponents<Collider>())
         {
@@ -148,6 +151,7 @@ public class CoinPickup : MonoBehaviour
             }
         }
 
+        ApplyIgnoreRaycastLayer(visualRoot.gameObject);
         visualRoot.localPosition = visualLocalOffset;
         visualRoot.localRotation = Quaternion.identity;
         visualRoot.localScale = visualScale;
@@ -185,5 +189,22 @@ public class CoinPickup : MonoBehaviour
         };
 
         return sharedCoinMaterial;
+    }
+
+    private static void ApplyIgnoreRaycastLayer(GameObject target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        int ignoreRaycastLayer = LayerMask.NameToLayer(IgnoreRaycastLayerName);
+
+        if (ignoreRaycastLayer < 0)
+        {
+            return;
+        }
+
+        target.layer = ignoreRaycastLayer;
     }
 }
