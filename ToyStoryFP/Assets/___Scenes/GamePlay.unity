@@ -1993,6 +1993,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 919900000000002002, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919900000000002002, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919900000000002002, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 4978345595291347896, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_Name
       value: PlayerController
@@ -3797,7 +3809,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   enemyPrefab: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
   initialWaveDelay: 2
-  waveInterval: 60
+  intermissionDuration: 180
   spawnInterval: 0.5
   baseEnemyCount: 10
   additionalEnemiesPerWave: 2

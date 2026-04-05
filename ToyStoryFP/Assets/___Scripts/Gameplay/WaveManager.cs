@@ -6,6 +6,13 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 public class WaveManager : MonoBehaviour
 {
+    private enum WaveState
+    {
+        InitialDelay,
+        WaveInProgress,
+        Intermission
+    }
+
     private const int MaxSpawnPositionAttempts = 12;
     private const float MinimumNavMeshSampleDistance = 8f;
     private const float SpawnSampleHeightOffset = 0.5f;
@@ -13,7 +20,7 @@ public class WaveManager : MonoBehaviour
     [Header("Wave Setup")]
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private float initialWaveDelay = 2f;
-    [SerializeField] private float waveInterval = 60f;
+    [SerializeField] private float intermissionDuration = 180f;
     [SerializeField] private float spawnInterval = 0.5f;
     [SerializeField] private int baseEnemyCount = 10;
     [SerializeField] private int additionalEnemiesPerWave = 2;
@@ -22,14 +29,57 @@ public class WaveManager : MonoBehaviour
     private readonly HashSet<PlayerHealthScript> aliveEnemies = new HashSet<PlayerHealthScript>();
     private EnemySpawnPoint[] spawnPoints = System.Array.Empty<EnemySpawnPoint>();
     private WaveAnnouncementUI waveAnnouncementUi;
+    private WaveIntermissionUI waveIntermissionUi;
     private int currentWaveIndex;
+    private int spawnAttemptsCompletedThisWave;
+    private int enemiesToSpawnThisWave;
+    private float remainingIntermissionTime;
     private bool hasLoggedMissingSpawnPoints;
     private bool hasLoggedMissingEnemyPrefab;
+    private bool isSpawningCurrentWave;
+    private WaveState currentState = WaveState.InitialDelay;
 
     void Start()
     {
         RefreshSceneReferences();
+        HideIntermissionPrompt();
         StartCoroutine(WaveLoop());
+    }
+
+    void Update()
+    {
+        if (currentState == WaveState.WaveInProgress)
+        {
+            if (HasWaveFinished())
+            {
+                BeginIntermission();
+            }
+
+            return;
+        }
+
+        if (currentState != WaveState.Intermission)
+        {
+            return;
+        }
+
+        if (UIManager.Instance != null && UIManager.Instance.IsPaused)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            StartNextWave();
+            return;
+        }
+
+        remainingIntermissionTime -= Time.deltaTime;
+
+        if (remainingIntermissionTime <= 0f)
+        {
+            StartNextWave();
+        }
     }
 
     void OnDestroy()
@@ -47,16 +97,12 @@ public class WaveManager : MonoBehaviour
 
     private IEnumerator WaveLoop()
     {
+        currentState = WaveState.InitialDelay;
         yield return new WaitForSeconds(Mathf.Max(0f, initialWaveDelay));
-
-        while (true)
-        {
-            StartWave();
-            yield return new WaitForSeconds(Mathf.Max(0f, waveInterval));
-        }
+        StartNextWave();
     }
 
-    private void StartWave()
+    private void StartNextWave()
     {
         if (!HasValidEnemyPrefab() || !HasSpawnPoints())
         {
@@ -64,7 +110,13 @@ public class WaveManager : MonoBehaviour
         }
 
         currentWaveIndex++;
+        currentState = WaveState.WaveInProgress;
+        remainingIntermissionTime = 0f;
+        enemiesToSpawnThisWave = GetEnemyCountForWave(currentWaveIndex);
+        spawnAttemptsCompletedThisWave = 0;
+        isSpawningCurrentWave = true;
         ResolveAnnouncementUi();
+        HideIntermissionPrompt();
         waveAnnouncementUi?.ShowWave(currentWaveIndex);
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
@@ -76,12 +128,15 @@ public class WaveManager : MonoBehaviour
         for (int i = 0; i < enemiesToSpawn; i++)
         {
             SpawnEnemy();
+            spawnAttemptsCompletedThisWave++;
 
             if (i < enemiesToSpawn - 1)
             {
                 yield return new WaitForSeconds(Mathf.Max(0.01f, spawnInterval));
             }
         }
+
+        isSpawningCurrentWave = false;
     }
 
     private void SpawnEnemy()
@@ -129,7 +184,7 @@ public class WaveManager : MonoBehaviour
 
     private void ResolveAnnouncementUi()
     {
-        if (waveAnnouncementUi != null)
+        if (waveAnnouncementUi != null && waveIntermissionUi != null)
         {
             return;
         }
@@ -140,6 +195,7 @@ public class WaveManager : MonoBehaviour
         }
 
         waveAnnouncementUi = PlayerController.Instance.GetComponentInChildren<WaveAnnouncementUI>(true);
+        waveIntermissionUi = PlayerController.Instance.GetComponentInChildren<WaveIntermissionUI>(true);
     }
 
     private bool HasSpawnPoints()
@@ -217,5 +273,26 @@ public class WaveManager : MonoBehaviour
     private int GetEnemyCountForWave(int waveIndex)
     {
         return Mathf.Max(1, baseEnemyCount + ((waveIndex - 1) * additionalEnemiesPerWave));
+    }
+
+    private bool HasWaveFinished()
+    {
+        return !isSpawningCurrentWave
+            && spawnAttemptsCompletedThisWave >= enemiesToSpawnThisWave
+            && aliveEnemies.Count == 0;
+    }
+
+    private void BeginIntermission()
+    {
+        currentState = WaveState.Intermission;
+        remainingIntermissionTime = Mathf.Max(0f, intermissionDuration);
+        ResolveAnnouncementUi();
+        waveIntermissionUi?.ShowPrompt();
+    }
+
+    private void HideIntermissionPrompt()
+    {
+        ResolveAnnouncementUi();
+        waveIntermissionUi?.HidePrompt();
     }
 }
