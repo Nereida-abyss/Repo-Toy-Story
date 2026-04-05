@@ -64,6 +64,15 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
     }
 
+    public void SetMaxHealth(int newMaxHealth, bool restoreCurrentHealthToMax)
+    {
+        maxHealth = Mathf.Max(1, newMaxHealth);
+        currentHealth = restoreCurrentHealthToMax
+            ? maxHealth
+            : Mathf.Clamp(currentHealth, 0, maxHealth);
+        NotifyHealthChanged();
+    }
+
     private void NotifyHealthChanged()
     {
         HealthChanged?.Invoke(this);

@@ -65,6 +65,7 @@ public class WeaponScript : MonoBehaviour
 
     public int CurrentAmmoInMagazine => playerOwnedWeapon ? currentAmmoInMagazine : 0;
     public int ReserveAmmo => reserveAmmo;
+    public int DamagePerShot => damagePerShot;
     public bool HasInfiniteReserve => infiniteReserve;
     public bool IsReloading => playerOwnedWeapon && isReloading;
     public bool IsPlayerOwnedWeapon => playerOwnedWeapon;
@@ -193,6 +194,12 @@ public class WeaponScript : MonoBehaviour
         equipPositionOffset = Vector3.zero;
         equipRotationOffset = Vector3.zero;
         ApplyCurrentPose();
+    }
+
+    public void SetDamagePerShot(int newDamagePerShot)
+    {
+        damagePerShot = Mathf.Max(1, newDamagePerShot);
+        NotifyStateChanged();
     }
 
     private bool CanFire()

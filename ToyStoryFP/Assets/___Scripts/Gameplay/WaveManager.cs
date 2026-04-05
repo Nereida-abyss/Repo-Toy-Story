@@ -6,6 +6,35 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 public class WaveManager : MonoBehaviour
 {
+    [System.Serializable]
+    private struct EnemyRoundScalingSettings
+    {
+        [Min(1f)] public float healthMultiplierPerRound;
+        [Min(1f)] public float damageMultiplierPerRound;
+        [Min(1f)] public float maxHealthMultiplier;
+        [Min(1f)] public float maxDamageMultiplier;
+
+        public static EnemyRoundScalingSettings Default => new EnemyRoundScalingSettings
+        {
+            healthMultiplierPerRound = 1.03f,
+            damageMultiplierPerRound = 1.02f,
+            maxHealthMultiplier = 1.75f,
+            maxDamageMultiplier = 1.35f
+        };
+    }
+
+    private readonly struct EnemyRoundScalingSnapshot
+    {
+        public EnemyRoundScalingSnapshot(float healthMultiplier, float damageMultiplier)
+        {
+            HealthMultiplier = healthMultiplier;
+            DamageMultiplier = damageMultiplier;
+        }
+
+        public float HealthMultiplier { get; }
+        public float DamageMultiplier { get; }
+    }
+
     public enum WaveRuntimeState
     {
         InitialDelay,
@@ -26,6 +55,9 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private int baseEnemyCount = 10;
     [SerializeField] private int additionalEnemiesPerWave = 2;
     [SerializeField] private float navMeshSampleDistance = 2f;
+
+    [Header("Enemy Round Scaling")]
+    [SerializeField] private EnemyRoundScalingSettings enemyRoundScaling = EnemyRoundScalingSettings.Default;
 
     private readonly HashSet<PlayerHealthScript> aliveEnemies = new HashSet<PlayerHealthScript>();
     private EnemySpawnPoint[] spawnPoints = System.Array.Empty<EnemySpawnPoint>();
@@ -166,7 +198,7 @@ public class WaveManager : MonoBehaviour
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            SpawnEnemy();
+            SpawnEnemy(waveIndex);
             spawnAttemptsCompletedThisWave++;
 
             if (i < enemiesToSpawn - 1)
@@ -178,7 +210,7 @@ public class WaveManager : MonoBehaviour
         isSpawningCurrentWave = false;
     }
 
-    private void SpawnEnemy()
+    private void SpawnEnemy(int waveIndex)
     {
         if (!TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint spawnPoint))
         {
@@ -187,6 +219,7 @@ public class WaveManager : MonoBehaviour
         }
 
         GameObject spawnedEnemy = Instantiate(enemyPrefab, spawnPosition, spawnPoint.Rotation);
+        ApplyRoundScalingToEnemy(spawnedEnemy, waveIndex);
         PlayerHealthScript enemyHealth = spawnedEnemy.GetComponent<PlayerHealthScript>();
 
         if (enemyHealth == null)
@@ -325,6 +358,52 @@ public class WaveManager : MonoBehaviour
     private int GetEnemyCountForWave(int waveIndex)
     {
         return Mathf.Max(1, baseEnemyCount + ((waveIndex - 1) * additionalEnemiesPerWave));
+    }
+
+    private void ApplyRoundScalingToEnemy(GameObject spawnedEnemy, int waveIndex)
+    {
+        if (spawnedEnemy == null)
+        {
+            return;
+        }
+
+        EnemyController enemyController = spawnedEnemy.GetComponent<EnemyController>();
+
+        if (enemyController == null)
+        {
+            enemyController = spawnedEnemy.GetComponentInChildren<EnemyController>();
+        }
+
+        if (enemyController == null)
+        {
+            return;
+        }
+
+        EnemyRoundScalingSnapshot roundScaling = GetRoundScalingSnapshot(waveIndex);
+        enemyController.ApplyRoundScaling(roundScaling.HealthMultiplier, roundScaling.DamageMultiplier);
+    }
+
+    private EnemyRoundScalingSnapshot GetRoundScalingSnapshot(int waveIndex)
+    {
+        int waveOffset = Mathf.Max(0, waveIndex - 1);
+        float healthMultiplier = GetEffectiveRoundMultiplier(
+            enemyRoundScaling.healthMultiplierPerRound,
+            enemyRoundScaling.maxHealthMultiplier,
+            waveOffset);
+        float damageMultiplier = GetEffectiveRoundMultiplier(
+            enemyRoundScaling.damageMultiplierPerRound,
+            enemyRoundScaling.maxDamageMultiplier,
+            waveOffset);
+
+        return new EnemyRoundScalingSnapshot(healthMultiplier, damageMultiplier);
+    }
+
+    private static float GetEffectiveRoundMultiplier(float multiplierPerRound, float maxMultiplier, int waveOffset)
+    {
+        float sanitizedPerRound = Mathf.Max(1f, multiplierPerRound);
+        float sanitizedMax = Mathf.Max(1f, maxMultiplier);
+        float compoundedMultiplier = Mathf.Pow(sanitizedPerRound, Mathf.Max(0, waveOffset));
+        return Mathf.Min(sanitizedMax, compoundedMultiplier);
     }
 
     private bool HasWaveFinished()

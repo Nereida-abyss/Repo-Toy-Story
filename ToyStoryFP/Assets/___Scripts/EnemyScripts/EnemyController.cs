@@ -54,6 +54,7 @@ public class EnemyController : MonoBehaviour
     private MovementScript movementScript;
     private NavMeshAgent navMeshAgent;
     private WeaponScript weaponScript;
+    private PlayerHealthScript healthScript;
     private EnemyAlertIndicator alertIndicator;
     private EnemyAudioController enemyAudio;
     private PlayerHealthScript cachedTargetHealth;
@@ -61,6 +62,9 @@ public class EnemyController : MonoBehaviour
     private float attackWarmupTimer;
     private float loseSightTimer;
     private float patrolRetargetTimer;
+    private int baseMaxHealth;
+    private int baseDamagePerShot;
+    private bool baseScalingStatsCached;
     private bool isAlerted;
     private bool hasPatrolDestination;
     private AIState currentState = AIState.Patrol;
@@ -70,12 +74,53 @@ public class EnemyController : MonoBehaviour
         movementScript = GetComponent<MovementScript>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         weaponScript = GetComponentInChildren<WeaponScript>(true);
+        healthScript = GetComponent<PlayerHealthScript>();
+
+        if (healthScript == null)
+        {
+            healthScript = GetComponentInChildren<PlayerHealthScript>(true);
+        }
+
         enemyAudio = GetComponent<EnemyAudioController>();
+        CacheBaseScalingStats();
         ConfigureNavigation();
         CacheTargetHealth();
         ResolveAlertIndicator();
         ResetAttackWarmup();
         SetAlerted(false, false);
+    }
+
+    public void ApplyRoundScaling(float healthMultiplier, float damageMultiplier)
+    {
+        CacheBaseScalingStats();
+
+        if (healthScript != null)
+        {
+            int scaledMaxHealth = Mathf.Max(
+                baseMaxHealth,
+                Mathf.RoundToInt(baseMaxHealth * Mathf.Max(1f, healthMultiplier)));
+            healthScript.SetMaxHealth(scaledMaxHealth, true);
+        }
+
+        if (weaponScript != null)
+        {
+            int scaledDamage = Mathf.Max(
+                baseDamagePerShot,
+                Mathf.RoundToInt(baseDamagePerShot * Mathf.Max(1f, damageMultiplier)));
+            weaponScript.SetDamagePerShot(scaledDamage);
+        }
+    }
+
+    private void CacheBaseScalingStats()
+    {
+        if (baseScalingStatsCached)
+        {
+            return;
+        }
+
+        baseMaxHealth = healthScript != null ? Mathf.Max(1, healthScript.MaxHealth) : 1;
+        baseDamagePerShot = weaponScript != null ? Mathf.Max(1, weaponScript.DamagePerShot) : 1;
+        baseScalingStatsCached = true;
     }
 
     void Update()
