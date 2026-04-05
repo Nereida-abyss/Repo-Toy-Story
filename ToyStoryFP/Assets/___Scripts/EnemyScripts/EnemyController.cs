@@ -6,6 +6,12 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyController : MonoBehaviour
 {
+    private enum AIState
+    {
+        Patrol,
+        Alert
+    }
+
     private const float DefaultDetectionRange = 10f;
     private const float DefaultLoseSightGraceTime = 0.6f;
     private const float DefaultEyeHeight = 1.4f;
@@ -13,6 +19,11 @@ public class EnemyController : MonoBehaviour
     private const float DefaultStoppingDistance = 4.5f;
     private const float DefaultAttackRange = 7f;
     private const float DefaultNavMeshSnapDistance = 1f;
+    private const float DefaultPatrolPointReachThreshold = 0.25f;
+    private const float DefaultPatrolRetargetDelay = 0.35f;
+    private const float DefaultPatrolSearchRadius = 6f;
+    private const float DefaultPatrolMinTravelDistance = 2f;
+    private const int PatrolPointSearchAttempts = 8;
 
     [Header("Target")]
     [SerializeField] private Transform target;
@@ -30,6 +41,12 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float attackRange = DefaultAttackRange;
     [SerializeField] private float turnSpeed = 360f;
 
+    [Header("Patrol")]
+    [SerializeField] private float patrolPointReachThreshold = DefaultPatrolPointReachThreshold;
+    [SerializeField] private float patrolRetargetDelay = DefaultPatrolRetargetDelay;
+    [SerializeField] private float patrolSearchRadius = DefaultPatrolSearchRadius;
+    [SerializeField] private float patrolMinTravelDistance = DefaultPatrolMinTravelDistance;
+
     [Header("Combat")]
     [SerializeField] private float attackWarmup = 0.65f;
     [Range(0f, 1f)] [SerializeField] private float attackAimDotThreshold = 0.92f;
@@ -42,7 +59,10 @@ public class EnemyController : MonoBehaviour
     private PlayerHealthScript cachedTargetHealth;
     private float attackWarmupTimer;
     private float loseSightTimer;
+    private float patrolRetargetTimer;
     private bool isAlerted;
+    private bool hasPatrolDestination;
+    private AIState currentState = AIState.Patrol;
 
     void Awake()
     {
@@ -59,30 +79,73 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
-        if (!TryResolveTarget())
+        bool hasTarget = TryResolveTarget();
+        Vector3 flatDirection = Vector3.zero;
+        float flatDistance = float.PositiveInfinity;
+
+        if (hasTarget)
         {
-            StopNavigation();
-            movementScript.SetMoveInput(Vector2.zero);
-            movementScript.SetExternalMovementState(Vector3.zero, IsNavigationAvailable());
-            SetAlerted(false, false);
-            ResetAttackWarmup();
+            Vector3 toTarget = target.position - transform.position;
+            flatDirection = Vector3.ProjectOnPlane(toTarget, Vector3.up);
+            flatDistance = flatDirection.magnitude;
+        }
+
+        UpdateDetectionState(hasTarget, flatDistance);
+
+        if (currentState == AIState.Alert && hasTarget)
+        {
+            HandleAlert(flatDirection, flatDistance);
             return;
         }
 
-        Vector3 toTarget = target.position - transform.position;
-        Vector3 flatDirection = Vector3.ProjectOnPlane(toTarget, Vector3.up);
-        float flatDistance = flatDirection.magnitude;
+        HandlePatrol();
+    }
 
-        UpdateDetectionState(flatDistance);
+    private void UpdateDetectionState(bool hasTarget, float flatDistance)
+    {
+        bool canSeeTargetNow = hasTarget &&
+            flatDistance <= GetDetectionRange() &&
+            HasLineOfSight();
+
+        if (canSeeTargetNow)
+        {
+            loseSightTimer = GetLoseSightGraceTime();
+
+            if (!isAlerted)
+            {
+                SetAlerted(true, true);
+            }
+
+            return;
+        }
 
         if (!isAlerted)
         {
-            StopNavigation();
-            movementScript.SetMoveInput(Vector2.zero);
-            movementScript.SetExternalMovementState(Vector3.zero, IsNavigationAvailable());
-            ResetAttackWarmup();
             return;
         }
+
+        if (loseSightTimer > 0f)
+        {
+            loseSightTimer -= Time.deltaTime;
+            return;
+        }
+
+        SetAlerted(false, false);
+    }
+
+    private void HandlePatrol()
+    {
+        ResetAttackWarmup();
+        UpdatePatrolNavigation();
+        movementScript.SetMoveInput(Vector2.zero);
+        movementScript.SetExternalMovementState(GetPlanarAgentVelocity(), IsNavigationAvailable());
+        movementScript.FaceDirection(GetFacingDirection(transform.forward), turnSpeed);
+    }
+
+    private void HandleAlert(Vector3 flatDirection, float flatDistance)
+    {
+        hasPatrolDestination = false;
+        patrolRetargetTimer = 0f;
 
         float desiredStoppingDistance = GetEffectiveStoppingDistance();
         bool shouldChase = flatDistance > desiredStoppingDistance;
@@ -90,7 +153,7 @@ public class EnemyController : MonoBehaviour
 
         if (shouldChase)
         {
-            UpdateNavigation();
+            SetAgentDestination(target.position, desiredStoppingDistance);
         }
         else
         {
@@ -125,36 +188,6 @@ public class EnemyController : MonoBehaviour
         {
             weaponScript.TryFire(GetTargetAimPoint());
         }
-    }
-
-    private void UpdateDetectionState(float flatDistance)
-    {
-        bool canSeeTargetNow = flatDistance <= GetDetectionRange() && HasLineOfSight();
-
-        if (canSeeTargetNow)
-        {
-            loseSightTimer = GetLoseSightGraceTime();
-
-            if (!isAlerted)
-            {
-                SetAlerted(true, true);
-            }
-
-            return;
-        }
-
-        if (!isAlerted)
-        {
-            return;
-        }
-
-        if (loseSightTimer > 0f)
-        {
-            loseSightTimer -= Time.deltaTime;
-            return;
-        }
-
-        SetAlerted(false, false);
     }
 
     private bool TryResolveTarget()
@@ -274,12 +307,15 @@ public class EnemyController : MonoBehaviour
     {
         bool wasAlerted = isAlerted;
         isAlerted = alerted;
+        currentState = alerted ? AIState.Alert : AIState.Patrol;
 
         if (!alerted)
         {
             StopNavigation();
             loseSightTimer = 0f;
             ResetAttackWarmup();
+            hasPatrolDestination = false;
+            patrolRetargetTimer = 0f;
         }
         else if (!wasAlerted)
         {
@@ -322,6 +358,26 @@ public class EnemyController : MonoBehaviour
         return attackRange > 0f ? attackRange : DefaultAttackRange;
     }
 
+    private float GetPatrolPointReachThreshold()
+    {
+        return patrolPointReachThreshold > 0f ? patrolPointReachThreshold : DefaultPatrolPointReachThreshold;
+    }
+
+    private float GetPatrolRetargetDelay()
+    {
+        return patrolRetargetDelay > 0f ? patrolRetargetDelay : DefaultPatrolRetargetDelay;
+    }
+
+    private float GetPatrolSearchRadius()
+    {
+        return patrolSearchRadius > 0f ? patrolSearchRadius : DefaultPatrolSearchRadius;
+    }
+
+    private float GetPatrolMinTravelDistance()
+    {
+        return patrolMinTravelDistance > 0f ? patrolMinTravelDistance : DefaultPatrolMinTravelDistance;
+    }
+
     private float GetEffectiveStoppingDistance()
     {
         return Mathf.Max(0.05f, Mathf.Min(GetStoppingDistance(), GetAttackRange()));
@@ -337,21 +393,108 @@ public class EnemyController : MonoBehaviour
         return target.position + Vector3.up * targetAimHeight;
     }
 
-    private void UpdateNavigation()
+    private void UpdatePatrolNavigation()
     {
         if (!EnsureAgentOnNavMesh())
+        {
+            hasPatrolDestination = false;
+            return;
+        }
+
+        if (hasPatrolDestination && HasReachedDestination(GetPatrolPointReachThreshold()))
+        {
+            StopNavigation();
+            hasPatrolDestination = false;
+            patrolRetargetTimer = GetPatrolRetargetDelay();
+        }
+
+        if (hasPatrolDestination)
         {
             return;
         }
 
-        navMeshAgent.stoppingDistance = GetEffectiveStoppingDistance();
+        if (patrolRetargetTimer > 0f)
+        {
+            patrolRetargetTimer -= Time.deltaTime;
+            return;
+        }
+
+        if (!TrySetNextPatrolDestination())
+        {
+            patrolRetargetTimer = GetPatrolRetargetDelay();
+        }
+    }
+
+    private bool TrySetNextPatrolDestination()
+    {
+        if (navMeshAgent == null)
+        {
+            return false;
+        }
+
+        float radius = GetPatrolSearchRadius();
+        float minTravelDistance = GetPatrolMinTravelDistance();
+        float minTravelDistanceSqr = minTravelDistance * minTravelDistance;
+
+        for (int attempt = 0; attempt < PatrolPointSearchAttempts; attempt++)
+        {
+            Vector2 offset2D = Random.insideUnitCircle * radius;
+            Vector3 candidate = transform.position + new Vector3(offset2D.x, 0f, offset2D.y);
+
+            if ((candidate - transform.position).sqrMagnitude < minTravelDistanceSqr)
+            {
+                continue;
+            }
+
+            if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, radius, navMeshAgent.areaMask))
+            {
+                continue;
+            }
+
+            Vector3 travel = Vector3.ProjectOnPlane(hit.position - transform.position, Vector3.up);
+
+            if (travel.sqrMagnitude < minTravelDistanceSqr)
+            {
+                continue;
+            }
+
+            if (!SetAgentDestination(hit.position, GetPatrolPointReachThreshold()))
+            {
+                continue;
+            }
+
+            hasPatrolDestination = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool SetAgentDestination(Vector3 destination, float desiredStoppingDistance)
+    {
+        if (!EnsureAgentOnNavMesh())
+        {
+            return false;
+        }
+
+        navMeshAgent.stoppingDistance = Mathf.Max(0.01f, desiredStoppingDistance);
 
         if (navMeshAgent.isStopped)
         {
             navMeshAgent.isStopped = false;
         }
 
-        navMeshAgent.SetDestination(target.position);
+        return navMeshAgent.SetDestination(destination);
+    }
+
+    private bool HasReachedDestination(float reachThreshold)
+    {
+        if (!IsNavigationAvailable() || navMeshAgent.pathPending || !navMeshAgent.hasPath)
+        {
+            return false;
+        }
+
+        return navMeshAgent.remainingDistance <= Mathf.Max(0.01f, reachThreshold);
     }
 
     private void StopNavigation()

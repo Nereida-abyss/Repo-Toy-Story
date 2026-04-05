@@ -119,6 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &25992916 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 756343466346896739, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+  m_PrefabInstance: {fileID: 1905847328}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dcb4a7aadf8ccc44a0c64e6ce67497b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CambioEscena
 --- !u!1 &179243986
 GameObject:
   m_ObjectHideFlags: 0
@@ -1932,10 +1943,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 134238219663904444, guid: 0c477606bdeb629418516db0806869dd, type: 3}
-      propertyPath: detectionRange
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: m_Name
       value: EnemyController
@@ -1993,6 +2000,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 25992916}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: RestartGamePlay
+      objectReference: {fileID: 0}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: CambioEscena, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1711693005712382280, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 4978345595291347896, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_Name
       value: PlayerController

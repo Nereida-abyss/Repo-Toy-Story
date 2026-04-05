@@ -178,7 +178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   target: {fileID: 0}
   targetAimHeight: 0.15
-  detectionRange: 8
+  detectionRange: 1
   loseSightGraceTime: 0.6
   eyeOrigin: {fileID: 0}
   eyeHeight: 1.4
@@ -190,6 +190,10 @@ MonoBehaviour:
   stoppingDistance: 0.75
   attackRange: 0.8
   turnSpeed: 360
+  patrolPointReachThreshold: 0.25
+  patrolRetargetDelay: 0.2
+  patrolSearchRadius: 5
+  patrolMinTravelDistance: 2.5
   attackWarmup: 0.65
   attackAimDotThreshold: 0.877
 --- !u!82 &8918308276734767724
@@ -317,8 +321,8 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.02
-  m_Speed: 0.93
-  m_Acceleration: 8
+  m_Speed: 0.1
+  m_Acceleration: 5
   avoidancePriority: 50
   m_AngularSpeed: 100
   m_StoppingDistance: 0.75

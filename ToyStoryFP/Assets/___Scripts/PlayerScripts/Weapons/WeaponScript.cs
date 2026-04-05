@@ -78,8 +78,7 @@ public class WeaponScript : MonoBehaviour
 
     void OnEnable()
     {
-        ResetVisualRecoil();
-
+        CacheBasePose();
         ResolvePlayerAudio();
         TryInitializeAmmo();
     }
@@ -145,14 +144,7 @@ public class WeaponScript : MonoBehaviour
 
     public void CancelReload()
     {
-        if (!isReloading)
-        {
-            return;
-        }
-
-        isReloading = false;
-        reloadTimer = 0f;
-        NotifyStateChanged();
+        SetReloadState(false, true);
     }
 
     public void SetPlayerOwned(bool enabled)
@@ -164,9 +156,18 @@ public class WeaponScript : MonoBehaviour
 
     public void NotifyEquipped()
     {
-        CancelReload();
+        SetReloadState(false, true);
         ResetVisualRecoil();
         NotifyStateChanged();
+    }
+
+    public void InitializeAsEquippedAtSpawn()
+    {
+        CacheBasePose();
+        ResolvePlayerAudio();
+        TryInitializeAmmo();
+        SetReloadState(false, false);
+        ResetVisualRecoil();
     }
 
     public void SetEquipAnimationProgress(float progress, bool lowering)
@@ -317,6 +318,31 @@ public class WeaponScript : MonoBehaviour
         }
 
         NotifyStateChanged();
+    }
+
+    private void SetReloadState(bool reloading, bool notifyStateChanged)
+    {
+        if (isReloading == reloading)
+        {
+            if (!reloading)
+            {
+                reloadTimer = 0f;
+            }
+
+            return;
+        }
+
+        isReloading = reloading;
+
+        if (!reloading)
+        {
+            reloadTimer = 0f;
+        }
+
+        if (notifyStateChanged)
+        {
+            NotifyStateChanged();
+        }
     }
 
     private void CacheBasePose()

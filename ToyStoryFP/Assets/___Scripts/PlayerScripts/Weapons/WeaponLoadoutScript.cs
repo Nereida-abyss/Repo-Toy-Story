@@ -24,6 +24,7 @@ public class WeaponLoadoutScript : MonoBehaviour
     private WeaponSwitchState switchState = WeaponSwitchState.Idle;
     private WeaponScript visibleWeapon;
     private PlayerAudioController playerAudio;
+    private bool initialLoadoutResolved;
 
     public event Action<WeaponScript> CurrentWeaponChanged;
 
@@ -110,7 +111,9 @@ public class WeaponLoadoutScript : MonoBehaviour
             activeIndex = 0;
         }
 
-        SetWeaponIndexImmediate(activeIndex);
+        bool initializeSilently = !initialLoadoutResolved;
+        SetWeaponIndexImmediate(activeIndex, initializeSilently);
+        initialLoadoutResolved = true;
     }
 
     public bool TryCycleWeapon(int direction)
@@ -262,7 +265,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    private void SetWeaponIndexImmediate(int index)
+    private void SetWeaponIndexImmediate(int index, bool initializeSilently = false)
     {
         if (weapons.Length == 0)
         {
@@ -282,8 +285,17 @@ public class WeaponLoadoutScript : MonoBehaviour
         ActivateOnly(equippedWeaponIndex);
 
         visibleWeapon = CurrentWeapon;
-        visibleWeapon?.NotifyEquipped();
-        visibleWeapon?.ResetEquipPose();
+
+        if (initializeSilently)
+        {
+            visibleWeapon?.InitializeAsEquippedAtSpawn();
+        }
+        else
+        {
+            visibleWeapon?.NotifyEquipped();
+            visibleWeapon?.ResetEquipPose();
+        }
+
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
