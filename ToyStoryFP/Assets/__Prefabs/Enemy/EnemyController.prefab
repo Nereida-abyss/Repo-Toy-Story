@@ -639,6 +639,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4765474583668706138}
     m_Modifications:
+    - target: {fileID: 1247729090888737821, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1567139045632650960, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -682,10 +686,6 @@ PrefabInstance:
     - target: {fileID: 2230486898179339370, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
       propertyPath: m_Name
       value: Swat
-      objectReference: {fileID: 0}
-    - target: {fileID: 1247729090888737821, guid: 0e48c28b38d701747ade3cd1ba717570, type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
