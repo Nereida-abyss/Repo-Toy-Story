@@ -278,6 +278,7 @@ public class WeaponScript : MonoBehaviour
             if (damageable != null)
             {
                 DamageResult damageResult = damageable.TakeDamage(damagePerShot);
+                NotifyEnemyAggro(hit.transform, hit.point, damageResult);
                 HandleDamageFeedback(damageResult);
             }
         }
@@ -504,6 +505,24 @@ public class WeaponScript : MonoBehaviour
         }
 
         CrosshairFeedbackController.Instance?.PlayHitMarker();
+    }
+
+    private void NotifyEnemyAggro(Transform hitTransform, Vector3 hitPoint, DamageResult damageResult)
+    {
+        if (!playerOwnedWeapon || !damageResult.WasDamaged || hitTransform == null)
+        {
+            return;
+        }
+
+        EnemyController enemyController = hitTransform.GetComponentInParent<EnemyController>();
+
+        if (enemyController == null)
+        {
+            return;
+        }
+
+        Transform aggressor = GetComponentInParent<PlayerController>()?.transform;
+        enemyController.NotifyDamagedByPlayer(aggressor, hitPoint);
     }
 
     private void ApplyCurrentPose()

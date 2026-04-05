@@ -133,16 +133,35 @@ public class MovementScript : MonoBehaviour
 
     public void SetExternalMovementState(Vector3 worldPlanarVelocity, bool grounded)
     {
-        externalTranslationDriven = true;
-        externalPlanarVelocity = Vector3.ProjectOnPlane(worldPlanarVelocity, Vector3.up);
-        isGrounded = grounded;
-
-        Vector3 localVelocity = transform.InverseTransformDirection(externalPlanarVelocity);
+        Vector3 localVelocity = PrepareExternalMovementState(worldPlanarVelocity, grounded);
         Vector2 normalizedVelocity = WalkSpeed > 0.01f
             ? new Vector2(localVelocity.x, localVelocity.z) / WalkSpeed
             : Vector2.zero;
 
         SetAnimationInput(normalizedVelocity);
+    }
+
+    public void SetExternalMovementAnimation(
+        Vector3 worldPlanarVelocity,
+        bool grounded,
+        float animationSpeedReference,
+        float minimumMoveBlend,
+        float animationMoveThreshold)
+    {
+        Vector3 localVelocity = PrepareExternalMovementState(worldPlanarVelocity, grounded);
+        Vector2 planarVelocity = new Vector2(localVelocity.x, localVelocity.z);
+        float planarSpeed = planarVelocity.magnitude;
+
+        if (planarSpeed <= Mathf.Max(0f, animationMoveThreshold))
+        {
+            SetAnimationInput(Vector2.zero);
+            return;
+        }
+
+        Vector2 direction = planarVelocity / planarSpeed;
+        float normalizedBlend = Mathf.Clamp01(planarSpeed / Mathf.Max(0.01f, animationSpeedReference));
+        normalizedBlend = Mathf.Max(normalizedBlend, Mathf.Clamp01(minimumMoveBlend));
+        SetAnimationInput(direction * normalizedBlend);
     }
 
     public void ClearExternalMovementState()
@@ -208,6 +227,14 @@ public class MovementScript : MonoBehaviour
 
         ignoreGroundingWhileAscending = false;
         isGrounded = true;
+    }
+
+    private Vector3 PrepareExternalMovementState(Vector3 worldPlanarVelocity, bool grounded)
+    {
+        externalTranslationDriven = true;
+        externalPlanarVelocity = Vector3.ProjectOnPlane(worldPlanarVelocity, Vector3.up);
+        isGrounded = grounded;
+        return transform.InverseTransformDirection(externalPlanarVelocity);
     }
 
     private void ResolveVisualReferences()
