@@ -57,6 +57,7 @@ public class EnemyController : MonoBehaviour
     private EnemyAlertIndicator alertIndicator;
     private EnemyAudioController enemyAudio;
     private PlayerHealthScript cachedTargetHealth;
+    private PlayerController cachedPlayerController;
     private float attackWarmupTimer;
     private float loseSightTimer;
     private float patrolRetargetTimer;
@@ -194,9 +195,11 @@ public class EnemyController : MonoBehaviour
     {
         if (target == null)
         {
-            if (PlayerController.Instance != null)
+            PlayerController playerController = ResolvePlayerController();
+
+            if (playerController != null)
             {
-                target = PlayerController.Instance.transform;
+                target = playerController.transform;
                 CacheTargetHealth();
             }
         }
@@ -222,13 +225,32 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        if (PlayerController.Instance != null && target == PlayerController.Instance.transform)
+        PlayerController playerController = ResolvePlayerController();
+
+        if (playerController != null && target == playerController.transform)
         {
-            cachedTargetHealth = PlayerController.Instance.Health;
+            cachedTargetHealth = playerController.Health;
             return;
         }
 
         cachedTargetHealth = target.GetComponent<PlayerHealthScript>();
+    }
+
+    private PlayerController ResolvePlayerController()
+    {
+        if (cachedPlayerController != null)
+        {
+            return cachedPlayerController;
+        }
+
+        cachedPlayerController = PlayerController.Instance;
+
+        if (cachedPlayerController == null)
+        {
+            cachedPlayerController = FindFirstObjectByType<PlayerController>();
+        }
+
+        return cachedPlayerController;
     }
 
     private void ResolveAlertIndicator()

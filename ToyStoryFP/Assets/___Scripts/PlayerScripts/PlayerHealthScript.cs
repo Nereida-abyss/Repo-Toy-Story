@@ -1,10 +1,11 @@
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.SceneManagement;
 
 public class PlayerHealthScript : MonoBehaviour, IDamageable
 {
+    private const string EndMenuSceneName = "EndMenu";
+
     [FormerlySerializedAs("health")]
     [SerializeField] private int maxHealth = 100;
     [Header("Death Drop")]
@@ -49,7 +50,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
 
             if (BelongsToPlayer())
             {
-                SceneManager.LoadScene("EndMenu");
+                CambioEscena.LoadSceneSafely(EndMenuSceneName);
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
                 Destroy(gameObject, 2f);

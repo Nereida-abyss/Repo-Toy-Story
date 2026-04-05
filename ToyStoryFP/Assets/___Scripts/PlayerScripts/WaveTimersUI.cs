@@ -6,9 +6,10 @@ public class WaveTimersUI : MonoBehaviour
 {
     [SerializeField] private string roundPrefix = "Round Time";
     [SerializeField] private string intermissionPrefix = "Intermission";
+    [SerializeField] private TMP_Text roundTimerText;
+    [SerializeField] private TMP_Text intermissionTimerText;
 
-    private TMP_Text roundTimerText;
-    private TMP_Text intermissionTimerText;
+    private bool hasLoggedMissingReferences;
 
     void Awake()
     {
@@ -27,7 +28,7 @@ public class WaveTimersUI : MonoBehaviour
 
         if (roundTimerText == null || intermissionTimerText == null)
         {
-            Debug.LogWarning("WaveTimersUI is missing one or more timer text references.", this);
+            LogMissingReferences();
             return;
         }
 
@@ -69,24 +70,8 @@ public class WaveTimersUI : MonoBehaviour
             return;
         }
 
-        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
-
-        for (int i = 0; i < texts.Length; i++)
-        {
-            if (texts[i] == null)
-            {
-                continue;
-            }
-
-            if (roundTimerText == null && texts[i].gameObject.name.Contains("RoundTimer"))
-            {
-                roundTimerText = texts[i];
-            }
-            else if (intermissionTimerText == null && texts[i].gameObject.name.Contains("IntermissionTimer"))
-            {
-                intermissionTimerText = texts[i];
-            }
-        }
+        roundTimerText ??= FindTextByExactName("RoundTimerText");
+        intermissionTimerText ??= FindTextByExactName("IntermissionTimerText");
     }
 
     private string FormatElapsedTime(float seconds)
@@ -103,5 +88,31 @@ public class WaveTimersUI : MonoBehaviour
         int minutes = totalSeconds / 60;
         int remainingSeconds = totalSeconds % 60;
         return $"{minutes:00}:{remainingSeconds:00}";
+    }
+
+    private TMP_Text FindTextByExactName(string targetName)
+    {
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            if (texts[i] != null && texts[i].gameObject.name == targetName)
+            {
+                return texts[i];
+            }
+        }
+
+        return null;
+    }
+
+    private void LogMissingReferences()
+    {
+        if (hasLoggedMissingReferences)
+        {
+            return;
+        }
+
+        hasLoggedMissingReferences = true;
+        Debug.LogWarning("WaveTimersUI is missing one or more timer text references.", this);
     }
 }

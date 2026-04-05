@@ -3,6 +3,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PlayerAudioController : MonoBehaviour
 {
+    private const string GeneralSourceName = "PlayerAudioGeneral";
+    private const string WeaponSourceName = "PlayerAudioWeapon";
+    private const string FootstepSourceName = "PlayerAudioFootsteps";
+
     [Header("Audio Sources")]
     [SerializeField] private AudioSource generalSource;
     [SerializeField] private AudioSource weaponSource;
@@ -34,6 +38,7 @@ public class PlayerAudioController : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
 
     private float footstepTimer;
+    private bool hasLoggedMissingSources;
 
     void Awake()
     {
@@ -120,24 +125,38 @@ public class PlayerAudioController : MonoBehaviour
     {
         if (generalSource == null)
         {
-            generalSource = ResolveChildSource("PlayerAudioGeneral");
+            generalSource = ResolveChildSource(GeneralSourceName);
         }
 
         if (weaponSource == null)
         {
-            weaponSource = ResolveChildSource("PlayerAudioWeapon");
+            weaponSource = ResolveChildSource(WeaponSourceName);
         }
 
         if (footstepSource == null)
         {
-            footstepSource = ResolveChildSource("PlayerAudioFootsteps");
+            footstepSource = ResolveChildSource(FootstepSourceName);
+        }
+
+        if (generalSource == null || weaponSource == null || footstepSource == null)
+        {
+            LogMissingSources();
         }
     }
 
     private AudioSource ResolveChildSource(string childName)
     {
-        Transform child = transform.Find(childName);
-        return child != null ? child.GetComponent<AudioSource>() : null;
+        AudioSource[] sources = GetComponentsInChildren<AudioSource>(true);
+
+        for (int i = 0; i < sources.Length; i++)
+        {
+            if (sources[i] != null && sources[i].gameObject.name == childName)
+            {
+                return sources[i];
+            }
+        }
+
+        return null;
     }
 
     private AudioClip GetRandomFootstepClip()
@@ -160,5 +179,16 @@ public class PlayerAudioController : MonoBehaviour
 
         source.pitch = 1f + Random.Range(-pitchRandomness, pitchRandomness);
         source.PlayOneShot(clip, volume);
+    }
+
+    private void LogMissingSources()
+    {
+        if (hasLoggedMissingSources)
+        {
+            return;
+        }
+
+        hasLoggedMissingSources = true;
+        Debug.LogWarning("PlayerAudioController is missing one or more child AudioSource references.", this);
     }
 }

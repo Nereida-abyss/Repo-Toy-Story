@@ -21,6 +21,13 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Duplicate PlayerController detected. Destroying the newest instance.", this);
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         movementScript = GetComponent<MovementScript>();
         healthScript = GetComponent<PlayerHealthScript>();
@@ -39,7 +46,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (UIManager.Instance != null && UIManager.Instance.IsPaused)
+        if (UIManager.IsGamePaused)
         {
             movementScript.SetMoveInput(Vector2.zero);
             return;

@@ -62,6 +62,11 @@ public class PlayerHUDController : MonoBehaviour
         playerHealth = GetComponentInParent<PlayerHealthScript>();
         PlayerController playerController = GetComponentInParent<PlayerController>();
 
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<PlayerController>();
+        }
+
         if (playerController != null)
         {
             weaponLoadout = playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
@@ -73,52 +78,27 @@ public class PlayerHUDController : MonoBehaviour
     {
         if (healthFillImage == null)
         {
-            Transform fill = transform.Find("HealthRoot/HealthBarBackground/HealthBarFill");
-
-            if (fill != null)
-            {
-                healthFillImage = fill.GetComponent<Image>();
-            }
+            healthFillImage = FindComponentInChildrenByName<Image>("HealthBarFill");
         }
 
         if (healthText == null)
         {
-            Transform text = transform.Find("HealthRoot/HealthText");
-
-            if (text != null)
-            {
-                healthText = text.GetComponent<TMP_Text>();
-            }
+            healthText = FindComponentInChildrenByName<TMP_Text>("HealthText");
         }
 
         if (ammoText == null)
         {
-            Transform text = transform.Find("AmmoText");
-
-            if (text != null)
-            {
-                ammoText = text.GetComponent<TMP_Text>();
-            }
+            ammoText = FindComponentInChildrenByName<TMP_Text>("AmmoText");
         }
 
         if (reloadText == null)
         {
-            Transform text = transform.Find("ReloadText");
-
-            if (text != null)
-            {
-                reloadText = text.GetComponent<TMP_Text>();
-            }
+            reloadText = FindComponentInChildrenByName<TMP_Text>("ReloadText");
         }
 
         if (coinsText == null)
         {
-            Transform text = transform.Find("CoinsText");
-
-            if (text != null)
-            {
-                coinsText = text.GetComponent<TMP_Text>();
-            }
+            coinsText = FindComponentInChildrenByName<TMP_Text>("CoinsText");
         }
     }
 
@@ -342,4 +322,23 @@ public class PlayerHUDController : MonoBehaviour
         coinsText.text = $"COINS {currentCoins}";
     }
 
+    private T FindComponentInChildrenByName<T>(string targetName) where T : Component
+    {
+        if (string.IsNullOrWhiteSpace(targetName))
+        {
+            return null;
+        }
+
+        T[] components = GetComponentsInChildren<T>(true);
+
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] != null && components[i].gameObject.name == targetName)
+            {
+                return components[i];
+            }
+        }
+
+        return null;
+    }
 }

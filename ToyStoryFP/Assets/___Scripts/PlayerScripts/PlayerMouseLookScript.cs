@@ -92,7 +92,7 @@ public class MouseLookScript : MonoBehaviour
 
     void Update()
     {
-        if (UIManager.Instance != null && UIManager.Instance.IsPaused)
+        if (UIManager.IsGamePaused)
         {
             return;
         }

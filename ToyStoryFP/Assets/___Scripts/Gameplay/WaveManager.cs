@@ -32,6 +32,7 @@ public class WaveManager : MonoBehaviour
     private WaveAnnouncementUI waveAnnouncementUi;
     private WaveIntermissionUI waveIntermissionUi;
     private WaveTimersUI waveTimersUi;
+    private PlayerController cachedPlayerController;
     private int currentWaveIndex;
     private int spawnAttemptsCompletedThisWave;
     private int enemiesToSpawnThisWave;
@@ -40,6 +41,7 @@ public class WaveManager : MonoBehaviour
     private float remainingWaveAnnouncementTime;
     private bool hasLoggedMissingSpawnPoints;
     private bool hasLoggedMissingEnemyPrefab;
+    private bool hasLoggedMissingPlayerUi;
     private bool isSpawningCurrentWave;
     private WaveRuntimeState currentState = WaveRuntimeState.InitialDelay;
 
@@ -50,16 +52,16 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
+        ResetRuntimeState();
         RefreshSceneReferences();
-        HideWaveAnnouncement();
-        HideIntermissionPrompt();
-        RefreshTimersUi();
+        HideTransientUi(true);
         StartCoroutine(WaveLoop());
     }
 
     void Update()
     {
-        bool isPaused = UIManager.Instance != null && UIManager.Instance.IsPaused;
+        bool isPaused = UIManager.IsGamePaused;
+        PruneDeadEnemies();
         UpdateWaveAnnouncementTimer(isPaused);
 
         if (currentState == WaveRuntimeState.WaveInProgress)
@@ -109,6 +111,8 @@ public class WaveManager : MonoBehaviour
 
     void OnDestroy()
     {
+        HideTransientUi(false);
+
         foreach (PlayerHealthScript health in aliveEnemies)
         {
             if (health != null)
@@ -130,6 +134,13 @@ public class WaveManager : MonoBehaviour
 
     private void StartNextWave()
     {
+        if (currentState == WaveRuntimeState.WaveInProgress)
+        {
+            return;
+        }
+
+        PruneDeadEnemies();
+
         if (!HasValidEnemyPrefab() || !HasSpawnPoints())
         {
             return;
@@ -207,6 +218,7 @@ public class WaveManager : MonoBehaviour
     private void RefreshSceneReferences()
     {
         spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsSortMode.None);
+        cachedPlayerController = ResolvePlayerController();
         ResolveAnnouncementUi();
     }
 
@@ -217,14 +229,25 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        if (PlayerController.Instance == null)
+        PlayerController playerController = ResolvePlayerController();
+
+        if (playerController == null)
         {
+            LogMissingPlayerUiWarning("WaveManager could not find an active PlayerController to bind wave UI.");
             return;
         }
 
-        waveAnnouncementUi = PlayerController.Instance.GetComponentInChildren<WaveAnnouncementUI>(true);
-        waveIntermissionUi = PlayerController.Instance.GetComponentInChildren<WaveIntermissionUI>(true);
-        waveTimersUi = PlayerController.Instance.GetComponentInChildren<WaveTimersUI>(true);
+        waveAnnouncementUi = playerController.GetComponentInChildren<WaveAnnouncementUI>(true);
+        waveIntermissionUi = playerController.GetComponentInChildren<WaveIntermissionUI>(true);
+        waveTimersUi = playerController.GetComponentInChildren<WaveTimersUI>(true);
+
+        if (waveAnnouncementUi == null || waveIntermissionUi == null || waveTimersUi == null)
+        {
+            LogMissingPlayerUiWarning("WaveManager found the player, but one or more wave UI views are missing.");
+            return;
+        }
+
+        hasLoggedMissingPlayerUi = false;
     }
 
     private bool HasSpawnPoints()
@@ -306,6 +329,7 @@ public class WaveManager : MonoBehaviour
 
     private bool HasWaveFinished()
     {
+        PruneDeadEnemies();
         return !isSpawningCurrentWave
             && spawnAttemptsCompletedThisWave >= enemiesToSpawnThisWave
             && aliveEnemies.Count == 0;
@@ -359,5 +383,93 @@ public class WaveManager : MonoBehaviour
     {
         ResolveAnnouncementUi();
         waveTimersUi?.Refresh(currentState, roundElapsedTime, RemainingIntermissionTime);
+    }
+
+    private void ResetRuntimeState()
+    {
+        StopAllCoroutines();
+        currentWaveIndex = 0;
+        spawnAttemptsCompletedThisWave = 0;
+        enemiesToSpawnThisWave = 0;
+        roundElapsedTime = 0f;
+        remainingIntermissionTime = 0f;
+        remainingWaveAnnouncementTime = 0f;
+        isSpawningCurrentWave = false;
+        currentState = WaveRuntimeState.InitialDelay;
+        aliveEnemies.Clear();
+    }
+
+    private void HideTransientUi(bool resolveMissingReferences)
+    {
+        if (resolveMissingReferences)
+        {
+            HideWaveAnnouncement();
+            HideIntermissionPrompt();
+            RefreshTimersUi();
+            return;
+        }
+
+        remainingWaveAnnouncementTime = 0f;
+        waveAnnouncementUi?.HideWave();
+        waveIntermissionUi?.HidePrompt();
+    }
+
+    private void PruneDeadEnemies()
+    {
+        if (aliveEnemies.Count == 0)
+        {
+            return;
+        }
+
+        List<PlayerHealthScript> deadEntries = null;
+
+        foreach (PlayerHealthScript health in aliveEnemies)
+        {
+            if (health != null)
+            {
+                continue;
+            }
+
+            deadEntries ??= new List<PlayerHealthScript>();
+            deadEntries.Add(health);
+        }
+
+        if (deadEntries == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < deadEntries.Count; i++)
+        {
+            aliveEnemies.Remove(deadEntries[i]);
+        }
+    }
+
+    private PlayerController ResolvePlayerController()
+    {
+        if (cachedPlayerController != null)
+        {
+            return cachedPlayerController;
+        }
+
+        cachedPlayerController = PlayerController.Instance;
+
+        if (cachedPlayerController == null)
+        {
+            cachedPlayerController = FindFirstObjectByType<PlayerController>();
+        }
+
+        return cachedPlayerController;
+    }
+
+    private void LogMissingPlayerUiWarning(string message)
+    {
+        if (hasLoggedMissingPlayerUi)
+        {
+            return;
+        }
+
+        hasLoggedMissingPlayerUi = true;
+        Debug.LogWarning(message, this);
     }
 }

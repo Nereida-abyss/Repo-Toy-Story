@@ -1,26 +1,27 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CambioEscena : MonoBehaviour
 {
+    private const string MainMenuSceneName = "MainMenu";
     private const string GamePlaySceneName = "GamePlay";
+    private const string EndMenuSceneName = "EndMenu";
 
     public void StartGame()
     {
-        LoadSceneWithFade(GamePlaySceneName);
+        LoadSceneSafely(GamePlaySceneName);
     }
 
     public void VolverAlMenu()
     {
-        SceneManager.LoadScene("MainMenu");
-        Time.timeScale = 1f;
+        LoadSceneSafely(MainMenuSceneName);
     }
 
     public void RestartGamePlay()
     {
-        Time.timeScale = 1f;
         string escenaActual = SceneManager.GetActiveScene().name;
-        LoadSceneWithFade(escenaActual);
+        LoadSceneSafely(escenaActual);
     }
 
     public void NextScene()
@@ -28,13 +29,23 @@ public class CambioEscena : MonoBehaviour
         int siguiente = SceneManager.GetActiveScene().buildIndex + 1;
         if (siguiente < SceneManager.sceneCountInBuildSettings)
         {
+            string nextScenePath = SceneUtility.GetScenePathByBuildIndex(siguiente);
+            string nextSceneName = Path.GetFileNameWithoutExtension(nextScenePath);
+
+            if (!string.IsNullOrWhiteSpace(nextSceneName))
+            {
+                LoadSceneSafely(nextSceneName);
+                return;
+            }
+
+            PrepareForSceneChange();
             SceneManager.LoadScene(siguiente);
         }
     }
 
     public void EndGame()
     {
-        SceneManager.LoadScene("EndMenu");
+        LoadSceneSafely(EndMenuSceneName);
     }
 
     public void ExitGame()
@@ -48,16 +59,28 @@ public class CambioEscena : MonoBehaviour
         #endif
     }
 
-    private void LoadSceneWithFade(string sceneName)
+    public static bool LoadSceneSafely(string sceneName)
     {
         if (string.IsNullOrWhiteSpace(sceneName))
         {
-            return;
+            Debug.LogWarning("CambioEscena received an empty scene name.");
+            return false;
         }
+
+        PrepareForSceneChange();
 
         if (!SceneTransitionFade.TryFadeOutAndLoadScene(sceneName))
         {
             SceneManager.LoadScene(sceneName);
         }
+
+        return true;
+    }
+
+    private static void PrepareForSceneChange()
+    {
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 }
