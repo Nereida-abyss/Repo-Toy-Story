@@ -8,13 +8,13 @@ public class CoinPickup : MonoBehaviour
     private static Material sharedCoinMaterial;
 
     [SerializeField] private int coinValue = 1;
-    [SerializeField] private float pickupRadius = 1.1f;
+    [SerializeField] private float pickupRadius = 0.2f;
     [SerializeField] private float rotationSpeed = 165f;
-    [SerializeField] private float bobAmplitude = 0.08f;
+    [SerializeField] private float bobAmplitude = 0.03f;
     [SerializeField] private float bobFrequency = 2.2f;
     [SerializeField] private float pickupDelay = 0.08f;
-    [SerializeField] private Vector3 visualScale = new Vector3(0.11f, 0.018f, 0.11f);
-    [SerializeField] private Vector3 visualLocalOffset = new Vector3(0f, 0.1f, 0f);
+    [SerializeField] private Vector3 visualScale = new Vector3(0.05f, 0.008f, 0.05f);
+    [SerializeField] private Vector3 visualLocalOffset = new Vector3(0f, 0.04f, 0f);
 
     private float spawnTime;
     private Vector3 basePosition;
@@ -85,7 +85,7 @@ public class CoinPickup : MonoBehaviour
         }
 
         triggerCollider.isTrigger = true;
-        triggerCollider.radius = Mathf.Max(0.1f, pickupRadius);
+        triggerCollider.radius = Mathf.Max(0.02f, pickupRadius);
 
         Rigidbody body = GetComponent<Rigidbody>();
         body.isKinematic = true;

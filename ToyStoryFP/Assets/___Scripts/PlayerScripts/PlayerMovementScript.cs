@@ -28,10 +28,12 @@ public class MovementScript : MonoBehaviour
     [SerializeField] private float jumpStateTransitionDuration = 0.05f;
     [SerializeField] private float locomotionTransitionDuration = 0.1f;
 
-    private Vector2 input;
+    private Vector2 moveInput;
+    private Vector2 animationInput;
     private Rigidbody rb;
     private MouseLookScript mouseLook;
     private PlayerAudioController playerAudio;
+    private Vector3 externalPlanarVelocity;
     private bool isGrounded;
     private bool ignoreGroundingWhileAscending;
     private bool jumpQueued;
@@ -39,6 +41,8 @@ public class MovementScript : MonoBehaviour
     private bool hasJumpParameter;
     private bool hasGroundedParameter;
     private bool hasVerticalSpeedParameter;
+    private bool hasExternalAnimationInput;
+    private bool externalTranslationDriven;
     private float jumpDelayTimer;
     private float jumpBufferTimer;
     private float groundedLockTimer;
@@ -89,6 +93,11 @@ public class MovementScript : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (rb == null || rb.isKinematic || externalTranslationDriven)
+        {
+            return;
+        }
+
         rb.AddForce(CalculateMovement(), ForceMode.VelocityChange);
     }
 
@@ -102,7 +111,45 @@ public class MovementScript : MonoBehaviour
 
     public void SetMoveInput(Vector2 newInput)
     {
-        input = Vector2.ClampMagnitude(newInput, 1f);
+        moveInput = Vector2.ClampMagnitude(newInput, 1f);
+
+        if (!hasExternalAnimationInput)
+        {
+            animationInput = moveInput;
+        }
+    }
+
+    public void SetAnimationInput(Vector2 newInput)
+    {
+        animationInput = Vector2.ClampMagnitude(newInput, 1f);
+        hasExternalAnimationInput = true;
+    }
+
+    public void ClearAnimationInputOverride()
+    {
+        hasExternalAnimationInput = false;
+        animationInput = moveInput;
+    }
+
+    public void SetExternalMovementState(Vector3 worldPlanarVelocity, bool grounded)
+    {
+        externalTranslationDriven = true;
+        externalPlanarVelocity = Vector3.ProjectOnPlane(worldPlanarVelocity, Vector3.up);
+        isGrounded = grounded;
+
+        Vector3 localVelocity = transform.InverseTransformDirection(externalPlanarVelocity);
+        Vector2 normalizedVelocity = WalkSpeed > 0.01f
+            ? new Vector2(localVelocity.x, localVelocity.z) / WalkSpeed
+            : Vector2.zero;
+
+        SetAnimationInput(normalizedVelocity);
+    }
+
+    public void ClearExternalMovementState()
+    {
+        externalTranslationDriven = false;
+        externalPlanarVelocity = Vector3.zero;
+        ClearAnimationInputOverride();
     }
 
     public void RequestJump()
@@ -126,7 +173,7 @@ public class MovementScript : MonoBehaviour
 
     Vector3 CalculateMovement()
     {
-        Vector3 targetVelocity = transform.TransformDirection(new Vector3(input.x, 0f, input.y)) * WalkSpeed;
+        Vector3 targetVelocity = transform.TransformDirection(new Vector3(moveInput.x, 0f, moveInput.y)) * WalkSpeed;
         Vector3 velocityChange = targetVelocity - rb.linearVelocity;
 
 
@@ -134,11 +181,16 @@ public class MovementScript : MonoBehaviour
         velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
         velocityChange.y = 0f;
 
-        return input.magnitude > 0 ? velocityChange : Vector3.zero;
+        return moveInput.magnitude > 0 ? velocityChange : Vector3.zero;
     }
 
     void OnCollisionStay(Collision collision)
     {
+        if (externalTranslationDriven)
+        {
+            return;
+        }
+
         if (groundedLockTimer > 0f)
         {
             return;
@@ -185,8 +237,8 @@ public class MovementScript : MonoBehaviour
             return;
         }
 
-        modelAnimator.SetFloat(HorizontalHash, input.x);
-        modelAnimator.SetFloat(VerticalHash, input.y);
+        modelAnimator.SetFloat(HorizontalHash, animationInput.x);
+        modelAnimator.SetFloat(VerticalHash, animationInput.y);
 
         if (hasGroundedParameter)
         {
@@ -386,16 +438,23 @@ public class MovementScript : MonoBehaviour
             return;
         }
 
-        Vector3 planarVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
+        Vector3 planarVelocity = externalTranslationDriven
+            ? externalPlanarVelocity
+            : Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
         float speedNormalized = WalkSpeed > 0.01f
             ? Mathf.Clamp01(planarVelocity.magnitude / WalkSpeed)
             : 0f;
 
-        playerAudio.UpdateFootsteps(isGrounded && !jumpQueued, input.magnitude, speedNormalized);
+        playerAudio.UpdateFootsteps(isGrounded && !jumpQueued, animationInput.magnitude, speedNormalized);
     }
 
     void OnCollisionExit(Collision collision)
     {
+        if (externalTranslationDriven)
+        {
+            return;
+        }
+
         isGrounded = false;
 
         if (groundedLockTimer <= 0f && VerticalSpeed <= 0.05f)

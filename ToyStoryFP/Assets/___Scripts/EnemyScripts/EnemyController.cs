@@ -1,13 +1,18 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(MovementScript))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class EnemyController : MonoBehaviour
 {
     private const float DefaultDetectionRange = 10f;
     private const float DefaultLoseSightGraceTime = 0.6f;
     private const float DefaultEyeHeight = 1.4f;
     private const float DefaultAlertHeightOffset = 1.8f;
+    private const float DefaultStoppingDistance = 4.5f;
+    private const float DefaultAttackRange = 7f;
+    private const float DefaultNavMeshSnapDistance = 1f;
 
     [Header("Target")]
     [SerializeField] private Transform target;
@@ -21,8 +26,8 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float alertHeightOffset = DefaultAlertHeightOffset;
 
     [Header("Movement")]
-    [SerializeField] private float stoppingDistance = 4.5f;
-    [SerializeField] private float attackRange = 7f;
+    [SerializeField] private float stoppingDistance = DefaultStoppingDistance;
+    [SerializeField] private float attackRange = DefaultAttackRange;
     [SerializeField] private float turnSpeed = 360f;
 
     [Header("Combat")]
@@ -30,6 +35,7 @@ public class EnemyController : MonoBehaviour
     [Range(0f, 1f)] [SerializeField] private float attackAimDotThreshold = 0.92f;
 
     private MovementScript movementScript;
+    private NavMeshAgent navMeshAgent;
     private WeaponScript weaponScript;
     private EnemyAlertIndicator alertIndicator;
     private EnemyAudioController enemyAudio;
@@ -41,8 +47,10 @@ public class EnemyController : MonoBehaviour
     void Awake()
     {
         movementScript = GetComponent<MovementScript>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
         weaponScript = GetComponentInChildren<WeaponScript>(true);
         enemyAudio = GetComponent<EnemyAudioController>();
+        ConfigureNavigation();
         CacheTargetHealth();
         ResolveAlertIndicator();
         ResetAttackWarmup();
@@ -53,7 +61,9 @@ public class EnemyController : MonoBehaviour
     {
         if (!TryResolveTarget())
         {
+            StopNavigation();
             movementScript.SetMoveInput(Vector2.zero);
+            movementScript.SetExternalMovementState(Vector3.zero, IsNavigationAvailable());
             SetAlerted(false, false);
             ResetAttackWarmup();
             return;
@@ -67,20 +77,35 @@ public class EnemyController : MonoBehaviour
 
         if (!isAlerted)
         {
+            StopNavigation();
             movementScript.SetMoveInput(Vector2.zero);
+            movementScript.SetExternalMovementState(Vector3.zero, IsNavigationAvailable());
             ResetAttackWarmup();
             return;
         }
 
-        movementScript.FaceDirection(flatDirection, turnSpeed);
+        float desiredStoppingDistance = GetEffectiveStoppingDistance();
+        bool shouldChase = flatDistance > desiredStoppingDistance;
+        bool isInAttackRange = flatDistance <= GetAttackRange();
 
-        Vector2 moveInput = flatDistance > stoppingDistance
-            ? Vector2.up
-            : Vector2.zero;
+        if (shouldChase)
+        {
+            UpdateNavigation();
+        }
+        else
+        {
+            StopNavigation();
+        }
 
-        movementScript.SetMoveInput(moveInput);
+        movementScript.SetMoveInput(Vector2.zero);
+        movementScript.SetExternalMovementState(GetPlanarAgentVelocity(), IsNavigationAvailable());
 
-        bool isInAttackRange = flatDistance <= attackRange;
+        Vector3 facingDirection = shouldChase
+            ? GetFacingDirection(flatDirection)
+            : flatDirection;
+
+        movementScript.FaceDirection(facingDirection, turnSpeed);
+
         bool hasValidAim = flatDirection.sqrMagnitude > 0.0001f &&
             Vector3.Dot(transform.forward, flatDirection.normalized) >= attackAimDotThreshold;
 
@@ -188,6 +213,26 @@ public class EnemyController : MonoBehaviour
         alertIndicator.Configure(anchor, GetAlertHeightOffset());
     }
 
+    private void ConfigureNavigation()
+    {
+        if (navMeshAgent == null)
+        {
+            return;
+        }
+
+        navMeshAgent.updateRotation = false;
+        navMeshAgent.stoppingDistance = GetEffectiveStoppingDistance();
+
+        Rigidbody rigidbody = GetComponent<Rigidbody>();
+
+        if (rigidbody != null)
+        {
+            rigidbody.isKinematic = true;
+        }
+
+        EnsureAgentOnNavMesh();
+    }
+
     private bool HasLineOfSight()
     {
         if (target == null)
@@ -232,6 +277,7 @@ public class EnemyController : MonoBehaviour
 
         if (!alerted)
         {
+            StopNavigation();
             loseSightTimer = 0f;
             ResetAttackWarmup();
         }
@@ -266,6 +312,21 @@ public class EnemyController : MonoBehaviour
         return alertHeightOffset > 0f ? alertHeightOffset : DefaultAlertHeightOffset;
     }
 
+    private float GetStoppingDistance()
+    {
+        return stoppingDistance > 0f ? stoppingDistance : DefaultStoppingDistance;
+    }
+
+    private float GetAttackRange()
+    {
+        return attackRange > 0f ? attackRange : DefaultAttackRange;
+    }
+
+    private float GetEffectiveStoppingDistance()
+    {
+        return Mathf.Max(0.05f, Mathf.Min(GetStoppingDistance(), GetAttackRange()));
+    }
+
     private void ResetAttackWarmup()
     {
         attackWarmupTimer = attackWarmup;
@@ -274,5 +335,90 @@ public class EnemyController : MonoBehaviour
     private Vector3 GetTargetAimPoint()
     {
         return target.position + Vector3.up * targetAimHeight;
+    }
+
+    private void UpdateNavigation()
+    {
+        if (!EnsureAgentOnNavMesh())
+        {
+            return;
+        }
+
+        navMeshAgent.stoppingDistance = GetEffectiveStoppingDistance();
+
+        if (navMeshAgent.isStopped)
+        {
+            navMeshAgent.isStopped = false;
+        }
+
+        navMeshAgent.SetDestination(target.position);
+    }
+
+    private void StopNavigation()
+    {
+        if (navMeshAgent == null || !navMeshAgent.isOnNavMesh)
+        {
+            return;
+        }
+
+        navMeshAgent.isStopped = true;
+        navMeshAgent.ResetPath();
+    }
+
+    private bool EnsureAgentOnNavMesh()
+    {
+        if (navMeshAgent == null)
+        {
+            return false;
+        }
+
+        if (navMeshAgent.isOnNavMesh)
+        {
+            return true;
+        }
+
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, DefaultNavMeshSnapDistance, navMeshAgent.areaMask))
+        {
+            navMeshAgent.Warp(hit.position);
+            return navMeshAgent.isOnNavMesh;
+        }
+
+        return false;
+    }
+
+    private bool IsNavigationAvailable()
+    {
+        return navMeshAgent != null && navMeshAgent.isOnNavMesh;
+    }
+
+    private Vector3 GetPlanarAgentVelocity()
+    {
+        if (!IsNavigationAvailable())
+        {
+            return Vector3.zero;
+        }
+
+        return Vector3.ProjectOnPlane(navMeshAgent.velocity, Vector3.up);
+    }
+
+    private Vector3 GetFacingDirection(Vector3 fallbackDirection)
+    {
+        Vector3 desiredVelocity = navMeshAgent != null
+            ? Vector3.ProjectOnPlane(navMeshAgent.desiredVelocity, Vector3.up)
+            : Vector3.zero;
+
+        if (desiredVelocity.sqrMagnitude > 0.0001f)
+        {
+            return desiredVelocity;
+        }
+
+        Vector3 velocity = GetPlanarAgentVelocity();
+
+        if (velocity.sqrMagnitude > 0.0001f)
+        {
+            return velocity;
+        }
+
+        return fallbackDirection;
     }
 }

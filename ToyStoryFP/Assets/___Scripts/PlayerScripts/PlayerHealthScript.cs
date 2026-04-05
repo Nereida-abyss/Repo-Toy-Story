@@ -47,19 +47,17 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         {
             HandleDeath();
 
-            if (gameObject.CompareTag("Enemy"))
-            {
-                Destroy(gameObject);
-            }
-
-            if (gameObject.CompareTag("Player"))
+            if (BelongsToPlayer())
             {
                 SceneManager.LoadScene("EndMenu");
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
-                Destroy(gameObject,2f);
+                Destroy(gameObject, 2f);
             }
-
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
@@ -89,6 +87,11 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
             return false;
         }
 
-        return GetComponentInParent<PlayerController>() == null;
+        return !BelongsToPlayer();
+    }
+
+    private bool BelongsToPlayer()
+    {
+        return GetComponentInParent<PlayerController>() != null;
     }
 }
