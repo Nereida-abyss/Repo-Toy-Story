@@ -22,6 +22,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private float initialWaveDelay = 2f;
     [SerializeField] private float intermissionDuration = 180f;
     [SerializeField] private float spawnInterval = 0.5f;
+    [SerializeField] private float waveAnnouncementDuration = 2.5f;
     [SerializeField] private int baseEnemyCount = 10;
     [SerializeField] private int additionalEnemiesPerWave = 2;
     [SerializeField] private float navMeshSampleDistance = 2f;
@@ -36,6 +37,7 @@ public class WaveManager : MonoBehaviour
     private int enemiesToSpawnThisWave;
     private float roundElapsedTime;
     private float remainingIntermissionTime;
+    private float remainingWaveAnnouncementTime;
     private bool hasLoggedMissingSpawnPoints;
     private bool hasLoggedMissingEnemyPrefab;
     private bool isSpawningCurrentWave;
@@ -49,6 +51,7 @@ public class WaveManager : MonoBehaviour
     void Start()
     {
         RefreshSceneReferences();
+        HideWaveAnnouncement();
         HideIntermissionPrompt();
         RefreshTimersUi();
         StartCoroutine(WaveLoop());
@@ -56,9 +59,15 @@ public class WaveManager : MonoBehaviour
 
     void Update()
     {
+        bool isPaused = UIManager.Instance != null && UIManager.Instance.IsPaused;
+        UpdateWaveAnnouncementTimer(isPaused);
+
         if (currentState == WaveRuntimeState.WaveInProgress)
         {
-            roundElapsedTime += Time.deltaTime;
+            if (!isPaused)
+            {
+                roundElapsedTime += Time.deltaTime;
+            }
 
             if (HasWaveFinished())
             {
@@ -75,7 +84,7 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        if (UIManager.Instance != null && UIManager.Instance.IsPaused)
+        if (isPaused)
         {
             RefreshTimersUi();
             return;
@@ -135,7 +144,7 @@ public class WaveManager : MonoBehaviour
         isSpawningCurrentWave = true;
         ResolveAnnouncementUi();
         HideIntermissionPrompt();
-        waveAnnouncementUi?.ShowWave(currentWaveIndex);
+        ShowWaveAnnouncement(currentWaveIndex);
         RefreshTimersUi();
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
@@ -315,6 +324,35 @@ public class WaveManager : MonoBehaviour
     {
         ResolveAnnouncementUi();
         waveIntermissionUi?.HidePrompt();
+    }
+
+    private void ShowWaveAnnouncement(int waveNumber)
+    {
+        ResolveAnnouncementUi();
+        remainingWaveAnnouncementTime = Mathf.Max(0.01f, waveAnnouncementDuration);
+        waveAnnouncementUi?.ShowWave(waveNumber);
+    }
+
+    private void HideWaveAnnouncement()
+    {
+        remainingWaveAnnouncementTime = 0f;
+        ResolveAnnouncementUi();
+        waveAnnouncementUi?.HideWave();
+    }
+
+    private void UpdateWaveAnnouncementTimer(bool isPaused)
+    {
+        if (remainingWaveAnnouncementTime <= 0f || isPaused)
+        {
+            return;
+        }
+
+        remainingWaveAnnouncementTime -= Time.deltaTime;
+
+        if (remainingWaveAnnouncementTime <= 0f)
+        {
+            HideWaveAnnouncement();
+        }
     }
 
     private void RefreshTimersUi()

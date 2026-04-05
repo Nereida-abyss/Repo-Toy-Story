@@ -3,9 +3,11 @@ using UnityEngine.SceneManagement;
 
 public class CambioEscena : MonoBehaviour
 {
+    private const string GamePlaySceneName = "GamePlay";
+
     public void StartGame()
     {
-        SceneManager.LoadScene("Gameplay");
+        LoadSceneWithFade(GamePlaySceneName);
     }
 
     public void VolverAlMenu()
@@ -16,9 +18,9 @@ public class CambioEscena : MonoBehaviour
 
     public void RestartGamePlay()
     {
-        string escenaActual = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene(escenaActual);
         Time.timeScale = 1f;
+        string escenaActual = SceneManager.GetActiveScene().name;
+        LoadSceneWithFade(escenaActual);
     }
 
     public void NextScene()
@@ -44,5 +46,18 @@ public class CambioEscena : MonoBehaviour
         #else
             Application.Quit();
         #endif
+    }
+
+    private void LoadSceneWithFade(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+        {
+            return;
+        }
+
+        if (!SceneTransitionFade.TryFadeOutAndLoadScene(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
     }
 }

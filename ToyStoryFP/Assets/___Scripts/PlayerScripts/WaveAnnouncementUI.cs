@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,17 +5,14 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class WaveAnnouncementUI : MonoBehaviour
 {
-    [SerializeField] private float visibleDuration = 2.5f;
-
     private GameObject panelRoot;
     private TMP_Text announcementText;
     private Graphic[] graphics;
-    private Coroutine hideRoutine;
 
     void Awake()
     {
         ResolveReferences();
-        HideImmediate();
+        HideWave();
     }
 
     void OnValidate()
@@ -36,23 +32,9 @@ public class WaveAnnouncementUI : MonoBehaviour
 
         announcementText.text = $"OLEADA {waveNumber}";
         SetVisible(true);
-
-        if (hideRoutine != null)
-        {
-            StopCoroutine(hideRoutine);
-        }
-
-        hideRoutine = StartCoroutine(HideAfterDelay());
     }
 
-    private IEnumerator HideAfterDelay()
-    {
-        yield return new WaitForSeconds(Mathf.Max(0.01f, visibleDuration));
-        HideImmediate();
-        hideRoutine = null;
-    }
-
-    private void HideImmediate()
+    public void HideWave()
     {
         SetVisible(false);
     }

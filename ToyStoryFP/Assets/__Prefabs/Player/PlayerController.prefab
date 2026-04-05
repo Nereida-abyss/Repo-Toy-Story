@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3619479782008495306}
   - component: {fileID: 1017103518327394351}
   - component: {fileID: 3505556120907137829}
+  - component: {fileID: 919900000000004001}
   m_Layer: 0
   m_Name: FPCamara
   m_TagString: Untagged
@@ -183,6 +184,25 @@ MonoBehaviour:
   weaponSwitchDuration: 0.33
   weaponSwitchLowerRatio: 0.45
   weaponSwitchRaiseRatio: 0.45
+--- !u!114 &919900000000004001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12284217865056662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c526a5e37c044306b61eae6f93a9e1e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameplayIntroFade
+  fadeDuration: 1.35
+  startVignetteIntensity: 1
+  endVignetteIntensity: 0
+  startPostExposure: -10
+  endPostExposure: 0
+  startVignetteSmoothness: 1
+  endVignetteSmoothness: 0.2
 --- !u!1 &54641668929060506
 GameObject:
   m_ObjectHideFlags: 0
