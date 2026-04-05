@@ -31,10 +31,9 @@ public class CambioEscena : MonoBehaviour
         }
     }
 
-    public void GoToCredits()
+    public void EndGame()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("Credits");
+        SceneManager.LoadScene("EndMenu");
     }
 
     public void ExitGame()

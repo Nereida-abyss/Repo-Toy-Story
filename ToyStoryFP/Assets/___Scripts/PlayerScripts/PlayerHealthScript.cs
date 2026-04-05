@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealthScript : MonoBehaviour, IDamageable
 {
@@ -44,8 +45,12 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
 
         if (wasKilled)
         {
+
             HandleDeath();
-            Destroy(gameObject);
+            SceneManager.LoadScene("EndMenu");
+            Destroy(gameObject,2f);
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
 
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
