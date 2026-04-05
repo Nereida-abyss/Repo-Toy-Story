@@ -45,12 +45,21 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
 
         if (wasKilled)
         {
-
             HandleDeath();
-            SceneManager.LoadScene("EndMenu");
-            Destroy(gameObject,2f);
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+
+            if (gameObject.CompareTag("Enemy"))
+            {
+                Destroy(gameObject);
+            }
+
+            if (gameObject.CompareTag("Player"))
+            {
+                SceneManager.LoadScene("EndMenu");
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                Destroy(gameObject,2f);
+            }
+
         }
 
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
