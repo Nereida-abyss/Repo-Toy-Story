@@ -2191,6 +2191,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: hurtClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
     - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: fireRate
       value: 8

@@ -17,12 +17,28 @@ public class PlayerHUDController : MonoBehaviour
     [Header("Currency UI")]
     [SerializeField] private TMP_Text coinsText;
 
+    [Header("Damage Feedback")]
+    [SerializeField] private Image damageFlashImage;
+    [SerializeField] private Color damageFlashColor = new Color(0.95f, 0.08f, 0.08f, 0.38f);
+    [SerializeField] private float damageFlashFadeIn = 0.04f;
+    [SerializeField] private float damageFlashHold = 0.05f;
+    [SerializeField] private float damageFlashFadeOut = 0.2f;
+    [SerializeField] private float damageFeedbackMinInterval = 0.04f;
+    [SerializeField] private float healthPulseScale = 1.12f;
+    [SerializeField] private float healthPulseDuration = 0.2f;
+
     private PlayerHealthScript playerHealth;
     private PlayerCurrencyController playerCurrency;
+    private PlayerAudioController playerAudio;
     private WeaponLoadoutScript weaponLoadout;
     private WeaponScript observedWeapon;
 
     private float displayedHealthNormalized = 1f;
+    private float damageFeedbackCooldownTimer;
+    private float damageFlashTimer;
+    private float healthPulseTimer;
+    private int lastKnownHealth = -1;
+    private Vector3 healthFillBaseScale = Vector3.one;
     private bool loggedMissingUiReferences;
 
     void Awake()
@@ -37,8 +53,10 @@ public class PlayerHUDController : MonoBehaviour
     void OnEnable()
     {
         ResolveReferences();
+        ResolveUiReferences();
         BindEvents();
         RefreshAllImmediate();
+        InitializeDamageFeedbackVisuals();
     }
 
     void OnDisable()
@@ -54,6 +72,7 @@ public class PlayerHUDController : MonoBehaviour
     void Update()
     {
         UpdateHealthAnimation();
+        UpdateDamageFeedbackAnimation();
         RefreshAmmo();
     }
 
@@ -71,6 +90,7 @@ public class PlayerHUDController : MonoBehaviour
         {
             weaponLoadout = playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
             playerCurrency = playerController.Currency ?? playerController.GetComponent<PlayerCurrencyController>();
+            playerAudio = playerController.Audio ?? playerController.GetComponent<PlayerAudioController>();
         }
     }
 
@@ -99,6 +119,11 @@ public class PlayerHUDController : MonoBehaviour
         if (coinsText == null)
         {
             coinsText = FindComponentInChildrenByName<TMP_Text>("CoinsText");
+        }
+
+        if (damageFlashImage == null)
+        {
+            damageFlashImage = FindComponentInChildrenByName<Image>("PanelUIPlayer");
         }
     }
 
@@ -198,6 +223,22 @@ public class PlayerHUDController : MonoBehaviour
 
     private void HandleHealthChanged(PlayerHealthScript health)
     {
+        if (health == null)
+        {
+            RefreshHealthText();
+            return;
+        }
+
+        int previousHealth = lastKnownHealth >= 0 ? lastKnownHealth : health.CurrentHealth;
+        int currentHealth = health.CurrentHealth;
+        int damageApplied = previousHealth - currentHealth;
+
+        if (damageApplied > 0)
+        {
+            PlayDamageFeedback(damageApplied);
+        }
+
+        lastKnownHealth = currentHealth;
         RefreshHealthText();
     }
 
@@ -231,10 +272,12 @@ public class PlayerHUDController : MonoBehaviour
     private void RefreshAllImmediate()
     {
         displayedHealthNormalized = playerHealth != null ? playerHealth.HealthNormalized : 1f;
+        lastKnownHealth = playerHealth != null ? playerHealth.CurrentHealth : -1;
 
         if (healthFillImage != null)
         {
             healthFillImage.fillAmount = displayedHealthNormalized;
+            healthFillBaseScale = healthFillImage.rectTransform.localScale;
         }
 
         RefreshHealthText();
@@ -320,6 +363,124 @@ public class PlayerHUDController : MonoBehaviour
 
         int currentCoins = playerCurrency != null ? playerCurrency.CurrentCoins : 0;
         coinsText.text = $"COINS {currentCoins}";
+    }
+
+    private void InitializeDamageFeedbackVisuals()
+    {
+        damageFeedbackCooldownTimer = 0f;
+        damageFlashTimer = 0f;
+        healthPulseTimer = 0f;
+
+        SetDamageFlashAlpha(0f);
+
+        if (healthFillImage != null)
+        {
+            healthFillBaseScale = healthFillImage.rectTransform.localScale;
+        }
+    }
+
+    private void UpdateDamageFeedbackAnimation()
+    {
+        if (damageFeedbackCooldownTimer > 0f)
+        {
+            damageFeedbackCooldownTimer -= Time.deltaTime;
+        }
+
+        UpdateDamageFlash();
+        UpdateHealthPulse();
+    }
+
+    private void UpdateDamageFlash()
+    {
+        if (damageFlashImage == null)
+        {
+            return;
+        }
+
+        if (damageFlashTimer <= 0f)
+        {
+            SetDamageFlashAlpha(0f);
+            return;
+        }
+
+        float totalDuration = GetDamageFlashTotalDuration();
+        damageFlashTimer = Mathf.Max(0f, damageFlashTimer - Time.deltaTime);
+        float elapsed = totalDuration - damageFlashTimer;
+
+        float fadeIn = Mathf.Max(0f, damageFlashFadeIn);
+        float hold = Mathf.Max(0f, damageFlashHold);
+        float fadeOut = Mathf.Max(0.001f, damageFlashFadeOut);
+        float alpha01;
+
+        if (elapsed <= fadeIn && fadeIn > 0.001f)
+        {
+            alpha01 = Mathf.Clamp01(elapsed / fadeIn);
+        }
+        else if (elapsed <= fadeIn + hold)
+        {
+            alpha01 = 1f;
+        }
+        else
+        {
+            float fadeOutElapsed = elapsed - fadeIn - hold;
+            alpha01 = 1f - Mathf.Clamp01(fadeOutElapsed / fadeOut);
+        }
+
+        SetDamageFlashAlpha(alpha01);
+    }
+
+    private void UpdateHealthPulse()
+    {
+        if (healthFillImage == null)
+        {
+            return;
+        }
+
+        if (healthPulseTimer <= 0f || healthPulseDuration <= 0.001f)
+        {
+            healthFillImage.rectTransform.localScale = healthFillBaseScale;
+            return;
+        }
+
+        healthPulseTimer = Mathf.Max(0f, healthPulseTimer - Time.deltaTime);
+        float normalizedProgress = 1f - (healthPulseTimer / healthPulseDuration);
+        float pulse = Mathf.Sin(Mathf.Clamp01(normalizedProgress) * Mathf.PI);
+        float scaleMultiplier = Mathf.Lerp(1f, Mathf.Max(1f, healthPulseScale), pulse);
+        healthFillImage.rectTransform.localScale = healthFillBaseScale * scaleMultiplier;
+    }
+
+    private void PlayDamageFeedback(int damageApplied)
+    {
+        if (damageApplied <= 0)
+        {
+            return;
+        }
+
+        if (damageFeedbackCooldownTimer <= 0f)
+        {
+            healthPulseTimer = Mathf.Max(0.01f, healthPulseDuration);
+            damageFeedbackCooldownTimer = Mathf.Max(0f, damageFeedbackMinInterval);
+        }
+
+        damageFlashTimer = GetDamageFlashTotalDuration();
+        playerAudio?.PlayHurt();
+    }
+
+    private float GetDamageFlashTotalDuration()
+    {
+        return Mathf.Max(0.05f, Mathf.Max(0f, damageFlashFadeIn) + Mathf.Max(0f, damageFlashHold) + Mathf.Max(0.001f, damageFlashFadeOut));
+    }
+
+    private void SetDamageFlashAlpha(float alpha01)
+    {
+        if (damageFlashImage == null)
+        {
+            return;
+        }
+
+        Color color = damageFlashColor;
+        color.a *= Mathf.Clamp01(alpha01);
+        damageFlashImage.color = color;
     }
 
     private T FindComponentInChildrenByName<T>(string targetName) where T : Component

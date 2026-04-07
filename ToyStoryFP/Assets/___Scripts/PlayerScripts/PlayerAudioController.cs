@@ -37,8 +37,16 @@ public class PlayerAudioController : MonoBehaviour
     [SerializeField] private AudioClip killConfirmClip;
     [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
 
+    [Header("Damage")]
+    [SerializeField] private AudioClip hurtClip;
+    [SerializeField] [Range(0f, 1f)] private float hurtVolume = 0.2f;
+    [SerializeField] private float hurtPitchRandomness = 0.035f;
+    [SerializeField] private float hurtMinInterval = 0.08f;
+
     private float footstepTimer;
+    private float lastHurtPlayTime = -100f;
     private bool hasLoggedMissingSources;
+    private bool hasLoggedMissingHurtClip;
 
     void Awake()
     {
@@ -70,6 +78,28 @@ public class PlayerAudioController : MonoBehaviour
         AudioClip clipToPlay = killConfirmClip != null ? killConfirmClip : weaponSwitchClip;
         float volumeToPlay = killConfirmClip != null ? killConfirmVolume : Mathf.Max(weaponSwitchVolume, killConfirmVolume);
         PlayOneShot(generalSource, clipToPlay, volumeToPlay);
+    }
+
+    public void PlayHurt()
+    {
+        if (Time.time < lastHurtPlayTime + Mathf.Max(0f, hurtMinInterval))
+        {
+            return;
+        }
+
+        if (hurtClip == null)
+        {
+            if (!hasLoggedMissingHurtClip)
+            {
+                hasLoggedMissingHurtClip = true;
+                Debug.LogWarning("PlayerAudioController hurtClip is not assigned.", this);
+            }
+
+            return;
+        }
+
+        lastHurtPlayTime = Time.time;
+        PlayOneShot(generalSource, hurtClip, hurtVolume, hurtPitchRandomness);
     }
 
     public void PlayWeaponFire(AudioClip clip, float volume, float pitchRandomness = 0.02f)
