@@ -1,20 +1,18 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class WaveIntermissionUI : MonoBehaviour
 {
+    [SerializeField] private GameObject panelRoot;
     [SerializeField] private string promptText = "If you want to start the next round, press T";
     [SerializeField] private TMP_Text promptLabel;
 
-    private Graphic[] graphics;
     private bool hasLoggedMissingReferences;
 
     void Awake()
     {
         ResolveReferences();
-        HidePrompt();
     }
 
     void OnValidate()
@@ -43,31 +41,24 @@ public class WaveIntermissionUI : MonoBehaviour
 
     private void ResolveReferences()
     {
+        panelRoot ??= gameObject;
+
         if (promptLabel == null)
         {
             promptLabel = FindTextByExactName("NextWavePromptText");
-        }
-
-        if (graphics == null || graphics.Length == 0)
-        {
-            graphics = GetComponentsInChildren<Graphic>(true);
         }
     }
 
     private void SetVisible(bool isVisible)
     {
-        if (graphics == null || graphics.Length == 0)
+        ResolveReferences();
+
+        if (panelRoot == null)
         {
             return;
         }
 
-        for (int i = 0; i < graphics.Length; i++)
-        {
-            if (graphics[i] != null)
-            {
-                graphics[i].enabled = isVisible;
-            }
-        }
+        panelRoot.SetActive(isVisible);
     }
 
     private TMP_Text FindTextByExactName(string targetName)

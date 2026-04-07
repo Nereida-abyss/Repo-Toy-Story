@@ -419,28 +419,41 @@ public class WaveManager : MonoBehaviour
         currentState = WaveRuntimeState.Intermission;
         remainingIntermissionTime = Mathf.Max(0f, intermissionDuration);
         ResolveAnnouncementUi();
-        waveIntermissionUi?.ShowPrompt();
+        HideWaveAnnouncement();
+        if (waveIntermissionUi != null)
+        {
+            waveIntermissionUi.ShowPrompt();
+        }
         RefreshTimersUi();
     }
 
     private void HideIntermissionPrompt()
     {
         ResolveAnnouncementUi();
-        waveIntermissionUi?.HidePrompt();
+        if (waveIntermissionUi != null)
+        {
+            waveIntermissionUi.HidePrompt();
+        }
     }
 
     private void ShowWaveAnnouncement(int waveNumber)
     {
         ResolveAnnouncementUi();
         remainingWaveAnnouncementTime = Mathf.Max(0.01f, waveAnnouncementDuration);
-        waveAnnouncementUi?.ShowWave(waveNumber);
+        if (waveAnnouncementUi != null)
+        {
+            waveAnnouncementUi.ShowWave(waveNumber);
+        }
     }
 
     private void HideWaveAnnouncement()
     {
         remainingWaveAnnouncementTime = 0f;
         ResolveAnnouncementUi();
-        waveAnnouncementUi?.HideWave();
+        if (waveAnnouncementUi != null)
+        {
+            waveAnnouncementUi.HideWave();
+        }
     }
 
     private void UpdateWaveAnnouncementTimer(bool isPaused)
@@ -461,7 +474,10 @@ public class WaveManager : MonoBehaviour
     private void RefreshTimersUi()
     {
         ResolveAnnouncementUi();
-        waveTimersUi?.Refresh(currentState, roundElapsedTime, RemainingIntermissionTime);
+        if (waveTimersUi != null)
+        {
+            waveTimersUi.Refresh(currentState, roundElapsedTime, RemainingIntermissionTime);
+        }
     }
 
     private void ResetRuntimeState()
@@ -476,6 +492,7 @@ public class WaveManager : MonoBehaviour
         isSpawningCurrentWave = false;
         currentState = WaveRuntimeState.InitialDelay;
         aliveEnemies.Clear();
+        HideTransientUi(false);
     }
 
     private void HideTransientUi(bool resolveMissingReferences)
@@ -489,8 +506,20 @@ public class WaveManager : MonoBehaviour
         }
 
         remainingWaveAnnouncementTime = 0f;
-        waveAnnouncementUi?.HideWave();
-        waveIntermissionUi?.HidePrompt();
+        if (waveAnnouncementUi != null)
+        {
+            waveAnnouncementUi.HideWave();
+        }
+
+        if (waveIntermissionUi != null)
+        {
+            waveIntermissionUi.HidePrompt();
+        }
+
+        if (waveTimersUi != null)
+        {
+            waveTimersUi.Refresh(WaveRuntimeState.InitialDelay, 0f, 0f);
+        }
     }
 
     private void PruneDeadEnemies()

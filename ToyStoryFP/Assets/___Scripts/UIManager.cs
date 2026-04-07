@@ -10,8 +10,11 @@ public class UIManager : MonoBehaviour
     [Header("Paneles")]
     public GameObject panelPause;
     public GameObject panelUI;
+    public GameObject settingsPanel;
 
-    public bool IsPaused => panelPause != null && panelPause.activeSelf;
+    public bool IsPaused =>
+        (panelPause != null && panelPause.activeSelf) ||
+        (settingsPanel != null && settingsPanel.activeSelf);
 
     void Awake()
     {
@@ -77,6 +80,11 @@ public class UIManager : MonoBehaviour
         if (panelPause != null)
         {
             panelPause.SetActive(paused);
+        }
+
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
         }
 
         if (panelUI != null)

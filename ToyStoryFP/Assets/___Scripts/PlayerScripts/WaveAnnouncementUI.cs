@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class WaveAnnouncementUI : MonoBehaviour
@@ -8,13 +7,11 @@ public class WaveAnnouncementUI : MonoBehaviour
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private TMP_Text announcementText;
 
-    private Graphic[] graphics;
     private bool hasLoggedMissingReferences;
 
     void Awake()
     {
         ResolveReferences();
-        HideWave();
     }
 
     void OnValidate()
@@ -43,36 +40,24 @@ public class WaveAnnouncementUI : MonoBehaviour
 
     private void ResolveReferences()
     {
-        if (panelRoot == null)
-        {
-            panelRoot = gameObject;
-        }
+        panelRoot ??= gameObject;
 
         if (announcementText == null)
         {
             announcementText = FindTextByExactName("WaveAnnouncementText");
         }
-
-        if (graphics == null || graphics.Length == 0)
-        {
-            graphics = GetComponentsInChildren<Graphic>(true);
-        }
     }
 
     private void SetVisible(bool isVisible)
     {
-        if (graphics == null || graphics.Length == 0)
+        ResolveReferences();
+
+        if (panelRoot == null)
         {
             return;
         }
 
-        for (int i = 0; i < graphics.Length; i++)
-        {
-            if (graphics[i] != null)
-            {
-                graphics[i].enabled = isVisible;
-            }
-        }
+        panelRoot.SetActive(isVisible);
     }
 
     private TMP_Text FindTextByExactName(string targetName)

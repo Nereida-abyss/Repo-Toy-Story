@@ -4316,7 +4316,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 487814238}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 697042448}
+        m_TargetAssemblyTypeName: SettingsPanelController, Assembly-CSharp
+        m_MethodName: OpenPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &487814238
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6027,6 +6039,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4222799816050943207, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
   m_PrefabInstance: {fileID: 8266095239124588978}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &697042448 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 610347972088071321, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+  m_PrefabInstance: {fileID: 8266095239124588978}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697042446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3e9d6e87e9f4b4fa43fd59bf42ad2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &704943082
 GameObject:
   m_ObjectHideFlags: 0
@@ -16911,6 +16934,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1011057056}
     m_Modifications:
+    - target: {fileID: 1152, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1152, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1154, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.b
+      value: 0.8396226
+      objectReference: {fileID: 0}
+    - target: {fileID: 1154, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.g
+      value: 0.8396226
+      objectReference: {fileID: 0}
+    - target: {fileID: 1154, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.r
+      value: 0.5505073
+      objectReference: {fileID: 0}
+    - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4222799816050943207, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -16994,6 +17049,10 @@ PrefabInstance:
     - target: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_Name
       value: PanelSetting
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -4,6 +4,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class WaveTimersUI : MonoBehaviour
 {
+    [SerializeField] private GameObject panelRoot;
     [SerializeField] private string roundPrefix = "Round Time";
     [SerializeField] private string intermissionPrefix = "Intermission";
     [SerializeField] private TMP_Text roundTimerText;
@@ -14,7 +15,6 @@ public class WaveTimersUI : MonoBehaviour
     void Awake()
     {
         ResolveReferences();
-        HideAll();
     }
 
     void OnValidate()
@@ -35,11 +35,13 @@ public class WaveTimersUI : MonoBehaviour
         switch (state)
         {
             case WaveManager.WaveRuntimeState.WaveInProgress:
+                panelRoot.SetActive(true);
                 roundTimerText.text = $"{roundPrefix} {FormatElapsedTime(roundElapsedTime)}";
                 roundTimerText.enabled = true;
                 intermissionTimerText.enabled = false;
                 break;
             case WaveManager.WaveRuntimeState.Intermission:
+                panelRoot.SetActive(true);
                 intermissionTimerText.text = $"{intermissionPrefix} {FormatRemainingTime(remainingIntermissionTime)}";
                 roundTimerText.enabled = false;
                 intermissionTimerText.enabled = true;
@@ -52,6 +54,11 @@ public class WaveTimersUI : MonoBehaviour
 
     private void HideAll()
     {
+        if (panelRoot != null)
+        {
+            panelRoot.SetActive(false);
+        }
+
         if (roundTimerText != null)
         {
             roundTimerText.enabled = false;
@@ -65,6 +72,8 @@ public class WaveTimersUI : MonoBehaviour
 
     private void ResolveReferences()
     {
+        panelRoot ??= gameObject;
+
         if (roundTimerText != null && intermissionTimerText != null)
         {
             return;
