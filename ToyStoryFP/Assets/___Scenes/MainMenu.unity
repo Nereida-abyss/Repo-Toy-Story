@@ -2293,7 +2293,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -3271,7 +3271,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -5902,7 +5902,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -15656,11 +15656,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2127055784}
   m_Mesh: {fileID: -6264831526926562434, guid: 5b37b45947726394db0f0b0f1205479f, type: 3}
---- !u!1 &2129231397 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-  m_PrefabInstance: {fileID: 8266095239124588979}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &2129231398 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4222799816050943207, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
@@ -15671,52 +15666,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 610347972088071321, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
   m_PrefabInstance: {fileID: 8266095239124588979}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129231397}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c3e9d6e87e9f4b4fa43fd59bf42ad2a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!225 &2129231402
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129231397}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
---- !u!114 &2129231403
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129231397}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
-  playOpenOnEnable: 1
-  openDuration: 0.25
-  closeDuration: 0.16
-  slideOffset: 24
-  startScale: 0.94
-  closeScale: 0.97
-  canvasGroup: {fileID: 2129231402}
-  disableRaycastWhileAnimating: 1
-  enableAudio: 1
-  audioSource: {fileID: 0}
-  useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
-  openVolume: 0.5
-  closeVolume: 0.38
 --- !u!1 &2138354747
 GameObject:
   m_ObjectHideFlags: 0
@@ -17370,40 +17325,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      propertyPath: m_Color.a
-      value: 0.84
-      objectReference: {fileID: 0}
-    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      propertyPath: m_Color.b
-      value: 0.33
-      objectReference: {fileID: 0}
-    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      propertyPath: m_Color.g
-      value: 0.16
-      objectReference: {fileID: 0}
-    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      propertyPath: m_Color.r
-      value: 0.08
-      objectReference: {fileID: 0}
     - target: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_Name
       value: PanelSetting
       objectReference: {fileID: 0}
-    - target: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2129231403}
-    - targetCorrespondingSourceObject: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2129231402}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
