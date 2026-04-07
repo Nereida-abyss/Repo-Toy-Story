@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -5,6 +6,7 @@ using UnityEngine.EventSystems;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
+    public static event Action<bool> PauseStateChanged;
     public static bool IsGamePaused => Instance != null && Instance.IsPaused;
 
     [Header("Paneles")]
@@ -68,6 +70,7 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        PauseStateChanged?.Invoke(false);
     }
 
     private void TogglePausa()
@@ -77,6 +80,8 @@ public class UIManager : MonoBehaviour
 
     private void ApplyPauseState(bool paused)
     {
+        bool previousPauseState = IsPaused;
+
         if (panelPause != null)
         {
             UIFxUtility.SetPanelActive(panelPause, paused);
@@ -95,6 +100,13 @@ public class UIManager : MonoBehaviour
         Time.timeScale = paused ? 0f : 1f;
         Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = paused;
+
+        bool currentPauseState = IsPaused;
+
+        if (currentPauseState != previousPauseState)
+        {
+            PauseStateChanged?.Invoke(currentPauseState);
+        }
     }
 
     private bool CanTogglePause()

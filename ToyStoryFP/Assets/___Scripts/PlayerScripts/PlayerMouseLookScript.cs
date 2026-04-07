@@ -21,6 +21,16 @@ public class MouseLookScript : MonoBehaviour
     [Header("Mouse Look Settings")]
     public Vector2 clampInDegrees = new Vector2(360, 180);
     public bool lockCursor = true;
+    [SerializeField] private float postUnpauseLookBlockDuration = 0.08f;
+    [SerializeField] private bool pauseInputResetOnOpen = true;
+    [SerializeField] private bool pauseInputResetOnClose = true;
+    [SerializeField] private float postUnpauseSpikeFilterDuration = 0.12f;
+    [SerializeField] private float postUnpauseSpikeThreshold = 3.5f;
+    [Header("Pause Pose Restore")]
+    [SerializeField] private Transform pausePoseRoot;
+    [SerializeField] private bool restorePoseOnUnpause = true;
+    [SerializeField] private bool restoreCameraLocalPositionOnUnpause = true;
+    [SerializeField] private bool clearAngularVelocityOnResume = true;
     [Space]
     private Vector2 sensitivity = new Vector2(2f, 2f); 
     [Space]
@@ -66,13 +76,48 @@ public class MouseLookScript : MonoBehaviour
     private float jumpCameraOffset;
     private JumpCameraPhase jumpCameraPhase;
     private float jumpCameraPhaseTimer;
+    private float postUnpauseLookBlockTimer;
+    private float postUnpauseSpikeFilterTimer;
+    private bool pauseStateInitialized;
+    private bool lastKnownPauseState;
+    private bool pauseEventSubscribed;
 
     [HideInInspector]
     public bool scoped;
 
+    private struct PausePoseSnapshot
+    {
+        public bool isValid;
+        public Vector3 rootPosition;
+        public Quaternion rootRotation;
+        public Quaternion cameraLocalRotation;
+        public Vector3 cameraLocalPosition;
+        public Quaternion characterBodyLocalRotation;
+        public Vector2 cachedTargetDirection;
+        public Vector2 cachedTargetCharacterDirection;
+        public Vector2 cachedMouseAbsolute;
+    }
+
+    private PausePoseSnapshot pausePoseSnapshot;
+    private bool pausePoseCapturedThisCycle;
+    private Rigidbody pausePoseRootRigidbody;
+
+    void OnEnable()
+    {
+        SubscribePauseStateEvents();
+        InitializePauseStateTracking();
+    }
+
+    void OnDisable()
+    {
+        UnsubscribePauseStateEvents();
+    }
+
     void Start()
     {
         instance = this;
+        SubscribePauseStateEvents();
+        InitializePauseStateTracking();
         float savedLookSensitivity = PlayerPrefs.GetFloat(LookSensitivityKey, DefaultLookSensitivity);
         SetSensitivity(savedLookSensitivity);
         baseLocalPosition = transform.localPosition;
@@ -105,8 +150,21 @@ public class MouseLookScript : MonoBehaviour
 
     void Update()
     {
-        if (UIManager.IsGamePaused)
+        bool pausedNow = UIManager.IsGamePaused;
+
+        if (!pauseStateInitialized || pausedNow != lastKnownPauseState)
         {
+            HandlePauseStateChanged(pausedNow);
+        }
+
+        if (pausedNow)
+        {
+            return;
+        }
+
+        if (postUnpauseLookBlockTimer > 0f)
+        {
+            postUnpauseLookBlockTimer = Mathf.Max(0f, postUnpauseLookBlockTimer - Time.unscaledDeltaTime);
             return;
         }
 
@@ -114,6 +172,19 @@ public class MouseLookScript : MonoBehaviour
         var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
 
         mouseDelta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+
+        if (postUnpauseSpikeFilterTimer > 0f)
+        {
+            postUnpauseSpikeFilterTimer = Mathf.Max(0f, postUnpauseSpikeFilterTimer - Time.unscaledDeltaTime);
+            float spikeThreshold = Mathf.Max(0.1f, postUnpauseSpikeThreshold);
+
+            if (mouseDelta.sqrMagnitude > spikeThreshold * spikeThreshold)
+            {
+                // Ignore abnormal mouse spikes right after closing pause/settings.
+                ResetLookInputBuffers();
+                return;
+            }
+        }
 
         mouseDelta = Vector2.Scale(mouseDelta, new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
 
@@ -149,6 +220,190 @@ public class MouseLookScript : MonoBehaviour
             transform.localRotation *= yRotation;
         }
 
+    }
+
+    private void SubscribePauseStateEvents()
+    {
+        if (pauseEventSubscribed)
+        {
+            return;
+        }
+
+        UIManager.PauseStateChanged += HandlePauseStateChanged;
+        pauseEventSubscribed = true;
+    }
+
+    private void UnsubscribePauseStateEvents()
+    {
+        if (!pauseEventSubscribed)
+        {
+            return;
+        }
+
+        UIManager.PauseStateChanged -= HandlePauseStateChanged;
+        pauseEventSubscribed = false;
+    }
+
+    private void InitializePauseStateTracking()
+    {
+        bool pausedNow = UIManager.IsGamePaused;
+        pauseStateInitialized = true;
+        lastKnownPauseState = pausedNow;
+        postUnpauseLookBlockTimer = 0f;
+        postUnpauseSpikeFilterTimer = 0f;
+        pausePoseCapturedThisCycle = false;
+
+        if (pausedNow && restorePoseOnUnpause)
+        {
+            CapturePausePoseSnapshot();
+        }
+
+        if (pausedNow && pauseInputResetOnOpen)
+        {
+            ResetLookInputBuffers();
+        }
+    }
+
+    private void HandlePauseStateChanged(bool paused)
+    {
+        if (pauseStateInitialized && paused == lastKnownPauseState)
+        {
+            return;
+        }
+
+        lastKnownPauseState = paused;
+        pauseStateInitialized = true;
+
+        if (paused)
+        {
+            if (restorePoseOnUnpause)
+            {
+                CapturePausePoseSnapshot();
+            }
+
+            postUnpauseLookBlockTimer = 0f;
+            postUnpauseSpikeFilterTimer = 0f;
+
+            if (pauseInputResetOnOpen)
+            {
+                ResetLookInputBuffers();
+            }
+
+            return;
+        }
+
+        if (restorePoseOnUnpause)
+        {
+            RestorePausePoseSnapshot();
+        }
+
+        if (pauseInputResetOnClose)
+        {
+            ResetLookInputBuffers();
+        }
+
+        postUnpauseLookBlockTimer = Mathf.Max(0f, postUnpauseLookBlockDuration);
+        postUnpauseSpikeFilterTimer = Mathf.Max(0f, postUnpauseSpikeFilterDuration);
+        pausePoseCapturedThisCycle = false;
+    }
+
+    private void ResetLookInputBuffers()
+    {
+        _smoothMouse = Vector2.zero;
+        mouseDelta = Vector2.zero;
+        recoilPitchVelocity = 0f;
+        recoilYawVelocity = 0f;
+        anticipationDropVelocity = 0f;
+    }
+
+    private void CapturePausePoseSnapshot()
+    {
+        if (pausePoseCapturedThisCycle)
+        {
+            return;
+        }
+
+        Transform snapshotRoot = ResolvePausePoseRoot();
+        pausePoseSnapshot.rootPosition = snapshotRoot.position;
+        pausePoseSnapshot.rootRotation = snapshotRoot.rotation;
+        pausePoseSnapshot.cameraLocalRotation = transform.localRotation;
+        pausePoseSnapshot.cameraLocalPosition = transform.localPosition;
+        pausePoseSnapshot.characterBodyLocalRotation = characterBody != null
+            ? characterBody.transform.localRotation
+            : Quaternion.identity;
+        pausePoseSnapshot.cachedTargetDirection = targetDirection;
+        pausePoseSnapshot.cachedTargetCharacterDirection = targetCharacterDirection;
+        pausePoseSnapshot.cachedMouseAbsolute = _mouseAbsolute;
+        pausePoseSnapshot.isValid = true;
+        pausePoseCapturedThisCycle = true;
+    }
+
+    private void RestorePausePoseSnapshot()
+    {
+        if (!pausePoseSnapshot.isValid)
+        {
+            return;
+        }
+
+        Transform snapshotRoot = ResolvePausePoseRoot();
+        snapshotRoot.SetPositionAndRotation(pausePoseSnapshot.rootPosition, pausePoseSnapshot.rootRotation);
+        transform.localRotation = pausePoseSnapshot.cameraLocalRotation;
+
+        if (restoreCameraLocalPositionOnUnpause)
+        {
+            transform.localPosition = pausePoseSnapshot.cameraLocalPosition;
+        }
+
+        if (characterBody != null)
+        {
+            characterBody.transform.localRotation = pausePoseSnapshot.characterBodyLocalRotation;
+        }
+
+        targetDirection = pausePoseSnapshot.cachedTargetDirection;
+        targetCharacterDirection = pausePoseSnapshot.cachedTargetCharacterDirection;
+        _mouseAbsolute = pausePoseSnapshot.cachedMouseAbsolute;
+
+        if (clearAngularVelocityOnResume)
+        {
+            Rigidbody poseRootRigidbody = ResolvePausePoseRootRigidbody(snapshotRoot);
+
+            if (poseRootRigidbody != null)
+            {
+                poseRootRigidbody.angularVelocity = Vector3.zero;
+            }
+        }
+    }
+
+    private Transform ResolvePausePoseRoot()
+    {
+        if (pausePoseRoot != null)
+        {
+            return pausePoseRoot;
+        }
+
+        return transform.root != null ? transform.root : transform;
+    }
+
+    private Rigidbody ResolvePausePoseRootRigidbody(Transform snapshotRoot)
+    {
+        if (snapshotRoot == null)
+        {
+            return null;
+        }
+
+        if (pausePoseRootRigidbody != null && pausePoseRootRigidbody.transform == snapshotRoot)
+        {
+            return pausePoseRootRigidbody;
+        }
+
+        pausePoseRootRigidbody = snapshotRoot.GetComponent<Rigidbody>();
+
+        if (pausePoseRootRigidbody == null)
+        {
+            pausePoseRootRigidbody = snapshotRoot.GetComponentInParent<Rigidbody>();
+        }
+
+        return pausePoseRootRigidbody;
     }
 
     public void PlayJumpPreparationDip(float downwardAngle, float duration)
