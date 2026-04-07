@@ -82,22 +82,22 @@ public class ScorePanelController : MonoBehaviour
 
         if (previousPanelToHide != null)
         {
-            previousPanelToHide.SetActive(false);
+            UIFxUtility.SetPanelActive(previousPanelToHide, false);
         }
 
-        panelScoreRoot.SetActive(true);
+        UIFxUtility.SetPanelActive(panelScoreRoot, true);
     }
 
     public void ClosePanel()
     {
         if (panelScoreRoot != null)
         {
-            panelScoreRoot.SetActive(false);
+            UIFxUtility.SetPanelActive(panelScoreRoot, false);
         }
 
         if (previousPanelToHide != null)
         {
-            previousPanelToHide.SetActive(true);
+            UIFxUtility.SetPanelActive(previousPanelToHide, true);
         }
     }
 
@@ -105,27 +105,27 @@ public class ScorePanelController : MonoBehaviour
     {
         if (panelScoreRoot != null)
         {
-            panelScoreRoot.SetActive(false);
+            UIFxUtility.HideImmediate(panelScoreRoot);
         }
     }
 
     private void RefreshBestStats()
     {
-        RunStatsStore.GetBestStats(out int maxCoins, out int maxWave, out int maxBotsKilled);
+        RunStatsStore.GetLastRunStats(out int coins, out int wave, out int bots);
 
         if (bestCoinsText != null)
         {
-            bestCoinsText.text = $"MAX COINS: {maxCoins}";
+            bestCoinsText.text = $"LAST COINS: {coins}";
         }
 
         if (bestWaveText != null)
         {
-            bestWaveText.text = $"MAX WAVE: {maxWave}";
+            bestWaveText.text = $"LAST WAVE: {wave}";
         }
 
         if (bestBotsText != null)
         {
-            bestBotsText.text = $"MAX BOTS: {maxBotsKilled}";
+            bestBotsText.text = $"LAST BOTS: {bots}";
         }
     }
 

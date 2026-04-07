@@ -29,7 +29,7 @@ public class WaveAnnouncementUI : MonoBehaviour
             return;
         }
 
-        announcementText.text = $"OLEADA {waveNumber}";
+        announcementText.text = $"WAVE {waveNumber}";
         SetVisible(true);
     }
 
@@ -57,7 +57,7 @@ public class WaveAnnouncementUI : MonoBehaviour
             return;
         }
 
-        panelRoot.SetActive(isVisible);
+        UIFxUtility.SetPanelActive(panelRoot, isVisible);
     }
 
     private TMP_Text FindTextByExactName(string targetName)

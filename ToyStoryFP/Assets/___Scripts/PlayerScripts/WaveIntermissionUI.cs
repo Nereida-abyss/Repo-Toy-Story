@@ -58,7 +58,7 @@ public class WaveIntermissionUI : MonoBehaviour
             return;
         }
 
-        panelRoot.SetActive(isVisible);
+        UIFxUtility.SetPanelActive(panelRoot, isVisible);
     }
 
     private TMP_Text FindTextByExactName(string targetName)

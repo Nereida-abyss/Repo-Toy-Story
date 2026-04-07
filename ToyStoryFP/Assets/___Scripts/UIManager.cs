@@ -79,12 +79,12 @@ public class UIManager : MonoBehaviour
     {
         if (panelPause != null)
         {
-            panelPause.SetActive(paused);
+            UIFxUtility.SetPanelActive(panelPause, paused);
         }
 
         if (settingsPanel != null)
         {
-            settingsPanel.SetActive(false);
+            UIFxUtility.SetPanelActive(settingsPanel, false);
         }
 
         if (panelUI != null)

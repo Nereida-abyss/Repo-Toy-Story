@@ -50,6 +50,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
 
             if (BelongsToPlayer())
             {
+                RunStatsStore.CommitLastRun();
                 CambioEscena.LoadSceneSafely(EndMenuSceneName);
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;

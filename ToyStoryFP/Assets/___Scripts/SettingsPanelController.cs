@@ -58,19 +58,19 @@ public class SettingsPanelController : MonoBehaviour
 
         if (previousPanelToHide != null)
         {
-            previousPanelToHide.SetActive(false);
+            UIFxUtility.SetPanelActive(previousPanelToHide, false);
         }
 
-        gameObject.SetActive(true);
+        UIFxUtility.SetPanelActive(gameObject, true);
     }
 
     public void ClosePanel()
     {
-        gameObject.SetActive(false);
+        UIFxUtility.SetPanelActive(gameObject, false);
 
         if (previousPanelToHide != null)
         {
-            previousPanelToHide.SetActive(true);
+            UIFxUtility.SetPanelActive(previousPanelToHide, true);
         }
     }
 

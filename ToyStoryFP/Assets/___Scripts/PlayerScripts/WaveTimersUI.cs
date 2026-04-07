@@ -35,13 +35,13 @@ public class WaveTimersUI : MonoBehaviour
         switch (state)
         {
             case WaveManager.WaveRuntimeState.WaveInProgress:
-                panelRoot.SetActive(true);
+                UIFxUtility.SetPanelActive(panelRoot, true);
                 roundTimerText.text = $"{roundPrefix} {FormatElapsedTime(roundElapsedTime)}";
                 roundTimerText.enabled = true;
                 intermissionTimerText.enabled = false;
                 break;
             case WaveManager.WaveRuntimeState.Intermission:
-                panelRoot.SetActive(true);
+                UIFxUtility.SetPanelActive(panelRoot, true);
                 intermissionTimerText.text = $"{intermissionPrefix} {FormatRemainingTime(remainingIntermissionTime)}";
                 roundTimerText.enabled = false;
                 intermissionTimerText.enabled = true;
@@ -56,7 +56,7 @@ public class WaveTimersUI : MonoBehaviour
     {
         if (panelRoot != null)
         {
-            panelRoot.SetActive(false);
+            UIFxUtility.SetPanelActive(panelRoot, false);
         }
 
         if (roundTimerText != null)
