@@ -8,7 +8,11 @@ public class SettingsPanelController : MonoBehaviour
     private const string FullscreenKey = "settings.fullscreen";
     private const string MasterVolumeKey = "settings.masterVolume";
     private const string MasterMutedKey = "settings.masterMuted";
+    private const string LookSensitivityKey = "settings.lookSensitivity";
     private const float DefaultVolume = 1f;
+    private const float DefaultLookSensitivity = 2f;
+    private const float MinLookSensitivity = 0.5f;
+    private const float MaxLookSensitivity = 5f;
 
     [SerializeField] private Button closeButton;
     [SerializeField] private Button fullscreenButton;
@@ -17,9 +21,12 @@ public class SettingsPanelController : MonoBehaviour
     [SerializeField] private Button muteButton;
     [SerializeField] private TMP_Text muteButtonText;
     [SerializeField] private TMP_Text muteStateText;
+    [SerializeField] private Slider lookSensitivitySlider;
+    [SerializeField] private TMP_Text lookSensitivityValueText;
     [SerializeField] private GameObject previousPanelToHide;
 
     private float masterVolume = DefaultVolume;
+    private float lookSensitivity = DefaultLookSensitivity;
     private bool masterMuted;
     private bool isFullscreen;
 
@@ -97,6 +104,20 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    public void OnLookSensitivityChanged(float value)
+    {
+        lookSensitivity = Mathf.Clamp(value, MinLookSensitivity, MaxLookSensitivity);
+        PlayerPrefs.SetFloat(LookSensitivityKey, lookSensitivity);
+        PlayerPrefs.Save();
+
+        if (MouseLookScript.instance != null)
+        {
+            MouseLookScript.instance.SetSensitivity(lookSensitivity);
+        }
+
+        RefreshUI();
+    }
+
     public static void ApplySavedSettings()
     {
         bool fullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
@@ -112,12 +133,21 @@ public class SettingsPanelController : MonoBehaviour
         isFullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
         masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, DefaultVolume));
         masterMuted = PlayerPrefs.GetInt(MasterMutedKey, 0) == 1;
+        lookSensitivity = Mathf.Clamp(
+            PlayerPrefs.GetFloat(LookSensitivityKey, DefaultLookSensitivity),
+            MinLookSensitivity,
+            MaxLookSensitivity);
     }
 
     private void ApplyCurrentSettings()
     {
         Screen.fullScreen = isFullscreen;
         ApplyAudioSettings();
+
+        if (MouseLookScript.instance != null)
+        {
+            MouseLookScript.instance.SetSensitivity(lookSensitivity);
+        }
     }
 
     private void ApplyAudioSettings()
@@ -146,11 +176,21 @@ public class SettingsPanelController : MonoBehaviour
         {
             muteStateText.text = masterMuted ? "Muted" : $"{Mathf.RoundToInt(masterVolume * 100f)}%";
         }
+
+        if (lookSensitivitySlider != null)
+        {
+            lookSensitivitySlider.SetValueWithoutNotify(lookSensitivity);
+        }
+
+        if (lookSensitivityValueText != null)
+        {
+            lookSensitivityValueText.text = lookSensitivity.ToString("0.00");
+        }
     }
 
     private void ValidateReferences()
     {
-        if (closeButton == null || fullscreenButton == null || fullscreenStateText == null || masterVolumeSlider == null || muteButton == null)
+        if (closeButton == null || fullscreenButton == null || fullscreenStateText == null || masterVolumeSlider == null || muteButton == null || lookSensitivitySlider == null || lookSensitivityValueText == null)
         {
             Debug.LogWarning("SettingsPanelController is missing one or more UI references.", this);
         }

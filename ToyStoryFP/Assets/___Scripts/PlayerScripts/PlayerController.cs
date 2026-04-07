@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
         weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
 
         RunStatsStore.BeginRun();
+        weaponLoadout?.BeginRunLoadout();
     }
 
     void OnDestroy()

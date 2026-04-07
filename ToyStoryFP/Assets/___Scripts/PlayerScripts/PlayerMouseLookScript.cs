@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class MouseLookScript : MonoBehaviour
 {
+    private const string LookSensitivityKey = "settings.lookSensitivity";
+    private const float DefaultLookSensitivity = 2f;
+    private const float MinLookSensitivity = 0.5f;
+    private const float MaxLookSensitivity = 5f;
+
     private enum JumpCameraPhase
     {
         None,
@@ -68,6 +73,8 @@ public class MouseLookScript : MonoBehaviour
     void Start()
     {
         instance = this;
+        float savedLookSensitivity = PlayerPrefs.GetFloat(LookSensitivityKey, DefaultLookSensitivity);
+        SetSensitivity(savedLookSensitivity);
         baseLocalPosition = transform.localPosition;
 
         targetDirection = transform.localRotation.eulerAngles;
@@ -81,6 +88,12 @@ public class MouseLookScript : MonoBehaviour
         {
             LockCursor();
         }
+    }
+
+    public void SetSensitivity(float value)
+    {
+        float clampedSensitivity = Mathf.Clamp(value, MinLookSensitivity, MaxLookSensitivity);
+        sensitivity = new Vector2(clampedSensitivity, clampedSensitivity);
     }
 
 

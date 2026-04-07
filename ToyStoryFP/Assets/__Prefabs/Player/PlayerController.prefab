@@ -185,6 +185,20 @@ MonoBehaviour:
   weaponSwitchDuration: 0.33
   weaponSwitchLowerRatio: 0.45
   weaponSwitchRaiseRatio: 0.45
+  defaultStartingWeaponId: Low_Poly_1323
+  weaponUnlockDefinitions:
+  - weaponId: Low_Poly_1323
+    weapon: {fileID: 0}
+    price: 0
+    unlockedByDefault: 1
+  - weaponId: TacticalRifle
+    weapon: {fileID: 0}
+    price: 0
+    unlockedByDefault: 0
+  - weaponId: AssaultRifle
+    weapon: {fileID: 0}
+    price: 0
+    unlockedByDefault: 0
 --- !u!114 &919900000000004001
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,6 +5,29 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class WeaponLoadoutScript : MonoBehaviour
 {
+    [Serializable]
+    public class WeaponUnlockDefinition
+    {
+        public string weaponId;
+        public WeaponScript weapon;
+        public int price;
+        public bool unlockedByDefault;
+    }
+
+    public struct WeaponShopEntry
+    {
+        public string WeaponId { get; }
+        public int Price { get; }
+        public bool IsUnlocked { get; }
+
+        public WeaponShopEntry(string weaponId, int price, bool isUnlocked)
+        {
+            WeaponId = weaponId;
+            Price = price;
+            IsUnlocked = isUnlocked;
+        }
+    }
+
     private enum WeaponSwitchState
     {
         Idle,
@@ -16,8 +39,11 @@ public class WeaponLoadoutScript : MonoBehaviour
     [SerializeField] private float weaponSwitchDuration = 0.35f;
     [SerializeField] private float weaponSwitchLowerRatio = 0.45f;
     [SerializeField] private float weaponSwitchRaiseRatio = 0.45f;
+    [SerializeField] private string defaultStartingWeaponId = "Low_Poly_1323";
+    [SerializeField] private List<WeaponUnlockDefinition> weaponUnlockDefinitions = new List<WeaponUnlockDefinition>();
 
-    private WeaponScript[] weapons = Array.Empty<WeaponScript>();
+    private WeaponScript[] allWeapons = Array.Empty<WeaponScript>();
+    private WeaponScript[] unlockedWeapons = Array.Empty<WeaponScript>();
     private int equippedWeaponIndex = -1;
     private int targetWeaponIndex = -1;
     private float switchPhaseTimer;
@@ -25,12 +51,20 @@ public class WeaponLoadoutScript : MonoBehaviour
     private WeaponScript visibleWeapon;
     private PlayerAudioController playerAudio;
     private bool initialLoadoutResolved;
+    private bool runLoadoutInitialized;
+
+    private readonly Dictionary<string, WeaponUnlockDefinition> definitionsById =
+        new Dictionary<string, WeaponUnlockDefinition>(StringComparer.Ordinal);
+    private readonly Dictionary<WeaponScript, string> weaponIdByWeapon = new Dictionary<WeaponScript, string>();
+    private readonly HashSet<string> unlockedWeaponIds = new HashSet<string>(StringComparer.Ordinal);
+    private readonly List<WeaponShopEntry> shopEntries = new List<WeaponShopEntry>();
+    private readonly HashSet<string> knownShopIds = new HashSet<string>(StringComparer.Ordinal);
 
     public event Action<WeaponScript> CurrentWeaponChanged;
 
     public WeaponScript CurrentWeapon =>
-        equippedWeaponIndex >= 0 && equippedWeaponIndex < weapons.Length
-            ? weapons[equippedWeaponIndex]
+        equippedWeaponIndex >= 0 && equippedWeaponIndex < unlockedWeapons.Length
+            ? unlockedWeapons[equippedWeaponIndex]
             : null;
 
     public bool IsSwitchingWeapon => switchState != WeaponSwitchState.Idle;
@@ -44,6 +78,7 @@ public class WeaponLoadoutScript : MonoBehaviour
 
         playerAudio = GetComponentInParent<PlayerAudioController>();
         RefreshWeapons();
+        BeginRunLoadout();
     }
 
     void Update()
@@ -69,61 +104,218 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     public void RefreshWeapons()
     {
-        weapons = CollectDirectChildWeapons();
+        allWeapons = CollectDirectChildWeapons();
+        BuildDefinitionMaps();
 
-        if (weapons.Length == 0)
+        if (allWeapons.Length == 0)
         {
+            unlockedWeapons = Array.Empty<WeaponScript>();
             equippedWeaponIndex = -1;
             targetWeaponIndex = -1;
             visibleWeapon = null;
             switchState = WeaponSwitchState.Idle;
+            CurrentWeaponChanged?.Invoke(null);
             return;
         }
 
-        int activeIndex = -1;
-        int activeWeaponCount = 0;
-
-        for (int i = 0; i < weapons.Length; i++)
+        for (int i = 0; i < allWeapons.Length; i++)
         {
             if (weaponCamera != null)
             {
-                weapons[i]._camera = weaponCamera;
+                allWeapons[i]._camera = weaponCamera;
             }
 
-            weapons[i].SetPlayerOwned(true);
+            allWeapons[i].SetPlayerOwned(true);
+        }
 
-            if (weapons[i].gameObject.activeSelf)
+        if (!runLoadoutInitialized)
+        {
+            unlockedWeapons = allWeapons;
+            int activeIndex = ResolveActiveIndex(unlockedWeapons);
+            bool initializeSilently = !initialLoadoutResolved;
+            SetWeaponIndexImmediate(activeIndex, initializeSilently);
+            initialLoadoutResolved = true;
+            return;
+        }
+
+        RebuildUnlockedWeapons();
+
+        if (unlockedWeapons.Length == 0)
+        {
+            DeactivateAllWeapons();
+            equippedWeaponIndex = -1;
+            targetWeaponIndex = -1;
+            visibleWeapon = null;
+            switchState = WeaponSwitchState.Idle;
+            CurrentWeaponChanged?.Invoke(null);
+            return;
+        }
+
+        if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
+        {
+            equippedWeaponIndex = 0;
+        }
+
+        SetWeaponIndexImmediate(equippedWeaponIndex);
+    }
+
+    public void BeginRunLoadout()
+    {
+        if (allWeapons.Length == 0)
+        {
+            RefreshWeapons();
+        }
+
+        unlockedWeaponIds.Clear();
+
+        for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
+        {
+            WeaponUnlockDefinition definition = weaponUnlockDefinitions[i];
+            if (definition == null || !definition.unlockedByDefault)
             {
-                activeWeaponCount++;
-                activeIndex = i;
+                continue;
+            }
+
+            string weaponId = NormalizeWeaponId(definition.weaponId);
+            if (!string.IsNullOrEmpty(weaponId))
+            {
+                unlockedWeaponIds.Add(weaponId);
             }
         }
 
-        if (activeWeaponCount != 1)
+        runLoadoutInitialized = true;
+        RebuildUnlockedWeapons();
+
+        if (unlockedWeaponIds.Count == 0 && allWeapons.Length > 0)
         {
-            activeIndex = equippedWeaponIndex >= 0 && equippedWeaponIndex < weapons.Length
-                ? equippedWeaponIndex
-                : 0;
+            string fallbackWeaponId = ResolveFallbackWeaponId();
+            if (!string.IsNullOrEmpty(fallbackWeaponId))
+            {
+                unlockedWeaponIds.Add(fallbackWeaponId);
+                RebuildUnlockedWeapons();
+            }
         }
 
-        if (activeIndex < 0 || activeIndex >= weapons.Length)
+        if (unlockedWeapons.Length == 0)
         {
-            activeIndex = 0;
+            DeactivateAllWeapons();
+            equippedWeaponIndex = -1;
+            targetWeaponIndex = -1;
+            visibleWeapon = null;
+            switchState = WeaponSwitchState.Idle;
+            CurrentWeaponChanged?.Invoke(null);
+            return;
         }
 
+        int startingIndex = ResolveStartingWeaponIndex();
         bool initializeSilently = !initialLoadoutResolved;
-        SetWeaponIndexImmediate(activeIndex, initializeSilently);
+        SetWeaponIndexImmediate(startingIndex, initializeSilently);
         initialLoadoutResolved = true;
+    }
+
+    public bool TryPurchaseWeapon(string weaponId, PlayerCurrencyController currency, bool autoEquip, out string failReason)
+    {
+        failReason = string.Empty;
+
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+        if (string.IsNullOrEmpty(normalizedWeaponId))
+        {
+            failReason = "Invalid weapon id.";
+            return false;
+        }
+
+        if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
+        {
+            failReason = $"Weapon '{normalizedWeaponId}' is not registered.";
+            return false;
+        }
+
+        if (IsWeaponUnlocked(normalizedWeaponId))
+        {
+            return true;
+        }
+
+        int price = Mathf.Max(0, definition.price);
+        if (currency == null)
+        {
+            failReason = "Currency controller is missing.";
+            return false;
+        }
+
+        if (!currency.TrySpendCoins(price))
+        {
+            failReason = "Not enough coins.";
+            return false;
+        }
+
+        unlockedWeaponIds.Add(normalizedWeaponId);
+        RebuildUnlockedWeapons();
+
+        if (unlockedWeapons.Length == 0)
+        {
+            failReason = $"Weapon '{normalizedWeaponId}' was unlocked but cannot be equipped.";
+            return true;
+        }
+
+        if (autoEquip)
+        {
+            int unlockedIndex = FindUnlockedWeaponIndex(normalizedWeaponId);
+            if (unlockedIndex >= 0)
+            {
+                SetWeaponIndexImmediate(unlockedIndex);
+            }
+        }
+        else if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
+        {
+            SetWeaponIndexImmediate(0);
+        }
+        else
+        {
+            EnsureEquippedWeaponVisible();
+        }
+
+        return true;
+    }
+
+    public bool IsWeaponUnlocked(string weaponId)
+    {
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+        return !string.IsNullOrEmpty(normalizedWeaponId) && unlockedWeaponIds.Contains(normalizedWeaponId);
+    }
+
+    public IReadOnlyList<WeaponShopEntry> GetWeaponShopEntries()
+    {
+        shopEntries.Clear();
+        knownShopIds.Clear();
+
+        for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
+        {
+            WeaponUnlockDefinition definition = weaponUnlockDefinitions[i];
+            if (definition == null)
+            {
+                continue;
+            }
+
+            string weaponId = NormalizeWeaponId(definition.weaponId);
+            if (string.IsNullOrEmpty(weaponId) || !knownShopIds.Add(weaponId))
+            {
+                continue;
+            }
+
+            shopEntries.Add(new WeaponShopEntry(weaponId, Mathf.Max(0, definition.price), IsWeaponUnlocked(weaponId)));
+        }
+
+        return shopEntries;
     }
 
     public bool TryCycleWeapon(int direction)
     {
-        if (weapons.Length <= 1 || IsSwitchingWeapon)
+        if (unlockedWeapons.Length <= 1 || IsSwitchingWeapon)
         {
             return false;
         }
 
-        if (equippedWeaponIndex < 0 || equippedWeaponIndex >= weapons.Length)
+        if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
         {
             SetWeaponIndexImmediate(0);
         }
@@ -132,7 +324,7 @@ public class WeaponLoadoutScript : MonoBehaviour
 
         do
         {
-            nextIndex = (nextIndex + direction + weapons.Length) % weapons.Length;
+            nextIndex = (nextIndex + direction + unlockedWeapons.Length) % unlockedWeapons.Length;
         }
         while (nextIndex == equippedWeaponIndex);
 
@@ -142,7 +334,7 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     private void StartWeaponSwitch(int nextIndex)
     {
-        if (nextIndex < 0 || nextIndex >= weapons.Length || nextIndex == equippedWeaponIndex)
+        if (nextIndex < 0 || nextIndex >= unlockedWeapons.Length || nextIndex == equippedWeaponIndex)
         {
             return;
         }
@@ -193,7 +385,7 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     private void CompleteLowering()
     {
-        if (targetWeaponIndex < 0 || targetWeaponIndex >= weapons.Length)
+        if (targetWeaponIndex < 0 || targetWeaponIndex >= unlockedWeapons.Length)
         {
             CancelWeaponSwitch();
             return;
@@ -267,7 +459,7 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     private void SetWeaponIndexImmediate(int index, bool initializeSilently = false)
     {
-        if (weapons.Length == 0)
+        if (unlockedWeapons.Length == 0)
         {
             equippedWeaponIndex = -1;
             targetWeaponIndex = -1;
@@ -277,13 +469,12 @@ public class WeaponLoadoutScript : MonoBehaviour
             return;
         }
 
-        equippedWeaponIndex = Mathf.Clamp(index, 0, weapons.Length - 1);
+        equippedWeaponIndex = Mathf.Clamp(index, 0, unlockedWeapons.Length - 1);
         targetWeaponIndex = -1;
         switchState = WeaponSwitchState.Idle;
         switchPhaseTimer = 0f;
 
         ActivateOnly(equippedWeaponIndex);
-
         visibleWeapon = CurrentWeapon;
 
         if (initializeSilently)
@@ -301,13 +492,12 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     private void EnsureEquippedWeaponVisible()
     {
-        if (equippedWeaponIndex < 0 || equippedWeaponIndex >= weapons.Length)
+        if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
         {
             return;
         }
 
-        WeaponScript equippedWeapon = weapons[equippedWeaponIndex];
-
+        WeaponScript equippedWeapon = unlockedWeapons[equippedWeaponIndex];
         if (equippedWeapon == null)
         {
             return;
@@ -316,19 +506,20 @@ public class WeaponLoadoutScript : MonoBehaviour
         int activeWeaponCount = 0;
         bool weaponMissing = !equippedWeapon.gameObject.activeSelf;
 
-        for (int i = 0; i < weapons.Length; i++)
+        for (int i = 0; i < allWeapons.Length; i++)
         {
-            if (weapons[i].gameObject.activeSelf)
-            {
-                activeWeaponCount++;
-            }
-
-            if (i == equippedWeaponIndex)
+            WeaponScript weapon = allWeapons[i];
+            if (weapon == null)
             {
                 continue;
             }
 
-            if (weapons[i].gameObject.activeSelf)
+            if (weapon.gameObject.activeSelf)
+            {
+                activeWeaponCount++;
+            }
+
+            if (weapon != equippedWeapon && weapon.gameObject.activeSelf)
             {
                 weaponMissing = true;
             }
@@ -353,12 +544,23 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     private void ActivateOnly(int index)
     {
-        for (int i = 0; i < weapons.Length; i++)
+        WeaponScript activeWeapon =
+            index >= 0 && index < unlockedWeapons.Length
+                ? unlockedWeapons[index]
+                : null;
+
+        for (int i = 0; i < allWeapons.Length; i++)
         {
-            bool shouldBeActive = i == index;
-            if (weapons[i].gameObject.activeSelf != shouldBeActive)
+            WeaponScript weapon = allWeapons[i];
+            if (weapon == null)
             {
-                weapons[i].gameObject.SetActive(shouldBeActive);
+                continue;
+            }
+
+            bool shouldBeActive = weapon == activeWeapon;
+            if (weapon.gameObject.activeSelf != shouldBeActive)
+            {
+                weapon.gameObject.SetActive(shouldBeActive);
             }
         }
     }
@@ -403,5 +605,246 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
 
         return directChildWeapons.ToArray();
+    }
+
+    private void BuildDefinitionMaps()
+    {
+        definitionsById.Clear();
+        weaponIdByWeapon.Clear();
+
+        if (weaponUnlockDefinitions == null)
+        {
+            weaponUnlockDefinitions = new List<WeaponUnlockDefinition>();
+        }
+
+        for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
+        {
+            WeaponUnlockDefinition definition = weaponUnlockDefinitions[i];
+            if (definition == null)
+            {
+                continue;
+            }
+
+            definition.weaponId = NormalizeWeaponId(definition.weaponId);
+            if (string.IsNullOrEmpty(definition.weaponId))
+            {
+                Debug.LogWarning("WeaponLoadoutScript found a weapon definition without id.", this);
+                continue;
+            }
+
+            if (definition.weapon == null)
+            {
+                definition.weapon = FindWeaponByName(definition.weaponId);
+            }
+
+            if (definitionsById.ContainsKey(definition.weaponId))
+            {
+                Debug.LogWarning($"WeaponLoadoutScript duplicate weapon id '{definition.weaponId}'. Keeping first occurrence.", this);
+                continue;
+            }
+
+            definitionsById.Add(definition.weaponId, definition);
+
+            if (definition.weapon != null && !weaponIdByWeapon.ContainsKey(definition.weapon))
+            {
+                weaponIdByWeapon.Add(definition.weapon, definition.weaponId);
+            }
+        }
+
+        for (int i = 0; i < allWeapons.Length; i++)
+        {
+            WeaponScript weapon = allWeapons[i];
+            if (weapon == null || weaponIdByWeapon.ContainsKey(weapon))
+            {
+                continue;
+            }
+
+            string fallbackId = NormalizeWeaponId(weapon.name);
+            if (definitionsById.ContainsKey(fallbackId))
+            {
+                weaponIdByWeapon[weapon] = fallbackId;
+                continue;
+            }
+
+            WeaponUnlockDefinition runtimeDefinition = new WeaponUnlockDefinition
+            {
+                weaponId = fallbackId,
+                weapon = weapon,
+                price = 0,
+                unlockedByDefault = false
+            };
+
+            weaponUnlockDefinitions.Add(runtimeDefinition);
+            definitionsById.Add(fallbackId, runtimeDefinition);
+            weaponIdByWeapon.Add(weapon, fallbackId);
+            Debug.LogWarning($"WeaponLoadoutScript auto-registered weapon '{fallbackId}'. Configure it in inspector to control unlock behavior.", this);
+        }
+    }
+
+    private void RebuildUnlockedWeapons()
+    {
+        List<WeaponScript> unlocked = new List<WeaponScript>(allWeapons.Length);
+
+        for (int i = 0; i < allWeapons.Length; i++)
+        {
+            WeaponScript weapon = allWeapons[i];
+            if (weapon == null)
+            {
+                continue;
+            }
+
+            string weaponId = ResolveWeaponId(weapon);
+            bool isUnlocked = !string.IsNullOrEmpty(weaponId) && unlockedWeaponIds.Contains(weaponId);
+
+            if (isUnlocked)
+            {
+                unlocked.Add(weapon);
+            }
+            else if (weapon.gameObject.activeSelf)
+            {
+                weapon.gameObject.SetActive(false);
+            }
+        }
+
+        unlockedWeapons = unlocked.ToArray();
+    }
+
+    private int ResolveActiveIndex(WeaponScript[] pool)
+    {
+        if (pool == null || pool.Length == 0)
+        {
+            return -1;
+        }
+
+        int activeIndex = -1;
+        int activeWeaponCount = 0;
+
+        for (int i = 0; i < pool.Length; i++)
+        {
+            if (!pool[i].gameObject.activeSelf)
+            {
+                continue;
+            }
+
+            activeWeaponCount++;
+            activeIndex = i;
+        }
+
+        if (activeWeaponCount == 1)
+        {
+            return activeIndex;
+        }
+
+        return equippedWeaponIndex >= 0 && equippedWeaponIndex < pool.Length ? equippedWeaponIndex : 0;
+    }
+
+    private string ResolveWeaponId(WeaponScript weapon)
+    {
+        if (weapon == null)
+        {
+            return string.Empty;
+        }
+
+        if (weaponIdByWeapon.TryGetValue(weapon, out string mappedId) && !string.IsNullOrEmpty(mappedId))
+        {
+            return mappedId;
+        }
+
+        string fallbackId = NormalizeWeaponId(weapon.name);
+        if (!string.IsNullOrEmpty(fallbackId))
+        {
+            weaponIdByWeapon[weapon] = fallbackId;
+        }
+
+        return fallbackId;
+    }
+
+    private int ResolveStartingWeaponIndex()
+    {
+        string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
+        if (!string.IsNullOrEmpty(preferredId))
+        {
+            int preferredIndex = FindUnlockedWeaponIndex(preferredId);
+            if (preferredIndex >= 0)
+            {
+                return preferredIndex;
+            }
+        }
+
+        return 0;
+    }
+
+    private int FindUnlockedWeaponIndex(string weaponId)
+    {
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+        if (string.IsNullOrEmpty(normalizedWeaponId))
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < unlockedWeapons.Length; i++)
+        {
+            if (ResolveWeaponId(unlockedWeapons[i]) == normalizedWeaponId)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private string ResolveFallbackWeaponId()
+    {
+        string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
+        if (!string.IsNullOrEmpty(preferredId))
+        {
+            if (definitionsById.ContainsKey(preferredId) || FindWeaponByName(preferredId) != null)
+            {
+                return preferredId;
+            }
+        }
+
+        if (allWeapons.Length > 0)
+        {
+            return ResolveWeaponId(allWeapons[0]);
+        }
+
+        return string.Empty;
+    }
+
+    private WeaponScript FindWeaponByName(string weaponName)
+    {
+        string normalizedName = NormalizeWeaponId(weaponName);
+        if (string.IsNullOrEmpty(normalizedName))
+        {
+            return null;
+        }
+
+        for (int i = 0; i < allWeapons.Length; i++)
+        {
+            WeaponScript weapon = allWeapons[i];
+            if (weapon != null && NormalizeWeaponId(weapon.name) == normalizedName)
+            {
+                return weapon;
+            }
+        }
+
+        return null;
+    }
+
+    private string NormalizeWeaponId(string rawWeaponId)
+    {
+        return string.IsNullOrWhiteSpace(rawWeaponId) ? string.Empty : rawWeaponId.Trim();
+    }
+
+    private void DeactivateAllWeapons()
+    {
+        for (int i = 0; i < allWeapons.Length; i++)
+        {
+            if (allWeapons[i] != null && allWeapons[i].gameObject.activeSelf)
+            {
+                allWeapons[i].gameObject.SetActive(false);
+            }
+        }
     }
 }

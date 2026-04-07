@@ -34,6 +34,24 @@ public class PlayerCurrencyController : MonoBehaviour
         NotifyCoinsChanged();
     }
 
+    public bool TrySpendCoins(int amount)
+    {
+        if (amount <= 0)
+        {
+            return true;
+        }
+
+        if (currentCoins < amount)
+        {
+            return false;
+        }
+
+        currentCoins -= amount;
+        RunStatsStore.UpdateCoins(currentCoins);
+        NotifyCoinsChanged();
+        return true;
+    }
+
     private void NotifyCoinsChanged()
     {
         CoinsChanged?.Invoke(this);
