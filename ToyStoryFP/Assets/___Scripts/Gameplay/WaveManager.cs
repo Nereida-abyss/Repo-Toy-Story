@@ -179,6 +179,7 @@ public class WaveManager : MonoBehaviour
         }
 
         currentWaveIndex++;
+        RunStatsStore.UpdateWave(currentWaveIndex);
         currentState = WaveRuntimeState.WaveInProgress;
         roundElapsedTime = 0f;
         remainingIntermissionTime = 0f;

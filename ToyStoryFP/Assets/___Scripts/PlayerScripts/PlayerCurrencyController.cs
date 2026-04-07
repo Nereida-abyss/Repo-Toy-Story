@@ -17,6 +17,7 @@ public class PlayerCurrencyController : MonoBehaviour
     {
         playerAudio = GetComponent<PlayerAudioController>();
         currentCoins = Mathf.Max(0, startingCoins);
+        RunStatsStore.UpdateCoins(currentCoins);
         NotifyCoinsChanged();
     }
 
@@ -28,6 +29,7 @@ public class PlayerCurrencyController : MonoBehaviour
         }
 
         currentCoins += amount;
+        RunStatsStore.UpdateCoins(currentCoins);
         playerAudio?.PlayCoinPickup();
         NotifyCoinsChanged();
     }

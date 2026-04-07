@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour
         currencyController = GetComponent<PlayerCurrencyController>();
         audioController = GetComponent<PlayerAudioController>();
         weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
+
+        RunStatsStore.BeginRun();
     }
 
     void OnDestroy()

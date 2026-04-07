@@ -498,6 +498,7 @@ public class WeaponScript : MonoBehaviour
 
         if (damageResult.WasKilled)
         {
+            RunStatsStore.RegisterBotKill();
             CrosshairFeedbackController.Instance?.PlayDeathMarker();
             ResolvePlayerAudio();
             playerAudio?.PlayKillConfirm();

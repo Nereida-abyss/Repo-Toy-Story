@@ -11,10 +11,14 @@ public class PanelController : MonoBehaviour
     public GameObject panelCredits;
     public GameObject panelButtons;
     public GameObject panelSetting;
+    public GameObject panelScore;
 
     [Header("Creditos (Opcional)")]
     [SerializeField] private Button creditsButton;
     [SerializeField] private Transform creditsTextRoot;
+
+    [Header("Score (Opcional)")]
+    [SerializeField] private ScorePanelController scorePanelController;
 
     [Header("Tiempos")]
     [SerializeField] private float gameOverDuration = 3f;
@@ -45,11 +49,14 @@ public class PanelController : MonoBehaviour
     private void Awake()
     {
         AutoDiscoverReferences();
+        EnsureScorePanelController();
         BindListeners();
     }
 
     private void OnEnable()
     {
+        AutoDiscoverReferences();
+        EnsureScorePanelController();
         BindListeners();
     }
 
@@ -104,6 +111,7 @@ public class PanelController : MonoBehaviour
         SetPanelActive(panelButtons, false);
         SetPanelActive(panelCredits, false);
         SetPanelActive(panelSetting, false);
+        SetPanelActive(panelScore, false);
 
         if (panelGameOver != null)
         {
@@ -130,6 +138,7 @@ public class PanelController : MonoBehaviour
 
         SetPanelActive(panelButtons, false);
         SetPanelActive(panelSetting, false);
+        SetPanelActive(panelScore, false);
         SetPanelActive(panelCredits, true);
 
         CanvasGroup creditsCanvasGroup = EnsureCanvasGroup(panelCredits);
@@ -408,6 +417,26 @@ public class PanelController : MonoBehaviour
     {
         AutoDiscoverCreditsButton();
         AutoDiscoverCreditsTextRoot();
+        AutoDiscoverScorePanel();
+    }
+
+    private void EnsureScorePanelController()
+    {
+        if (scorePanelController == null)
+        {
+            scorePanelController = GetComponent<ScorePanelController>();
+        }
+
+        if (scorePanelController == null)
+        {
+            Debug.LogWarning(
+                "PanelController could not find ScorePanelController on Controlador. Add it in EndMenu scene.",
+                this);
+            return;
+        }
+
+        scorePanelController.ConfigureIfNeeded(panelButtons, panelScore);
+        AutoDiscoverScorePanel();
     }
 
     private void AutoDiscoverCreditsButton()
@@ -452,5 +481,22 @@ public class PanelController : MonoBehaviour
 
         Transform directMatch = panelCredits.transform.Find("Textos");
         creditsTextRoot = directMatch != null ? directMatch : panelCredits.transform;
+    }
+
+    private void AutoDiscoverScorePanel()
+    {
+        if (panelScore != null)
+        {
+            return;
+        }
+
+        Transform scoreTransform = transform.Find("PanelScore");
+
+        if (scoreTransform == null && transform.parent != null)
+        {
+            scoreTransform = transform.parent.Find("PanelScore");
+        }
+
+        panelScore = scoreTransform != null ? scoreTransform.gameObject : null;
     }
 }
