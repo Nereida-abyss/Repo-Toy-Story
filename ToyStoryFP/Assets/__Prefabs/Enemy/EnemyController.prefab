@@ -190,6 +190,9 @@ MonoBehaviour:
   stoppingDistance: 0.75
   attackRange: 0.8
   turnSpeed: 360
+  alertSpeedMultiplier: 2
+  damageSpeedMultiplier: 1.7
+  damageSpeedBoostDuration: 3
   patrolPointReachThreshold: 0.25
   patrolRetargetDelay: 0.2
   patrolSearchRadius: 5

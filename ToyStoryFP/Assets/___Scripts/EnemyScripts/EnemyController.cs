@@ -37,6 +37,9 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float stoppingDistance = DefaultStoppingDistance;
     [SerializeField] private float attackRange = DefaultAttackRange;
     [SerializeField] private float turnSpeed = 360f;
+    [SerializeField] private float alertSpeedMultiplier = 2f;
+    [SerializeField] private float damageSpeedMultiplier = 1.7f;
+    [SerializeField] private float damageSpeedBoostDuration = 3f;
 
     [Header("Patrol")]
     [SerializeField] private float patrolPointReachThreshold = DefaultPatrolPointReachThreshold;
@@ -107,6 +110,8 @@ public class EnemyController : MonoBehaviour
     private float stuckCheckTimer;
     private float timeWithoutProgress;
     private float previousRemainingDistance = float.PositiveInfinity;
+    private float baseNavSpeed = 0.1f;
+    private float damageSpeedBoostTimer;
     private int preferredCombatSideSign = 1;
     private int baseMaxHealth;
     private int baseDamagePerShot;
@@ -186,7 +191,9 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        damageSpeedBoostTimer = Mathf.Max(damageSpeedBoostTimer, Mathf.Max(0f, damageSpeedBoostDuration));
         EnterEnragedState(playerTarget);
+        UpdateAgentSpeedByState();
         ResolveCoordinator();
         tacticsCoordinator?.BroadcastAggro(this, lastKnownPlayerPosition, allyAlertRadius, aggressor);
     }
@@ -229,6 +236,7 @@ public class EnemyController : MonoBehaviour
         UpdateMeasuredPlanarVelocity();
         UpdateTimers(canSeeTarget);
         UpdateAwarenessState(hasTarget, canSeeTarget);
+        UpdateAgentSpeedByState();
 
         switch (currentState)
         {
@@ -250,6 +258,7 @@ public class EnemyController : MonoBehaviour
         if (combatDecisionTimer > 0f) combatDecisionTimer -= Time.deltaTime;
         if (combatSidePreferenceTimer > 0f) combatSidePreferenceTimer -= Time.deltaTime;
         if (damageAggroTimer > 0f) damageAggroTimer -= Time.deltaTime;
+        if (damageSpeedBoostTimer > 0f) damageSpeedBoostTimer -= Time.deltaTime;
         if (currentState == AIState.Investigate && investigationTimer > 0f) investigationTimer -= Time.deltaTime;
         if (destinationRefreshTimer > 0f) destinationRefreshTimer -= Time.deltaTime;
         if (stuckCheckTimer > 0f) stuckCheckTimer -= Time.deltaTime;
@@ -920,8 +929,10 @@ public class EnemyController : MonoBehaviour
     private void ConfigureNavigation()
     {
         if (navMeshAgent == null) return;
+        baseNavSpeed = Mathf.Max(0.01f, navMeshAgent.speed);
         navMeshAgent.updateRotation = false;
         navMeshAgent.stoppingDistance = GetEffectiveStoppingDistance();
+        UpdateAgentSpeedByState();
 
         Rigidbody rigidbody = GetComponent<Rigidbody>();
         if (rigidbody != null) rigidbody.isKinematic = true;
@@ -993,6 +1004,8 @@ public class EnemyController : MonoBehaviour
         {
             alertIndicator.SetVisible(nextState != AIState.Patrol, playPulse && changedState && nextState != AIState.Patrol);
         }
+
+        UpdateAgentSpeedByState();
     }
 
     private void RememberPlayerPosition(Vector3 worldPosition)
@@ -1188,5 +1201,33 @@ public class EnemyController : MonoBehaviour
         baseMaxHealth = healthScript != null ? Mathf.Max(1, healthScript.MaxHealth) : 1;
         baseDamagePerShot = weaponScript != null ? Mathf.Max(1, weaponScript.DamagePerShot) : 1;
         baseScalingStatsCached = true;
+    }
+
+    private void UpdateAgentSpeedByState()
+    {
+        if (navMeshAgent == null)
+        {
+            return;
+        }
+
+        if (baseNavSpeed <= 0f)
+        {
+            baseNavSpeed = Mathf.Max(0.01f, navMeshAgent.speed);
+        }
+
+        bool isAlerted = currentState != AIState.Patrol;
+        float appliedMultiplier = 1f;
+
+        if (isAlerted)
+        {
+            appliedMultiplier *= Mathf.Max(1f, alertSpeedMultiplier);
+
+            if (damageSpeedBoostTimer > 0f)
+            {
+                appliedMultiplier *= Mathf.Max(1f, damageSpeedMultiplier);
+            }
+        }
+
+        navMeshAgent.speed = Mathf.Max(0.01f, baseNavSpeed * appliedMultiplier);
     }
 }
