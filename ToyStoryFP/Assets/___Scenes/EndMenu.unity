@@ -1347,6 +1347,7 @@ GameObject:
   - component: {fileID: 147881630}
   - component: {fileID: 147881629}
   - component: {fileID: 147881628}
+  - component: {fileID: 147881631}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -1395,13 +1396,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -1468,6 +1469,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 147881626}
   m_CullTransparentMesh: 1
+--- !u!114 &147881631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147881626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &168286459
 GameObject:
   m_ObjectHideFlags: 0
@@ -3334,7 +3365,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 1, g: 0.97, b: 0.79, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3357,7 +3388,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -3503,6 +3534,8 @@ GameObject:
   - component: {fileID: 372974927}
   - component: {fileID: 372974929}
   - component: {fileID: 372974928}
+  - component: {fileID: 372974931}
+  - component: {fileID: 372974930}
   m_Layer: 5
   m_Name: PanelGameOver
   m_TagString: Untagged
@@ -3545,7 +3578,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.08, g: 0.16, b: 0.33, a: 0.1764706}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3570,6 +3603,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 372974926}
   m_CullTransparentMesh: 1
+--- !u!225 &372974930
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372974926}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &372974931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372974926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  playOpenOnEnable: 1
+  openDuration: 0.25
+  closeDuration: 0.16
+  slideOffset: 24
+  startScale: 0.94
+  closeScale: 0.97
+  canvasGroup: {fileID: 372974930}
+  disableRaycastWhileAnimating: 1
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  openVolume: 0.5
+  closeVolume: 0.38
 --- !u!1 &379786204
 GameObject:
   m_ObjectHideFlags: 0
@@ -4380,6 +4453,7 @@ GameObject:
   - component: {fileID: 487814239}
   - component: {fileID: 487814238}
   - component: {fileID: 487814237}
+  - component: {fileID: 487814240}
   m_Layer: 5
   m_Name: SettingButton
   m_TagString: Untagged
@@ -4427,13 +4501,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -4500,6 +4574,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 487814235}
   m_CullTransparentMesh: 1
+--- !u!114 &487814240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487814235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &498980706
 GameObject:
   m_ObjectHideFlags: 0
@@ -4655,8 +4759,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -4679,7 +4783,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -4825,6 +4929,8 @@ GameObject:
   - component: {fileID: 522448091}
   - component: {fileID: 522448093}
   - component: {fileID: 522448092}
+  - component: {fileID: 522448095}
+  - component: {fileID: 522448094}
   m_Layer: 5
   m_Name: PanelCredits
   m_TagString: Untagged
@@ -4865,7 +4971,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
+  m_Color: {r: 0.08, g: 0.16, b: 0.33, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4890,6 +4996,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 522448090}
   m_CullTransparentMesh: 1
+--- !u!225 &522448094
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522448090}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &522448095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522448090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  playOpenOnEnable: 1
+  openDuration: 0.25
+  closeDuration: 0.16
+  slideOffset: 24
+  startScale: 0.94
+  closeScale: 0.97
+  canvasGroup: {fileID: 522448094}
+  disableRaycastWhileAnimating: 1
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  openVolume: 0.5
+  closeVolume: 0.38
 --- !u!1 &566725200
 GameObject:
   m_ObjectHideFlags: 0
@@ -6183,6 +6329,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3e9d6e87e9f4b4fa43fd59bf42ad2a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!225 &697042449
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697042446}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &697042450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697042446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  playOpenOnEnable: 1
+  openDuration: 0.25
+  closeDuration: 0.16
+  slideOffset: 24
+  startScale: 0.94
+  closeScale: 0.97
+  canvasGroup: {fileID: 697042449}
+  disableRaycastWhileAnimating: 1
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  openVolume: 0.5
+  closeVolume: 0.38
 --- !u!1 &704943082
 GameObject:
   m_ObjectHideFlags: 0
@@ -6217,8 +6403,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.35379165, y: 0.18048151}
   m_AnchorMax: {x: 0.6463125, y: 0.2685926}
-  m_AnchoredPosition: {x: 0, y: -1.2200317}
-  m_SizeDelta: {x: 0.61187744, y: -3.0371094}
+  m_AnchoredPosition: {x: -0.10006714, y: 276.28}
+  m_SizeDelta: {x: 97.91, y: -3.0371}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &704943084
 MonoBehaviour:
@@ -6249,8 +6435,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4291426303
+  m_fontColor: {r: 1, g: 0.97, b: 0.79, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -6273,7 +6459,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -7192,8 +7378,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -7216,7 +7402,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -8800,6 +8986,7 @@ GameObject:
   - component: {fileID: 1142174814}
   - component: {fileID: 1142174813}
   - component: {fileID: 1142174812}
+  - component: {fileID: 1142174815}
   m_Layer: 5
   m_Name: CreditsButton
   m_TagString: Untagged
@@ -8848,13 +9035,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -8921,6 +9108,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1142174810}
   m_CullTransparentMesh: 1
+--- !u!114 &1142174815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142174810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &1145601125
 GameObject:
   m_ObjectHideFlags: 0
@@ -10300,8 +10517,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -10324,7 +10541,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -10560,6 +10777,7 @@ GameObject:
   - component: {fileID: 1307265981}
   - component: {fileID: 1307265980}
   - component: {fileID: 1307265979}
+  - component: {fileID: 1307265982}
   m_Layer: 5
   m_Name: ExitButton
   m_TagString: Untagged
@@ -10608,13 +10826,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -10681,6 +10899,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1307265977}
   m_CullTransparentMesh: 1
+--- !u!114 &1307265982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1307265977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &1311906016
 GameObject:
   m_ObjectHideFlags: 0
@@ -11470,7 +11718,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -361}
+  m_AnchoredPosition: {x: 0, y: -106}
   m_SizeDelta: {x: 659.5499, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1442055893
@@ -14411,8 +14659,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.29700002, y: 0.2685926}
   m_AnchorMax: {x: 0.7042499, y: 0.38070372}
-  m_AnchoredPosition: {x: -1.0000305, y: -1.5}
-  m_SizeDelta: {x: -4.628296, y: 2.4866028}
+  m_AnchoredPosition: {x: 8.4851, y: 276}
+  m_SizeDelta: {x: 121.7549, y: 2.4866}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1794520904
 MonoBehaviour:
@@ -14443,8 +14691,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4291426303
+  m_fontColor: {r: 1, g: 0.97, b: 0.79, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -14467,9 +14715,9 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -14525,6 +14773,7 @@ GameObject:
   - component: {fileID: 1796683310}
   - component: {fileID: 1796683309}
   - component: {fileID: 1796683308}
+  - component: {fileID: 1796683311}
   m_Layer: 5
   m_Name: ScoreButton
   m_TagString: Untagged
@@ -14573,13 +14822,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -14634,6 +14883,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796683306}
   m_CullTransparentMesh: 1
+--- !u!114 &1796683311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796683306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &1796777892
 GameObject:
   m_ObjectHideFlags: 0
@@ -14823,13 +15102,15 @@ GameObject:
   - component: {fileID: 1826629846}
   - component: {fileID: 1826629848}
   - component: {fileID: 1826629847}
+  - component: {fileID: 1826629850}
+  - component: {fileID: 1826629849}
   m_Layer: 5
   m_Name: PanelButtons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1826629846
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14868,7 +15149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.08, g: 0.16, b: 0.33, a: 0.1764706}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -14893,6 +15174,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1826629845}
   m_CullTransparentMesh: 1
+--- !u!225 &1826629849
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826629845}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1826629850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826629845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  playOpenOnEnable: 1
+  openDuration: 0.25
+  closeDuration: 0.16
+  slideOffset: 24
+  startScale: 0.94
+  closeScale: 0.97
+  canvasGroup: {fileID: 1826629849}
+  disableRaycastWhileAnimating: 1
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  openVolume: 0.5
+  closeVolume: 0.38
 --- !u!1 &1836136596
 GameObject:
   m_ObjectHideFlags: 0
@@ -15275,8 +15596,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -15299,7 +15620,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -16072,6 +16393,7 @@ GameObject:
   - component: {fileID: 2024493286}
   - component: {fileID: 2024493285}
   - component: {fileID: 2024493284}
+  - component: {fileID: 2024493287}
   m_Layer: 5
   m_Name: RetryButton
   m_TagString: Untagged
@@ -16120,13 +16442,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -16193,6 +16515,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2024493282}
   m_CullTransparentMesh: 1
+--- !u!114 &2024493287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024493282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &2039115669
 GameObject:
   m_ObjectHideFlags: 0
@@ -16883,8 +17235,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -16907,7 +17259,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -17231,6 +17583,8 @@ GameObject:
   - component: {fileID: 2146100002}
   - component: {fileID: 2146100004}
   - component: {fileID: 2146100003}
+  - component: {fileID: 2146100006}
+  - component: {fileID: 2146100005}
   m_Layer: 5
   m_Name: PanelScore
   m_TagString: Untagged
@@ -17275,7 +17629,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.84}
+  m_Color: {r: 0.08, g: 0.16, b: 0.33, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17300,6 +17654,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2146100001}
   m_CullTransparentMesh: 1
+--- !u!225 &2146100005
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146100001}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &2146100006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  playOpenOnEnable: 1
+  openDuration: 0.25
+  closeDuration: 0.16
+  slideOffset: 24
+  startScale: 0.94
+  closeScale: 0.97
+  canvasGroup: {fileID: 2146100005}
+  disableRaycastWhileAnimating: 1
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  openVolume: 0.5
+  closeVolume: 0.38
 --- !u!1 &2146100011
 GameObject:
   m_ObjectHideFlags: 0
@@ -17366,8 +17760,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4291426303
+  m_fontColor: {r: 1, g: 0.97, b: 0.79, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17390,7 +17784,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -17503,7 +17897,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.8, g: 0.92, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17639,7 +18033,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.8, g: 0.92, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17775,7 +18169,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.8, g: 0.92, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17856,6 +18250,7 @@ GameObject:
   - component: {fileID: 2146100055}
   - component: {fileID: 2146100054}
   - component: {fileID: 2146100053}
+  - component: {fileID: 2146100056}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -17904,13 +18299,13 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+    m_HighlightedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_PressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+    m_SelectedColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    m_DisabledColor: {r: 0.62, g: 0.67, b: 0.78, a: 0.75}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0.07
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -17965,6 +18360,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2146100051}
   m_CullTransparentMesh: 1
+--- !u!114 &2146100056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146100051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  targetGraphic: {fileID: 0}
+  affectGraphicColor: 1
+  normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
+  hoverColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+  pressedColor: {r: 1, g: 0.84, b: 0.58, a: 1}
+  hoverScale: 1.07
+  pressedScale: 0.93
+  animationSpeed: 17
+  enableAudio: 1
+  audioSource: {fileID: 0}
+  useSharedAudioSource: 1
+  useAudioManagerFallback: 0
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  hoverVolume: 0.35
+  clickVolume: 0.6
+  pitchRandomness: 0.04
+  hoverMinInterval: 0.08
 --- !u!1 &2146100061
 GameObject:
   m_ObjectHideFlags: 0
@@ -18031,8 +18456,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4282854960
+  m_fontColor: {r: 0.19, g: 0.18, b: 0.28, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -18055,7 +18480,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -18141,6 +18566,26 @@ PrefabInstance:
       propertyPath: m_AnchorMin.x
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1246, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 1246, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1256, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 1256, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1256, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.33333334
+      objectReference: {fileID: 0}
     - target: {fileID: 4222799816050943207, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -18221,6 +18666,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.a
+      value: 0.84
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.b
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.g
+      value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736179202163226408, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      propertyPath: m_Color.r
+      value: 0.08
+      objectReference: {fileID: 0}
     - target: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_Name
       value: PanelSetting
@@ -18232,7 +18693,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 697042450}
+    - targetCorrespondingSourceObject: {fileID: 4750397471671830600, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 697042449}
   m_SourcePrefab: {fileID: 100100000, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
