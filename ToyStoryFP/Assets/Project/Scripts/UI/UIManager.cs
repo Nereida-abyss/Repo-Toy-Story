@@ -22,7 +22,7 @@ public class UIManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            GameDebug.Advertencia("UI", "Se detecto un UIManager duplicado. Se destruira la instancia mas nueva.", this);
+            GameDebug.Advertencia("UI", "Se detecto un UIManager duplicado. Se destruirá la instancia mas nueva.", this);
             Destroy(gameObject);
             return;
         }

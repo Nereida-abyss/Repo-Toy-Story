@@ -71,7 +71,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         RestoreVisualStateImmediate();
     }
 
-    // Actualiza la logica en cada frame.
+    // Actualiza la lógica en cada frame.
     private void Update()
     {
         AnimateVisual();
@@ -160,7 +160,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         isPressed = false;
     }
 
-    // Conecta boton listener.
+    // Conecta botón listener.
     private void BindButtonListener()
     {
         if (button == null || listenerBound)
@@ -173,7 +173,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = true;
     }
 
-    // Desconecta boton listener.
+    // Desconecta botón listener.
     private void UnbindButtonListener()
     {
         if (button == null)
@@ -185,7 +185,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = false;
     }
 
-    // Gestiona boton clicked.
+    // Gestiona botón clicked.
     private void HandleButtonClicked()
     {
         if (!enableAudio)

@@ -160,7 +160,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         SetWeaponIndexImmediate(equippedWeaponIndex);
     }
 
-    // Inicia ejecucion equipamiento.
+    // Inicia ejecución equipamiento.
     public void BeginRunLoadout()
     {
         if (allWeapons.Length == 0)
@@ -458,7 +458,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Gestiona la cancelacion del cambio de arma.
+    // Gestiona la cancelación del cambio de arma.
     private void CancelWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -580,14 +580,14 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Obtiene lower duracion.
+    // Obtiene lower duración.
     private float GetLowerDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchLowerRatio) / totalRatio);
     }
 
-    // Obtiene raise duracion.
+    // Obtiene raise duración.
     private float GetRaiseDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));

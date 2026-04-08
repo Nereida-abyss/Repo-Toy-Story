@@ -98,7 +98,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         }
     }
 
-    // Asegura marcador raiz.
+    // Asegura marcador raíz.
     private RectTransform EnsureMarkerRoot(string markerName, Color color, float size, float thickness, out CanvasGroup canvasGroup)
     {
         Transform existingMarker = FindChildByName(markerName);

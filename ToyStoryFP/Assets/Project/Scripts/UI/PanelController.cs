@@ -13,7 +13,7 @@ public class PanelController : MonoBehaviour
     public GameObject panelSetting;
     public GameObject panelScore;
 
-    [Header("Creditos (Opcional)")]
+    [Header("Créditos (Opcional)")]
     [SerializeField] private Button creditsButton;
     [SerializeField] private Transform creditsTextRoot;
 
@@ -137,13 +137,13 @@ public class PanelController : MonoBehaviour
         isSequenceRunning = false;
     }
 
-    // Arranca la configuracion inicial del componente.
+    // Arranca la configuración inicial del componente.
     private void Start()
     {
         StartSequence(PlayIntroSequence());
     }
 
-    // Abre creditos desde el boton.
+    // Abre créditos desde el botón.
     public void OpenCreditsFromButton()
     {
         if (isSequenceRunning)
@@ -183,8 +183,8 @@ public class PanelController : MonoBehaviour
         activeSequence = null;
     }
 
-    // Secuencia inicial del EndMenu: GameOver -> creditos.
-    // Al cerrar creditos, devuelve el control al panel de botones.
+    // Secuencia inicial del EndMenu: GameOver -> créditos.
+    // Al cerrar créditos, devuelve el control al panel de botones.
     private IEnumerator PlayIntroSequence()
     {
         SetPanelActive(panelButtons, false);
@@ -206,7 +206,7 @@ public class PanelController : MonoBehaviour
         yield return PlayCreditsSequence(allowSkip: true, introMode: true);
     }
 
-    // Reproduce la secuencia completa de creditos (entrada, animacion, skip y salida).
+    // Reproduce la secuencia completa de créditos (entrada, animación, skip y salida).
     // Al final restaura el panel de botones.
     private IEnumerator PlayCreditsSequence(bool allowSkip, bool introMode = false)
     {
@@ -251,7 +251,7 @@ public class PanelController : MonoBehaviour
         }
         else
         {
-            GameDebug.Advertencia("EndMenu", "No se encontraron textos TMP en creditos. Se usara timing de fallback.", this);
+            GameDebug.Advertencia("EndMenu", "No se encontraron textos TMP en créditos. Se usara timing de fallback.", this);
             yield return HoldFallbackCredits(allowSkip, skipAllowedAtTime, () => skipRequested = true);
         }
 
@@ -277,8 +277,8 @@ public class PanelController : MonoBehaviour
         SetPanelActive(panelButtons, true);
     }
 
-    // Animacion principal de creditos: intro, nombres y cierre final.
-    // Si hay skip, corta la animacion y deja el texto en estado consistente.
+    // Animación principal de créditos: intro, nombres y cierre final.
+    // Si hay skip, corta la animación y deja el texto en estado consistente.
     private IEnumerator AnimateCreditsHypeReel(
         List<CreditTextEntry> entries,
         bool allowSkip,
@@ -512,7 +512,7 @@ public class PanelController : MonoBehaviour
     }
 
     // Pulso visual de apertura antes de mostrar los nombres.
-    // Respeta el skip para no bloquear la transicion.
+    // Respeta el skip para no bloquear la transición.
     private IEnumerator AnimateIntroBeat(
         Transform targetRoot,
         Vector3 baseRootScale,
@@ -552,7 +552,7 @@ public class PanelController : MonoBehaviour
         targetRoot.localScale = baseRootScale;
     }
 
-    // Anima los textos de creditos por grupos para destacar cada bloque.
+    // Anima los textos de créditos por grupos para destacar cada bloque.
     private IEnumerator AnimateCreditsBySections(
         List<CreditSection> sections,
         bool allowSkip,
@@ -921,7 +921,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Hace aparecer los textos de creditos de forma progresiva.
+    // Hace aparecer los textos de créditos de forma progresiva.
     private IEnumerator AnimateCreditTextsIn(
         List<CreditTextEntry> entries,
         bool allowSkip,
@@ -977,7 +977,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Mantiene los creditos en modo simple cuando no hay textos para animar.
+    // Mantiene los créditos en modo simple cuando no hay textos para animar.
     private IEnumerator HoldFallbackCredits(bool allowSkip, float skipAllowedAtTime, System.Action onSkip)
     {
         float holdElapsed = 0f;
@@ -1022,7 +1022,7 @@ public class PanelController : MonoBehaviour
         canvasGroup.alpha = 0f;
     }
 
-    // Recopila credito texto entradas.
+    // Recopila crédito texto entradas.
     private List<CreditTextEntry> CollectCreditTextEntries()
     {
         List<CreditTextEntry> entries = new List<CreditTextEntry>();
@@ -1055,7 +1055,7 @@ public class PanelController : MonoBehaviour
         return entries;
     }
 
-    // Recopila credito secciones.
+    // Recopila crédito secciones.
     private List<CreditSection> CollectCreditSections()
     {
         List<CreditSection> sections = new List<CreditSection>();
@@ -1111,7 +1111,7 @@ public class PanelController : MonoBehaviour
         return sections.Count >= 2 ? sections : new List<CreditSection>();
     }
 
-    // Devuelve los textos a su posicion y color originales.
+    // Devuelve los textos a su posición y color originales.
     private void RestoreCreditTextEntries(List<CreditTextEntry> entries)
     {
         for (int i = 0; i < entries.Count; i++)
@@ -1158,7 +1158,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Deja todos los grupos de textos ocultos antes de empezar la animacion.
+    // Deja todos los grupos de textos ocultos antes de empezar la animación.
     private void InitializeSectionsHidden(List<CreditSection> sections)
     {
         if (sections == null)
@@ -1175,7 +1175,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Atenua todos los grupos de textos para mantener foco visual.
+    // Atenúa todos los grupos de textos para mantener foco visual.
     private void ApplyDimAlphaToAll(List<CreditSection> sections, float dimAlpha)
     {
         if (sections == null)
@@ -1288,7 +1288,7 @@ public class PanelController : MonoBehaviour
         return entries[0];
     }
 
-    // Ajusta duraciones para que los creditos queden dentro del tiempo objetivo.
+    // Ajusta duraciones para que los créditos queden dentro del tiempo objetivo.
     private void ApplyHypeDurationScaling(
         int namesCount,
         ref float revealDuration,
@@ -1333,7 +1333,7 @@ public class PanelController : MonoBehaviour
         finalDuration = Mathf.Max(0.01f, finalDuration * scale);
     }
 
-    // Reproduce audio de creditos con fallback al AudioManager si hace falta.
+    // Reproduce audio de créditos con fallback al AudioManager si hace falta.
     private void PlayCreditsAudio(AudioClip clip, string fallbackToken)
     {
         if (clip != null)
@@ -1398,7 +1398,7 @@ public class PanelController : MonoBehaviour
         return sfxList.Length > 0 ? 0 : -1;
     }
 
-    // Comprueba si el usuario puede y quiere saltar los creditos.
+    // Comprueba si el usuario puede y quiere saltar los créditos.
     private bool ShouldSkipCredits(bool allowSkip, float skipAllowedAtTime)
     {
         if (!allowSkip || Time.unscaledTime < skipAllowedAtTime)
@@ -1417,7 +1417,7 @@ public class PanelController : MonoBehaviour
         return 1f - inverse * inverse * inverse;
     }
 
-    // Elige la curva de suavizado configurada para animar creditos.
+    // Elige la curva de suavizado configurada para animar créditos.
     private float EvaluateCreditsEase(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -1433,7 +1433,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Curva con pequeno rebote para dar energia a la animacion.
+    // Curva con pequeño rebote para dar energía a la animación.
     private float EaseOutBack(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -1490,7 +1490,7 @@ public class PanelController : MonoBehaviour
 
         GameDebug.Advertencia(
             "EndMenu",
-            "No se encontro CreditsButton. Asigna la referencia en Inspector o manten el nombre 'CreditsButton'.",
+            "No se encontró CreditsButton. Asigna la referencia en Inspector o mantén el nombre 'CreditsButton'.",
             this);
     }
 
@@ -1513,7 +1513,7 @@ public class PanelController : MonoBehaviour
         AutoDiscoverScorePanel();
     }
 
-    // Asegura puntaje panel controller.
+    // Asegura puntuación panel controller.
     private void EnsureScorePanelController()
     {
         if (scorePanelController == null)
@@ -1525,7 +1525,7 @@ public class PanelController : MonoBehaviour
         {
             GameDebug.Advertencia(
                 "EndMenu",
-                "No se encontro ScorePanelController en el controlador. Anadelo en la escena EndMenu.",
+                "No se encontró ScorePanelController en el controlador. Añádelo en la escena EndMenu.",
                 this);
             return;
         }
@@ -1534,7 +1534,7 @@ public class PanelController : MonoBehaviour
         AutoDiscoverScorePanel();
     }
 
-    // Gestiona auto detectar creditos boton.
+    // Gestiona auto detectar créditos botón.
     private void AutoDiscoverCreditsButton()
     {
         if (creditsButton != null || panelButtons == null)
@@ -1556,7 +1556,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Gestiona auto detectar creditos texto raiz.
+    // Gestiona auto detectar créditos texto raíz.
     private void AutoDiscoverCreditsTextRoot()
     {
         if (creditsTextRoot != null || panelCredits == null)
@@ -1567,7 +1567,7 @@ public class PanelController : MonoBehaviour
         creditsTextRoot = FindChildByName(panelCredits.transform, "Textos") ?? panelCredits.transform;
     }
 
-    // Gestiona auto detectar puntaje panel.
+    // Gestiona auto detectar puntuación panel.
     private void AutoDiscoverScorePanel()
     {
         if (panelScore != null)

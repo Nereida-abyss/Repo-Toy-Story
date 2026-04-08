@@ -13,7 +13,7 @@ public static class RunStatsStore
     private static int currentRunWave;
     private static int currentRunBotsKilled;
 
-    // Inicia ejecucion.
+    // Inicia ejecución.
     public static void BeginRun()
     {
         currentRunCoins = 0;
@@ -63,7 +63,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
-    // Gestiona commit ultimo ejecucion.
+    // Gestiona commit ultimo ejecución.
     public static void CommitLastRun()
     {
         PlayerPrefs.SetInt(LastCoinsKey, Mathf.Max(0, currentRunCoins));
@@ -72,7 +72,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
-    // Obtiene ultimo ejecucion estadisticas.
+    // Obtiene ultimo ejecución estadísticas.
     public static void GetLastRunStats(out int coins, out int wave, out int bots)
     {
         coins = Mathf.Max(0, PlayerPrefs.GetInt(LastCoinsKey, 0));
@@ -80,7 +80,7 @@ public static class RunStatsStore
         bots = Mathf.Max(0, PlayerPrefs.GetInt(LastBotsKilledKey, 0));
     }
 
-    // Obtiene best estadisticas.
+    // Obtiene best estadísticas.
     public static void GetBestStats(out int maxCoins, out int maxWave, out int maxBotsKilled)
     {
         maxCoins = GetMaxCoins();

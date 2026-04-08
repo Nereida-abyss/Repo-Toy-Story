@@ -295,7 +295,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshCoins();
     }
 
-    // Actualiza vida animacion.
+    // Actualiza vida animaciÃ³n.
     private void UpdateHealthAnimation()
     {
         if (playerHealth == null || healthFillImage == null)
@@ -379,7 +379,7 @@ public class PlayerHUDController : MonoBehaviour
         coinsText.text = $"COINS {currentCoins}";
     }
 
-    // Inicializa daño feedback visuals.
+    // Inicializa daï¿½o feedback visuals.
     private void InitializeDamageFeedbackVisuals()
     {
         damageFeedbackCooldownTimer = 0f;
@@ -394,7 +394,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Actualiza daño feedback animacion.
+    // Actualiza daï¿½o feedback animaciÃ³n.
     private void UpdateDamageFeedbackAnimation()
     {
         if (damageFeedbackCooldownTimer > 0f)
@@ -406,7 +406,7 @@ public class PlayerHUDController : MonoBehaviour
         UpdateHealthPulse();
     }
 
-    // Actualiza daño flash.
+    // Actualiza daï¿½o flash.
     private void UpdateDamageFlash()
     {
         if (damageFlashImage == null)
@@ -467,7 +467,7 @@ public class PlayerHUDController : MonoBehaviour
         healthFillImage.rectTransform.localScale = healthFillBaseScale * scaleMultiplier;
     }
 
-    // Reproduce daño feedback.
+    // Reproduce daÃ±o feedback.
     private void PlayDamageFeedback(int damageApplied)
     {
         if (damageApplied <= 0)
@@ -485,13 +485,13 @@ public class PlayerHUDController : MonoBehaviour
         playerAudio?.PlayHurt();
     }
 
-    // Obtiene daño flash total duracion.
+    // Obtiene daï¿½o flash total duraciÃ³n.
     private float GetDamageFlashTotalDuration()
     {
         return Mathf.Max(0.05f, Mathf.Max(0f, damageFlashFadeIn) + Mathf.Max(0f, damageFlashHold) + Mathf.Max(0.001f, damageFlashFadeOut));
     }
 
-    // Actualiza daño flash alpha.
+    // Actualiza daï¿½o flash alpha.
     private void SetDamageFlashAlpha(float alpha01)
     {
         if (damageFlashImage == null)

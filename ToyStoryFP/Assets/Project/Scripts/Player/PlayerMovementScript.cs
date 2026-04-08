@@ -118,14 +118,14 @@ public class MovementScript : MonoBehaviour
         }
     }
 
-    // Actualiza animacion entrada.
+    // Actualiza animación entrada.
     public void SetAnimationInput(Vector2 newInput)
     {
         animationInput = Vector2.ClampMagnitude(newInput, 1f);
         hasExternalAnimationInput = true;
     }
 
-    // Limpia animacion entrada override.
+    // Limpia animación entrada override.
     public void ClearAnimationInputOverride()
     {
         hasExternalAnimationInput = false;
@@ -143,7 +143,7 @@ public class MovementScript : MonoBehaviour
         SetAnimationInput(normalizedVelocity);
     }
 
-    // Actualiza externo movimiento animacion.
+    // Actualiza externo movimiento animación.
     public void SetExternalMovementAnimation(
         Vector3 worldPlanarVelocity,
         bool grounded,
@@ -181,7 +181,7 @@ public class MovementScript : MonoBehaviour
         jumpBufferTimer = jumpInputBuffer;
     }
 
-    // Gestiona face direccion.
+    // Gestiona face dirección.
     public void FaceDirection(Vector3 worldDirection, float overrideTurnSpeed = -1f)
     {
         Vector3 flattenedDirection = Vector3.ProjectOnPlane(worldDirection, Vector3.up);
@@ -260,7 +260,7 @@ public class MovementScript : MonoBehaviour
         CacheAnimatorParameters();
     }
 
-    // Resuelve visual model raiz.
+    // Resuelve visual model raíz.
     private Transform ResolveVisualModelRoot()
     {
         if (!string.IsNullOrWhiteSpace(visualModelNameHint))
@@ -282,7 +282,7 @@ public class MovementScript : MonoBehaviour
         return fallbackAnimator != null ? fallbackAnimator.transform : null;
     }
 
-    // Actualiza movimiento animacion.
+    // Actualiza movimiento animación.
     private void UpdateMovementAnimation(bool groundedAtFrameStart)
     {
         if (modelAnimator == null)
@@ -321,7 +321,7 @@ public class MovementScript : MonoBehaviour
         }
     }
 
-    // Gestiona trigger salto animacion.
+    // Gestiona trigger salto animación.
     private void TriggerJumpAnimation()
     {
         if (modelAnimator == null)
@@ -429,7 +429,7 @@ public class MovementScript : MonoBehaviour
         modelAnimator.CrossFadeInFixedTime(stateHash, transitionDuration);
     }
 
-    // Reproduce salto preparacion dip.
+    // Reproduce salto preparación dip.
     private void PlayJumpPreparationDip()
     {
         if (mouseLook == null)
@@ -445,7 +445,7 @@ public class MovementScript : MonoBehaviour
         mouseLook.PlayJumpPreparationDip(jumpPreparationCameraDip, jumpDelay);
     }
 
-    // Reproduce salto camara lift.
+    // Reproduce salto cámara lift.
     private void PlayJumpCameraLift()
     {
         if (mouseLook == null)
@@ -461,7 +461,7 @@ public class MovementScript : MonoBehaviour
         mouseLook.PlayJumpCameraSequence();
     }
 
-    // Reproduce salto anticipacion soltar.
+    // Reproduce salto anticipación soltar.
     private void PlayJumpAnticipationDrop()
     {
         if (mouseLook == null)

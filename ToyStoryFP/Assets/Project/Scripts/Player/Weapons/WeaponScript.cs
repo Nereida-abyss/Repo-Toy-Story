@@ -178,7 +178,7 @@ public class WeaponScript : MonoBehaviour
         ResetVisualRecoil();
     }
 
-    // Actualiza equip animacion progress.
+    // Actualiza equip animaciÃ³n progress.
     public void SetEquipAnimationProgress(float progress, bool lowering)
     {
         progress = Mathf.Clamp01(progress);
@@ -205,7 +205,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Actualiza daño per disparo.
+    // Actualiza daï¿½o per disparo.
     public void SetDamagePerShot(int newDamagePerShot)
     {
         damagePerShot = Mathf.Max(1, newDamagePerShot);
@@ -418,7 +418,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Aplica camara retroceso.
+    // Aplica cÃ¡mara retroceso.
     private void ApplyCameraRecoil()
     {
         if (!playerOwnedWeapon || _camera == null)
@@ -515,7 +515,7 @@ public class WeaponScript : MonoBehaviour
         playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
     }
 
-    // Gestiona daño feedback.
+    // Gestiona daï¿½o feedback.
     private void HandleDamageFeedback(DamageResult damageResult)
     {
         if (!playerOwnedWeapon || !damageResult.WasDamaged)

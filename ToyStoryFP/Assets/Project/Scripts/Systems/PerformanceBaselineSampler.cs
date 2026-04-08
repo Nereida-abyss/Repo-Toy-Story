@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Muestreador simple de rendimiento para obtener baseline rapido por escena.
-/// Recomendado: colocarlo temporalmente en cada escena durante la fase de auditoria.
-/// </summary>
+// Muestra simple de rendimiento para obtener baseline rápidamente por escena.
+// Recomendado: colocarlo temporalmente en cada escena durante la fase de auditoria.
 [DisallowMultipleComponent]
 public class PerformanceBaselineSampler : MonoBehaviour
 {
@@ -21,7 +19,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
     private int gc1Inicial;
     private int gc2Inicial;
 
-    // Arranca la configuracion inicial del componente.
+    // Arranca la configuración inicial del componente.
     private void Start()
     {
         if (iniciarAutomaticamente)
@@ -30,7 +28,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
         }
     }
 
-    // Actualiza la logica en cada frame.
+    // Actualiza la lógica en cada frame.
     private void Update()
     {
         if (!muestreoActivo)

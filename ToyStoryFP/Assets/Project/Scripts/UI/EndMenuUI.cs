@@ -31,7 +31,6 @@ public class EndMenuUI : MonoBehaviour
         yield return StartCoroutine(FadeOut(gameOverPanel));
         gameOverPanel.SetActive(false);
         
-      
         creditsPanel.SetActive(true);
         yield return StartCoroutine(FadeIn(creditsPanel));
         

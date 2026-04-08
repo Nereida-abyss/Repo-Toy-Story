@@ -134,8 +134,8 @@ public class UIPanelFx : MonoBehaviour
             return;
         }
 
-        // Si el objeto no esta activo en jerarquia (por ejemplo, su padre se desactivo),
-        // no podemos iniciar corrutinas aqui. Cerramos en modo inmediato.
+        // Si el objeto no esta activo en jerarquía (por ejemplo, su padre se desactivo),
+        // no podemos iniciar corrutinas aquí. Cerramos en modo inmediato.
         if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
         {
             gameObject.SetActive(false);

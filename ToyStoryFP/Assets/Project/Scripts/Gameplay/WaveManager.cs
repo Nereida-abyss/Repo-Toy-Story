@@ -195,7 +195,7 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
 
-    // Genera oleada corrutina.
+    // Genera oleada currutina.
     private IEnumerator SpawnWaveCoroutine(int waveIndex)
     {
         int enemiesToSpawn = GetEnemyCountForWave(waveIndex);
@@ -219,7 +219,7 @@ public class WaveManager : MonoBehaviour
     {
         if (!TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint spawnPoint))
         {
-            GameDebug.Advertencia("Oleadas", "No se encontro una posicion valida en NavMesh para generar enemigo.", this);
+            GameDebug.Advertencia("Oleadas", "No se encontró una posición valida en NavMesh para generar enemigo.", this);
             return;
         }
 
@@ -337,7 +337,7 @@ public class WaveManager : MonoBehaviour
         return spawnPoints[index];
     }
 
-    // Intenta resolver spawn posicion.
+    // Intenta resolver spawn posición.
     private bool TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint resolvedSpawnPoint)
     {
         spawnPosition = Vector3.zero;

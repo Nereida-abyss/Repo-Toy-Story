@@ -108,7 +108,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return RequestSlot(requester, center, innerRadius, outerRadius, innerCount, outerCount, areaMask, out slotPosition);
     }
 
-    // Gestiona solicitud investigacion punto.
+    // Gestiona solicitud investigación punto.
     public bool RequestInvestigatePoint(
         EnemyController requester,
         Vector3 center,

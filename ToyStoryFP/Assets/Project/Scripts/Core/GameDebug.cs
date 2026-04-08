@@ -2,17 +2,12 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityDebug = UnityEngine.Debug;
 
-/// <summary>
-/// Envoltura centralizada para logs del juego.
-/// Estandariza formato en espanol y evita repetir cadenas en cada sistema.
-/// </summary>
+// Envoltura centralizada para logs del juego.
 public static class GameDebug
 {
     private const string SistemaPorDefecto = "General";
 
-    /// <summary>
-    /// Permite activar/desactivar logs informativos sin perder warnings/errores.
-    /// </summary>
+    // Permite activar/desactivar logs informativos sin perder warnings/errores.
     public static bool MostrarLogsInfo { get; set; } = true;
 
     [Conditional("UNITY_EDITOR")]

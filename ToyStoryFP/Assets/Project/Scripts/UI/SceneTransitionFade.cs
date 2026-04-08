@@ -75,7 +75,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
-    // Resuelve objetivo camara.
+    // Resuelve objetivo cámara.
     private static Camera ResolveTargetCamera()
     {
         if (Camera.main != null && Camera.main.isActiveAndEnabled)

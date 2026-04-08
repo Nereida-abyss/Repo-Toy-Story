@@ -383,7 +383,7 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Resuelve pausa pose raiz.
+    // Resuelve pausa pose raíz.
     private Transform ResolvePausePoseRoot()
     {
         if (pausePoseRoot != null)
@@ -394,7 +394,7 @@ public class MouseLookScript : MonoBehaviour
         return transform.root != null ? transform.root : transform;
     }
 
-    // Resuelve pausa pose raiz rigidbody.
+    // Resuelve pausa pose raíz rigidbody.
     private Rigidbody ResolvePausePoseRootRigidbody(Transform snapshotRoot)
     {
         if (snapshotRoot == null)
@@ -417,7 +417,7 @@ public class MouseLookScript : MonoBehaviour
         return pausePoseRootRigidbody;
     }
 
-    // Reproduce salto preparacion dip.
+    // Reproduce salto preparación dip.
     public void PlayJumpPreparationDip(float downwardAngle, float duration)
     {
         if (duration <= 0f)
@@ -431,7 +431,7 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(ResetJumpPreparationDip), duration);
     }
 
-    // Reproduce salto camara secuencia.
+    // Reproduce salto cámara secuencia.
     public void PlayJumpCameraSequence()
     {
         ReleaseJumpAnticipationDrop();
@@ -446,7 +446,7 @@ public class MouseLookScript : MonoBehaviour
         PlayJumpCameraSequence();
     }
 
-    // Reproduce salto anticipacion soltar.
+    // Reproduce salto anticipación soltar.
     public void PlayJumpAnticipationDrop(float anticipationDuration)
     {
         if (anticipationDuration <= 0f || anticipationDropHeight <= 0f)
@@ -461,7 +461,7 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(BeginAnticipationDropReturn), anticipationDuration);
     }
 
-    // Gestiona release salto anticipacion soltar.
+    // Gestiona release salto anticipación soltar.
     public void ReleaseJumpAnticipationDrop()
     {
         CancelInvoke(nameof(BeginAnticipationDropReturn));
@@ -475,20 +475,20 @@ public class MouseLookScript : MonoBehaviour
         recoilYawOffset += yawKick;
     }
 
-    // Reinicia salto preparacion dip.
+    // Reinicia salto preparación dip.
     private void ResetJumpPreparationDip()
     {
         jumpPreparationPitchOffset = 0f;
     }
 
-    // Inicia anticipacion soltar return.
+    // Inicia anticipación soltar return.
     private void BeginAnticipationDropReturn()
     {
         anticipationDropTarget = 0f;
         anticipationDropSmoothTime = Mathf.Max(0.01f, anticipationDropReturnDuration);
     }
 
-    // Actualiza camara vertical offsets.
+    // Actualiza cámara vertical offsets.
     private void UpdateCameraVerticalOffsets()
     {
         anticipationDropOffset = Mathf.SmoothDamp(
@@ -504,7 +504,7 @@ public class MouseLookScript : MonoBehaviour
         transform.localPosition = desiredPosition;
     }
 
-    // Actualiza salto camara offset.
+    // Actualiza salto cámara offset.
     private void UpdateJumpCameraOffset()
     {
         if (jumpCameraPhase == JumpCameraPhase.None)

@@ -42,7 +42,7 @@ public class ScorePanelController : MonoBehaviour
         UnbindListeners();
     }
 
-    // Actualiza la logica en cada frame.
+    // Actualiza la lógica en cada frame.
     private void Update()
     {
         if (panelScoreRoot == null || !panelScoreRoot.activeSelf)
@@ -118,7 +118,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
-    // Refresca best estadisticas.
+    // Refresca best estadísticas.
     private void RefreshBestStats()
     {
         RunStatsStore.GetLastRunStats(out int coins, out int wave, out int bots);
@@ -156,7 +156,7 @@ public class ScorePanelController : MonoBehaviour
         }
         else
         {
-            GameDebug.Advertencia("Score", "No se encontro ScoreButton dentro de PanelButtons.", this);
+            GameDebug.Advertencia("Score", "No se encontró ScoreButton dentro de PanelButtons.", this);
         }
 
         if (closeButton != null)
@@ -166,7 +166,7 @@ public class ScorePanelController : MonoBehaviour
         }
         else
         {
-            GameDebug.Advertencia("Score", "No se encontro BackButton dentro de PanelScore.", this);
+            GameDebug.Advertencia("Score", "No se encontró BackButton dentro de PanelScore.", this);
         }
 
         listenersBound = true;
@@ -262,7 +262,7 @@ public class ScorePanelController : MonoBehaviour
         return null;
     }
 
-    // Resuelve canvas raiz.
+    // Resuelve canvas raíz.
     private Transform ResolveCanvasRoot()
     {
         if (endMenuCanvasRoot != null)

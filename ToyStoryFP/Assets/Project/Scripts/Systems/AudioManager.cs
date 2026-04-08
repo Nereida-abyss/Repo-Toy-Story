@@ -29,8 +29,8 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
 
-        // DontDestroyOnLoad solo funciona en objetos raiz.
-        // Si el gestor esta anidado en la jerarquia, lo desacoplamos primero.
+        // DontDestroyOnLoad solo funciona en objetos raíz.
+        // Si el gestor esta anidado en la jerarquía, lo desacoplamos primero.
         if (transform.parent != null)
         {
             transform.SetParent(null, true);
@@ -52,7 +52,7 @@ public class AudioManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    // Arranca la configuracion inicial del componente.
+    // Arranca la configuración inicial del componente.
     private void Start()
     {
         EnsureMainMenuMusic();
@@ -82,13 +82,13 @@ public class AudioManager : MonoBehaviour
 
         if (musicIndex < 0 || musicIndex >= musicList.Length)
         {
-            GameDebug.Advertencia("Audio", $"Indice de musica fuera de rango: {musicIndex}", this);
+            GameDebug.Advertencia("Audio", $"Indice de música fuera de rango: {musicIndex}", this);
             return;
         }
 
         if (musicSource == null)
         {
-            GameDebug.Advertencia("Audio", "No hay AudioSource de musica asignado.", this);
+            GameDebug.Advertencia("Audio", "No hay AudioSource de música asignado.", this);
             return;
         }
 
