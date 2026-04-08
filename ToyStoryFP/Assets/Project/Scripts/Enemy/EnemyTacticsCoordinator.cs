@@ -11,6 +11,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
     private readonly Dictionary<EnemyController, int> reservedSlotIndices = new Dictionary<EnemyController, int>();
     private readonly Dictionary<EnemyController, int> reservedCombatSideSigns = new Dictionary<EnemyController, int>();
 
+    // Gestiona resolver.
     public static EnemyTacticsCoordinator Resolve()
     {
         if (cachedInstance != null)
@@ -42,6 +43,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         }
     }
 
+    // Gestiona register enemigo.
     public void RegisterEnemy(EnemyController enemy, int avoidancePriorityMin, int avoidancePriorityMax)
     {
         if (enemy == null)
@@ -57,6 +59,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         enemy.SetAvoidancePriority(Random.Range(clampedMin, clampedMax + 1));
     }
 
+    // Gestiona unregister enemigo.
     public void UnregisterEnemy(EnemyController enemy)
     {
         if (enemy == null)
@@ -69,6 +72,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         reservedCombatSideSigns.Remove(enemy);
     }
 
+    // Gestiona broadcast aggro.
     public void BroadcastAggro(EnemyController source, Vector3 playerPosition, float radius, Transform aggressor)
     {
         CleanupRegistry();
@@ -90,6 +94,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         }
     }
 
+    // Gestiona solicitud combate ranura.
     public bool RequestCombatSlot(
         EnemyController requester,
         Vector3 center,
@@ -103,6 +108,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return RequestSlot(requester, center, innerRadius, outerRadius, innerCount, outerCount, areaMask, out slotPosition);
     }
 
+    // Gestiona solicitud investigacion punto.
     public bool RequestInvestigatePoint(
         EnemyController requester,
         Vector3 center,
@@ -116,6 +122,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return RequestSlot(requester, center, innerRadius, outerRadius, innerCount, outerCount, areaMask, out slotPosition);
     }
 
+    // Gestiona solicitud combate movimiento punto.
     public bool RequestCombatMovePoint(
         EnemyController requester,
         Vector3 playerPosition,
@@ -199,6 +206,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return true;
     }
 
+    // Gestiona solicitud ranura.
     private bool RequestSlot(
         EnemyController requester,
         Vector3 center,
@@ -278,6 +286,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return true;
     }
 
+    // Obtiene ranura definition.
     private void GetSlotDefinition(
         int slotIndex,
         int innerCount,
@@ -299,6 +308,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         angleDegrees = ((360f / outerCount) * outerIndex) + (180f / outerCount);
     }
 
+    // Intenta muestra ranura.
     private bool TrySampleSlot(Vector3 candidatePosition, int areaMask, out Vector3 sampledPosition)
     {
         sampledPosition = candidatePosition;
@@ -312,6 +322,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return false;
     }
 
+    // Obtiene reservation penalty.
     private float GetReservationPenalty(EnemyController requester, int slotIndex, Vector3 candidatePosition)
     {
         float penalty = 0f;
@@ -339,6 +350,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return penalty;
     }
 
+    // Obtiene combate movimiento penalty.
     private float GetCombatMovePenalty(EnemyController requester, int sideSign, Vector3 candidatePosition)
     {
         float penalty = 0f;
@@ -366,6 +378,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return penalty;
     }
 
+    // Obtiene deterministic jitter.
     private float GetDeterministicJitter(EnemyController requester, float jitterRadius)
     {
         if (requester == null || jitterRadius <= 0f)
@@ -378,6 +391,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return Mathf.Lerp(-jitterRadius, jitterRadius, normalized);
     }
 
+    // Gestiona limpieza registry.
     private void CleanupRegistry()
     {
         registeredEnemies.RemoveWhere(enemy => enemy == null);
@@ -415,6 +429,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         CleanupCombatReservations();
     }
 
+    // Gestiona limpieza combate reservations.
     private void CleanupCombatReservations()
     {
         if (reservedCombatSideSigns.Count == 0)

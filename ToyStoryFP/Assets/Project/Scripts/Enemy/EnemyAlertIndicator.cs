@@ -21,6 +21,7 @@ public class EnemyAlertIndicator : MonoBehaviour
     private bool isVisible;
     private float pulseTimer;
 
+    // Gestiona configure.
     public void Configure(Transform target, float offset)
     {
         followTarget = target;
@@ -31,6 +32,7 @@ public class EnemyAlertIndicator : MonoBehaviour
         textRect.localScale = Vector3.one;
     }
 
+    // Actualiza visible.
     public void SetVisible(bool visible, bool playPulse)
     {
         EnsureVisuals();
@@ -61,6 +63,7 @@ public class EnemyAlertIndicator : MonoBehaviour
         UpdatePulse();
     }
 
+    // Asegura visuals.
     private void EnsureVisuals()
     {
         if (canvas != null && canvasGroup != null && textRect != null)
@@ -117,6 +120,7 @@ public class EnemyAlertIndicator : MonoBehaviour
         canvasGroup.alpha = 0f;
     }
 
+    // Actualiza transform.
     private void UpdateTransform()
     {
         if (followTarget == null)
@@ -140,12 +144,14 @@ public class EnemyAlertIndicator : MonoBehaviour
         transform.forward = cachedCamera.transform.forward;
     }
 
+    // Actualiza visibility.
     private void UpdateVisibility()
     {
         float targetAlpha = isVisible ? 1f : 0f;
         canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, targetAlpha, fadeSpeed * Time.deltaTime);
     }
 
+    // Actualiza pulse.
     private void UpdatePulse()
     {
         if (textRect == null)

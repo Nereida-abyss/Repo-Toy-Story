@@ -27,6 +27,7 @@ public static class ProjectMaintenanceBatchRunner
     };
 
     [MenuItem("Tools/ToyStory/Proyecto/Mantenimiento/Staged Safe/1) Preview")]
+    // Gestiona ejecucion por etapas seguro vista previa.
     public static void RunStagedSafePreview()
     {
         ProjectStructureBootstrapper.CrearOValidarEstructura();
@@ -54,6 +55,7 @@ public static class ProjectMaintenanceBatchRunner
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Mantenimiento/Staged Safe/2) Apply Migration + Hierarchy")]
+    // Gestiona ejecucion por etapas seguro apply.
     public static void RunStagedSafeApply()
     {
         ProjectStructureBootstrapper.CrearOValidarEstructura();
@@ -73,6 +75,7 @@ public static class ProjectMaintenanceBatchRunner
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Mantenimiento/Staged Safe/3) Validation")]
+    // Gestiona ejecucion por etapas seguro validacion.
     public static void RunStagedSafeValidation()
     {
         StringBuilder report = new StringBuilder();
@@ -141,6 +144,7 @@ public static class ProjectMaintenanceBatchRunner
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Mantenimiento/Staged Safe/Run Full")]
+    // Gestiona ejecucion por etapas seguro full.
     public static void RunStagedSafeFull()
     {
         RunStagedSafePreview();
@@ -148,6 +152,7 @@ public static class ProjectMaintenanceBatchRunner
         RunStagedSafeValidation();
     }
 
+    // Cuenta faltante scripts en escena.
     private static int CountMissingScriptsInScene(Scene scene)
     {
         if (!scene.IsValid() || !scene.isLoaded)
@@ -166,6 +171,7 @@ public static class ProjectMaintenanceBatchRunner
         return count;
     }
 
+    // Cuenta faltante scripts en hierarchy.
     private static int CountMissingScriptsInHierarchy(Transform root)
     {
         if (root == null)
@@ -183,6 +189,7 @@ public static class ProjectMaintenanceBatchRunner
         return count;
     }
 
+    // Cuenta transform find usages.
     private static int CountTransformFindUsages()
     {
         string[] scriptGuids = AssetDatabase.FindAssets("t:Script", new[] { "Assets/Project/Scripts" });
@@ -210,6 +217,7 @@ public static class ProjectMaintenanceBatchRunner
         return count;
     }
 
+    // Valida naming expectations.
     private static int ValidateNamingExpectations(Scene scene, StringBuilder report)
     {
         if (!scene.IsValid() || !scene.isLoaded)
@@ -270,6 +278,7 @@ public static class ProjectMaintenanceBatchRunner
         return issues;
     }
 
+    // Valida expected hijos.
     private static int ValidateExpectedChildren(
         Dictionary<string, Transform> rootsByName,
         string rootName,
@@ -324,6 +333,7 @@ public static class ProjectMaintenanceBatchRunner
         return result;
     }
 
+    // Cuenta legacy carpetas still present.
     private static int CountLegacyFoldersStillPresent()
     {
         string[] legacyFolders =

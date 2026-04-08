@@ -58,21 +58,25 @@ public class PlayerAudioController : MonoBehaviour
         ResolveSources();
     }
 
+    // Reproduce salto.
     public void PlayJump()
     {
         PlayOneShot(generalSource, jumpClip, jumpVolume);
     }
 
+    // Reproduce arma cambio.
     public void PlayWeaponSwitch()
     {
         PlayOneShot(generalSource, weaponSwitchClip, weaponSwitchVolume);
     }
 
+    // Reproduce moneda pickup.
     public void PlayCoinPickup()
     {
         PlayOneShot(generalSource, coinPickupClip, coinPickupVolume, coinPickupPitchRandomness);
     }
 
+    // Reproduce kill confirm.
     public void PlayKillConfirm()
     {
         AudioClip clipToPlay = killConfirmClip != null ? killConfirmClip : weaponSwitchClip;
@@ -80,6 +84,7 @@ public class PlayerAudioController : MonoBehaviour
         PlayOneShot(generalSource, clipToPlay, volumeToPlay);
     }
 
+    // Reproduce hurt.
     public void PlayHurt()
     {
         if (Time.time < lastHurtPlayTime + Mathf.Max(0f, hurtMinInterval))
@@ -102,21 +107,25 @@ public class PlayerAudioController : MonoBehaviour
         PlayOneShot(generalSource, hurtClip, hurtVolume, hurtPitchRandomness);
     }
 
+    // Reproduce arma disparo.
     public void PlayWeaponFire(AudioClip clip, float volume, float pitchRandomness = 0.02f)
     {
         PlayOneShot(weaponSource, clip, volume, pitchRandomness);
     }
 
+    // Reproduce recarga.
     public void PlayReload(AudioClip clip, float volume, float pitchRandomness = 0.02f)
     {
         PlayOneShot(weaponSource, clip, volume, pitchRandomness);
     }
 
+    // Reproduce dry disparo.
     public void PlayDryFire(AudioClip clip, float volume, float pitchRandomness = 0.015f)
     {
         PlayOneShot(weaponSource, clip, volume, pitchRandomness);
     }
 
+    // Actualiza footsteps.
     public void UpdateFootsteps(bool grounded, float moveInputAmount, float speedNormalized)
     {
         float movementIntensity = speedNormalized;
@@ -151,6 +160,7 @@ public class PlayerAudioController : MonoBehaviour
             Mathf.Clamp01(movementIntensity));
     }
 
+    // Resuelve sources.
     private void ResolveSources()
     {
         if (generalSource == null)
@@ -174,6 +184,7 @@ public class PlayerAudioController : MonoBehaviour
         }
     }
 
+    // Resuelve hijo origen.
     private AudioSource ResolveChildSource(string childName)
     {
         AudioSource[] sources = GetComponentsInChildren<AudioSource>(true);
@@ -189,6 +200,7 @@ public class PlayerAudioController : MonoBehaviour
         return null;
     }
 
+    // Obtiene aleatorio footstep clip.
     private AudioClip GetRandomFootstepClip()
     {
         if (footstepClips == null || footstepClips.Length == 0)
@@ -200,6 +212,7 @@ public class PlayerAudioController : MonoBehaviour
         return footstepClips[clipIndex];
     }
 
+    // Reproduce one disparo.
     private void PlayOneShot(AudioSource source, AudioClip clip, float volume, float pitchRandomness = 0f)
     {
         if (source == null || clip == null || volume <= 0f)
@@ -211,6 +224,7 @@ public class PlayerAudioController : MonoBehaviour
         source.PlayOneShot(clip, volume);
     }
 
+    // Gestiona registro faltante sources.
     private void LogMissingSources()
     {
         if (hasLoggedMissingSources)

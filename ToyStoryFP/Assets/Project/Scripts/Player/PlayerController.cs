@@ -66,6 +66,7 @@ public class PlayerController : MonoBehaviour
         HandleWeaponInput();
     }
 
+    // Gestiona arma entrada.
     private void HandleWeaponInput()
     {
         if (weaponLoadout == null)

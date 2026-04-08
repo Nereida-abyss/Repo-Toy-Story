@@ -30,6 +30,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         NotifyHealthChanged();
     }
 
+    // Gestiona take daño.
     public DamageResult TakeDamage(int damage)
     {
         if (!IsAlive || damage <= 0)
@@ -65,6 +66,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
     }
 
+    // Actualiza maximo vida.
     public void SetMaxHealth(int newMaxHealth, bool restoreCurrentHealthToMax)
     {
         maxHealth = Mathf.Max(1, newMaxHealth);
@@ -74,11 +76,13 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         NotifyHealthChanged();
     }
 
+    // Notifica vida cambios.
     private void NotifyHealthChanged()
     {
         HealthChanged?.Invoke(this);
     }
 
+    // Gestiona death.
     private void HandleDeath()
     {
         Died?.Invoke(this);
@@ -91,6 +95,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         CoinPickup.Spawn(transform.position + coinDropOffset, coinValue);
     }
 
+    // Comprueba si soltar moneda.
     private bool ShouldDropCoin()
     {
         if (!dropCoinOnDeath || coinValue <= 0)
@@ -101,6 +106,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         return !BelongsToPlayer();
     }
 
+    // Gestiona belongs a jugador.
     private bool BelongsToPlayer()
     {
         return GetComponentInParent<PlayerController>() != null;

@@ -31,16 +31,19 @@ public class SettingsPanelController : MonoBehaviour
     private bool isFullscreen;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    // Aplica guardado ajustes en startup.
     private static void ApplySavedSettingsOnStartup()
     {
         ApplySavedSettings();
     }
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         ValidateReferences();
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         LoadSavedSettings();
@@ -48,6 +51,7 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    // Abre panel.
     public void OpenPanel()
     {
         if (gameObject.activeSelf)
@@ -64,6 +68,7 @@ public class SettingsPanelController : MonoBehaviour
         UIFxUtility.SetPanelActive(gameObject, true);
     }
 
+    // Cierra panel.
     public void ClosePanel()
     {
         UIFxUtility.SetPanelActive(gameObject, false);
@@ -74,6 +79,7 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    // Alterna fullscreen.
     public void ToggleFullscreen()
     {
         isFullscreen = !isFullscreen;
@@ -84,6 +90,7 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    // Gestiona el evento de master volumen cambios.
     public void OnMasterVolumeChanged(float value)
     {
         masterVolume = Mathf.Clamp01(value);
@@ -94,6 +101,7 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    // Alterna mute.
     public void ToggleMute()
     {
         masterMuted = !masterMuted;
@@ -104,6 +112,7 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    // Gestiona el evento de look sensitivity cambios.
     public void OnLookSensitivityChanged(float value)
     {
         lookSensitivity = Mathf.Clamp(value, MinLookSensitivity, MaxLookSensitivity);
@@ -118,6 +127,7 @@ public class SettingsPanelController : MonoBehaviour
         RefreshUI();
     }
 
+    // Aplica guardado ajustes.
     public static void ApplySavedSettings()
     {
         bool fullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
@@ -128,6 +138,7 @@ public class SettingsPanelController : MonoBehaviour
         AudioListener.volume = muted ? 0f : volume;
     }
 
+    // Carga guardado ajustes.
     private void LoadSavedSettings()
     {
         isFullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
@@ -139,6 +150,7 @@ public class SettingsPanelController : MonoBehaviour
             MaxLookSensitivity);
     }
 
+    // Aplica actual ajustes.
     private void ApplyCurrentSettings()
     {
         Screen.fullScreen = isFullscreen;
@@ -150,11 +162,13 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    // Aplica audio ajustes.
     private void ApplyAudioSettings()
     {
         AudioListener.volume = masterMuted ? 0f : masterVolume;
     }
 
+    // Refresca UI.
     private void RefreshUI()
     {
         if (fullscreenStateText != null)
@@ -188,6 +202,7 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    // Valida referencias.
     private void ValidateReferences()
     {
         if (closeButton == null || fullscreenButton == null || fullscreenStateText == null || masterVolumeSlider == null || muteButton == null || lookSensitivitySlider == null || lookSensitivityValueText == null)

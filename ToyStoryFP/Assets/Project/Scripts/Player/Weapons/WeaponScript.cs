@@ -90,6 +90,7 @@ public class WeaponScript : MonoBehaviour
         UpdateVisualRecoil();
     }
 
+    // Intenta disparo.
     public bool TryFire()
     {
         if (!CanFire())
@@ -101,6 +102,7 @@ public class WeaponScript : MonoBehaviour
         return FireRay(shotTransform.position, shotTransform.forward);
     }
 
+    // Intenta disparo.
     public bool TryFire(Vector3 targetPoint)
     {
         if (!CanFire())
@@ -119,6 +121,7 @@ public class WeaponScript : MonoBehaviour
         return FireRay(shotTransform.position, direction);
     }
 
+    // Intenta recarga.
     public bool TryReload()
     {
         if (!playerOwnedWeapon || isReloading || magazineSize <= 0)
@@ -143,11 +146,13 @@ public class WeaponScript : MonoBehaviour
         return true;
     }
 
+    // Gestiona cancelar recarga.
     public void CancelReload()
     {
         SetReloadState(false, true);
     }
 
+    // Actualiza jugador owned.
     public void SetPlayerOwned(bool enabled)
     {
         playerOwnedWeapon = enabled;
@@ -155,6 +160,7 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
+    // Notifica equipada.
     public void NotifyEquipped()
     {
         SetReloadState(false, true);
@@ -162,6 +168,7 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
+    // Inicializa as equipada at spawn.
     public void InitializeAsEquippedAtSpawn()
     {
         CacheBasePose();
@@ -171,6 +178,7 @@ public class WeaponScript : MonoBehaviour
         ResetVisualRecoil();
     }
 
+    // Actualiza equip animacion progress.
     public void SetEquipAnimationProgress(float progress, bool lowering)
     {
         progress = Mathf.Clamp01(progress);
@@ -189,6 +197,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
+    // Reinicia equip pose.
     public void ResetEquipPose()
     {
         equipPositionOffset = Vector3.zero;
@@ -196,12 +205,14 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
+    // Actualiza daño per disparo.
     public void SetDamagePerShot(int newDamagePerShot)
     {
         damagePerShot = Mathf.Max(1, newDamagePerShot);
         NotifyStateChanged();
     }
 
+    // Comprueba si disparo.
     private bool CanFire()
     {
         if (Time.time < nextAllowedShotTime)
@@ -236,6 +247,7 @@ public class WeaponScript : MonoBehaviour
         return false;
     }
 
+    // Resuelve disparo transform.
     private Transform ResolveShotTransform()
     {
         if (_camera != null)
@@ -246,6 +258,7 @@ public class WeaponScript : MonoBehaviour
         return fireOrigin != null ? fireOrigin : transform;
     }
 
+    // Gestiona disparo ray.
     private bool FireRay(Vector3 origin, Vector3 direction)
     {
         nextAllowedShotTime = Time.time + (1f / fireRate);
@@ -289,6 +302,7 @@ public class WeaponScript : MonoBehaviour
         return true;
     }
 
+    // Intenta initialize ammo.
     private void TryInitializeAmmo()
     {
         if (!playerOwnedWeapon || ammoInitialized)
@@ -302,6 +316,7 @@ public class WeaponScript : MonoBehaviour
         ammoInitialized = true;
     }
 
+    // Actualiza recarga.
     private void UpdateReload()
     {
         if (!isReloading)
@@ -334,6 +349,7 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
+    // Actualiza recarga estado.
     private void SetReloadState(bool reloading, bool notifyStateChanged)
     {
         if (isReloading == reloading)
@@ -359,6 +375,7 @@ public class WeaponScript : MonoBehaviour
         }
     }
 
+    // Guarda en cache base pose.
     private void CacheBasePose()
     {
         if (basePoseCached)
@@ -371,6 +388,7 @@ public class WeaponScript : MonoBehaviour
         basePoseCached = true;
     }
 
+    // Reinicia visual retroceso.
     private void ResetVisualRecoil()
     {
         recoilPositionOffset = Vector3.zero;
@@ -382,6 +400,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
+    // Actualiza visual retroceso.
     private void UpdateVisualRecoil()
     {
         recoilPositionOffset = Vector3.SmoothDamp(
@@ -399,6 +418,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
+    // Aplica camara retroceso.
     private void ApplyCameraRecoil()
     {
         if (!playerOwnedWeapon || _camera == null)
@@ -417,6 +437,7 @@ public class WeaponScript : MonoBehaviour
         mouseLook.ApplyRecoil(cameraRecoilPitch, yawKick);
     }
 
+    // Aplica arma retroceso.
     private void ApplyWeaponRecoil()
     {
         if (!playerOwnedWeapon)
@@ -431,11 +452,13 @@ public class WeaponScript : MonoBehaviour
             UnityEngine.Random.Range(-weaponRecoilRotation.z, weaponRecoilRotation.z));
     }
 
+    // Notifica estado cambios.
     private void NotifyStateChanged()
     {
         StateChanged?.Invoke(this);
     }
 
+    // Resuelve jugador audio.
     private void ResolvePlayerAudio()
     {
         if (playerAudio == null)
@@ -449,6 +472,7 @@ public class WeaponScript : MonoBehaviour
         }
     }
 
+    // Reproduce disparo audio.
     private void PlayFireAudio()
     {
         if (fireSound == null)
@@ -467,6 +491,7 @@ public class WeaponScript : MonoBehaviour
         enemyAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
     }
 
+    // Reproduce dry disparo audio.
     private void PlayDryFireAudio()
     {
         if (!playerOwnedWeapon || dryFireSound == null)
@@ -478,6 +503,7 @@ public class WeaponScript : MonoBehaviour
         playerAudio?.PlayDryFire(dryFireSound, dryFireVolume, dryFirePitchRandomness);
     }
 
+    // Reproduce recarga audio.
     private void PlayReloadAudio()
     {
         if (!playerOwnedWeapon || reloadSound == null)
@@ -489,6 +515,7 @@ public class WeaponScript : MonoBehaviour
         playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
     }
 
+    // Gestiona daño feedback.
     private void HandleDamageFeedback(DamageResult damageResult)
     {
         if (!playerOwnedWeapon || !damageResult.WasDamaged)
@@ -508,6 +535,7 @@ public class WeaponScript : MonoBehaviour
         CrosshairFeedbackController.Instance?.PlayHitMarker();
     }
 
+    // Notifica enemigo aggro.
     private void NotifyEnemyAggro(Transform hitTransform, Vector3 hitPoint, DamageResult damageResult)
     {
         if (!playerOwnedWeapon || !damageResult.WasDamaged || hitTransform == null)
@@ -526,9 +554,11 @@ public class WeaponScript : MonoBehaviour
         enemyController.NotifyDamagedByPlayer(aggressor, hitPoint);
     }
 
+    // Aplica actual pose.
     private void ApplyCurrentPose()
     {
         transform.localPosition = baseLocalPosition + equipPositionOffset + recoilPositionOffset;
         transform.localRotation = Quaternion.Euler(baseLocalEulerAngles + equipRotationOffset + recoilRotationOffset);
     }
 }
+

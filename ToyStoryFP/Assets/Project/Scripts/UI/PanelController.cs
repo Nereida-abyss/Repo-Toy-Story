@@ -107,6 +107,7 @@ public class PanelController : MonoBehaviour
         OutBack
     }
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         AutoDiscoverReferences();
@@ -114,6 +115,7 @@ public class PanelController : MonoBehaviour
         BindListeners();
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         AutoDiscoverReferences();
@@ -121,6 +123,7 @@ public class PanelController : MonoBehaviour
         BindListeners();
     }
 
+    // Libera listeners y estado al deshabilitar el objeto.
     private void OnDisable()
     {
         UnbindListeners();
@@ -134,11 +137,13 @@ public class PanelController : MonoBehaviour
         isSequenceRunning = false;
     }
 
+    // Arranca la configuracion inicial del componente.
     private void Start()
     {
         StartSequence(PlayIntroSequence());
     }
 
+    // Abre creditos desde el boton.
     public void OpenCreditsFromButton()
     {
         if (isSequenceRunning)
@@ -149,6 +154,7 @@ public class PanelController : MonoBehaviour
         StartSequence(PlayCreditsSequence(allowSkip: true));
     }
 
+    // Arranca la secuencia solo si el menu esta listo.
     private void StartSequence(IEnumerator routine)
     {
         if (routine == null || isSequenceRunning)
@@ -168,6 +174,7 @@ public class PanelController : MonoBehaviour
         activeSequence = StartCoroutine(RunManagedSequence(routine));
     }
 
+    // Marca la secuencia en curso y limpia el estado al terminar.
     private IEnumerator RunManagedSequence(IEnumerator routine)
     {
         isSequenceRunning = true;
@@ -176,6 +183,8 @@ public class PanelController : MonoBehaviour
         activeSequence = null;
     }
 
+    // Secuencia inicial del EndMenu: GameOver -> creditos.
+    // Al cerrar creditos, devuelve el control al panel de botones.
     private IEnumerator PlayIntroSequence()
     {
         SetPanelActive(panelButtons, false);
@@ -197,6 +206,8 @@ public class PanelController : MonoBehaviour
         yield return PlayCreditsSequence(allowSkip: true, introMode: true);
     }
 
+    // Reproduce la secuencia completa de creditos (entrada, animacion, skip y salida).
+    // Al final restaura el panel de botones.
     private IEnumerator PlayCreditsSequence(bool allowSkip, bool introMode = false)
     {
         if (panelCredits == null)
@@ -266,6 +277,8 @@ public class PanelController : MonoBehaviour
         SetPanelActive(panelButtons, true);
     }
 
+    // Animacion principal de creditos: intro, nombres y cierre final.
+    // Si hay skip, corta la animacion y deja el texto en estado consistente.
     private IEnumerator AnimateCreditsHypeReel(
         List<CreditTextEntry> entries,
         bool allowSkip,
@@ -498,6 +511,8 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Pulso visual de apertura antes de mostrar los nombres.
+    // Respeta el skip para no bloquear la transicion.
     private IEnumerator AnimateIntroBeat(
         Transform targetRoot,
         Vector3 baseRootScale,
@@ -537,6 +552,7 @@ public class PanelController : MonoBehaviour
         targetRoot.localScale = baseRootScale;
     }
 
+    // Anima los textos de creditos por grupos para destacar cada bloque.
     private IEnumerator AnimateCreditsBySections(
         List<CreditSection> sections,
         bool allowSkip,
@@ -684,6 +700,7 @@ public class PanelController : MonoBehaviour
             skipAction);
     }
 
+    // Entrada de un grupo de textos: aparece con movimiento y mas visibilidad.
     private IEnumerator AnimateSectionIntro(
         CreditSection section,
         float startYOffset,
@@ -766,6 +783,7 @@ public class PanelController : MonoBehaviour
         SetSectionScale(section, 1f);
     }
 
+    // Entrada secuencial: muestra los textos del grupo uno por uno.
     private IEnumerator AnimateSectionIntroSequential(
         CreditSection section,
         float targetAlpha,
@@ -836,6 +854,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Ajusta la transparencia de un grupo de textos para dar o quitar foco.
     private IEnumerator AnimateSectionAlpha(
         CreditSection section,
         float fromAlpha,
@@ -879,6 +898,7 @@ public class PanelController : MonoBehaviour
         SetSectionAlpha(section, toAlpha);
     }
 
+    // Pausa controlada: espera el tiempo indicado o sale antes si hay skip.
     private IEnumerator HoldDuration(
         float duration,
         bool allowSkip,
@@ -901,6 +921,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Hace aparecer los textos de creditos de forma progresiva.
     private IEnumerator AnimateCreditTextsIn(
         List<CreditTextEntry> entries,
         bool allowSkip,
@@ -956,6 +977,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Mantiene los creditos en modo simple cuando no hay textos para animar.
     private IEnumerator HoldFallbackCredits(bool allowSkip, float skipAllowedAtTime, System.Action onSkip)
     {
         float holdElapsed = 0f;
@@ -973,6 +995,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Desvanece el panel hasta ocultarlo (alpha 0) en tiempo real.
     private IEnumerator FadeCanvasGroupAlpha(CanvasGroup canvasGroup, float duration)
     {
         if (canvasGroup == null)
@@ -999,6 +1022,7 @@ public class PanelController : MonoBehaviour
         canvasGroup.alpha = 0f;
     }
 
+    // Recopila credito texto entradas.
     private List<CreditTextEntry> CollectCreditTextEntries()
     {
         List<CreditTextEntry> entries = new List<CreditTextEntry>();
@@ -1031,6 +1055,7 @@ public class PanelController : MonoBehaviour
         return entries;
     }
 
+    // Recopila credito secciones.
     private List<CreditSection> CollectCreditSections()
     {
         List<CreditSection> sections = new List<CreditSection>();
@@ -1086,6 +1111,7 @@ public class PanelController : MonoBehaviour
         return sections.Count >= 2 ? sections : new List<CreditSection>();
     }
 
+    // Devuelve los textos a su posicion y color originales.
     private void RestoreCreditTextEntries(List<CreditTextEntry> entries)
     {
         for (int i = 0; i < entries.Count; i++)
@@ -1097,6 +1123,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Restaura cada grupo de textos al estado inicial.
     private void RestoreCreditSections(List<CreditSection> sections)
     {
         if (sections == null)
@@ -1131,6 +1158,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Deja todos los grupos de textos ocultos antes de empezar la animacion.
     private void InitializeSectionsHidden(List<CreditSection> sections)
     {
         if (sections == null)
@@ -1147,6 +1175,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Atenua todos los grupos de textos para mantener foco visual.
     private void ApplyDimAlphaToAll(List<CreditSection> sections, float dimAlpha)
     {
         if (sections == null)
@@ -1165,6 +1194,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Aplica una misma transparencia a todos los textos del grupo.
     private void SetSectionAlpha(CreditSection section, float normalizedAlpha)
     {
         if (section == null || section.Entries == null)
@@ -1180,6 +1210,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Desplaza en vertical todos los textos del grupo.
     private void SetSectionVerticalOffset(CreditSection section, float yOffset)
     {
         if (section == null || section.Entries == null)
@@ -1194,6 +1225,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Escala el grupo de textos completo.
     private void SetSectionScale(CreditSection section, float multiplier)
     {
         if (section == null || section.Root == null)
@@ -1205,6 +1237,7 @@ public class PanelController : MonoBehaviour
         section.Root.localScale = section.OriginalLocalScale * clampedMultiplier;
     }
 
+    // Cambia la transparencia de un texto respetando su color base.
     private void SetTextAlpha(CreditTextEntry entry, float normalizedAlpha)
     {
         Color color = entry.OriginalColor;
@@ -1212,6 +1245,7 @@ public class PanelController : MonoBehaviour
         entry.Text.color = color;
     }
 
+    // Calcula un micro-temblor para dar impacto visual al texto.
     private Vector2 EvaluateMicroShakeOffset(float elapsed, float amplitude)
     {
         float safeAmplitude = Mathf.Max(0f, amplitude);
@@ -1226,6 +1260,7 @@ public class PanelController : MonoBehaviour
         return new Vector2(x, y);
     }
 
+    // Busca final stinger entry.
     private CreditTextEntry FindFinalStingerEntry(List<CreditTextEntry> entries)
     {
         if (entries == null || entries.Count == 0)
@@ -1253,6 +1288,7 @@ public class PanelController : MonoBehaviour
         return entries[0];
     }
 
+    // Ajusta duraciones para que los creditos queden dentro del tiempo objetivo.
     private void ApplyHypeDurationScaling(
         int namesCount,
         ref float revealDuration,
@@ -1297,6 +1333,7 @@ public class PanelController : MonoBehaviour
         finalDuration = Mathf.Max(0.01f, finalDuration * scale);
     }
 
+    // Reproduce audio de creditos con fallback al AudioManager si hace falta.
     private void PlayCreditsAudio(AudioClip clip, string fallbackToken)
     {
         if (clip != null)
@@ -1330,6 +1367,7 @@ public class PanelController : MonoBehaviour
         AudioManager.Instance.PlaySFX(fallbackIndex);
     }
 
+    // Busca audio gestor SFX indice por token.
     private int FindAudioManagerSfxIndexByToken(string token)
     {
         if (AudioManager.Instance == null || AudioManager.Instance.sfxList == null)
@@ -1360,6 +1398,7 @@ public class PanelController : MonoBehaviour
         return sfxList.Length > 0 ? 0 : -1;
     }
 
+    // Comprueba si el usuario puede y quiere saltar los creditos.
     private bool ShouldSkipCredits(bool allowSkip, float skipAllowedAtTime)
     {
         if (!allowSkip || Time.unscaledTime < skipAllowedAtTime)
@@ -1370,6 +1409,7 @@ public class PanelController : MonoBehaviour
         return Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0);
     }
 
+    // Curva de suavizado para que los movimientos de texto se vean naturales.
     private float EaseOutCubic(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -1377,6 +1417,7 @@ public class PanelController : MonoBehaviour
         return 1f - inverse * inverse * inverse;
     }
 
+    // Elige la curva de suavizado configurada para animar creditos.
     private float EvaluateCreditsEase(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -1392,6 +1433,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Curva con pequeno rebote para dar energia a la animacion.
     private float EaseOutBack(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -1400,11 +1442,13 @@ public class PanelController : MonoBehaviour
         return 1f + adjusted * adjusted * ((overshoot + 1f) * adjusted + overshoot);
     }
 
+    // Espera en tiempo real (sin depender de la escala de tiempo del juego).
     private WaitForSecondsRealtime WaitForSecondsRealtime(float duration)
     {
         return new WaitForSecondsRealtime(Mathf.Max(0f, duration));
     }
 
+    // Helper de UI para activar o desactivar paneles.
     private void SetPanelActive(GameObject panel, bool isActive)
     {
         if (panel != null)
@@ -1413,6 +1457,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Asegura un CanvasGroup para poder aplicar transiciones al panel.
     private CanvasGroup EnsureCanvasGroup(GameObject target)
     {
         CanvasGroup canvasGroup = target.GetComponent<CanvasGroup>();
@@ -1425,6 +1470,7 @@ public class PanelController : MonoBehaviour
         return canvasGroup;
     }
 
+    // Conecta botones y evita listeners duplicados.
     private void BindListeners()
     {
         if (listenersBound)
@@ -1448,6 +1494,7 @@ public class PanelController : MonoBehaviour
             this);
     }
 
+    // Desconecta listeners para no dejar suscripciones activas.
     private void UnbindListeners()
     {
         if (creditsButton != null)
@@ -1458,6 +1505,7 @@ public class PanelController : MonoBehaviour
         listenersBound = false;
     }
 
+    // Gestiona auto detectar referencias.
     private void AutoDiscoverReferences()
     {
         AutoDiscoverCreditsButton();
@@ -1465,6 +1513,7 @@ public class PanelController : MonoBehaviour
         AutoDiscoverScorePanel();
     }
 
+    // Asegura puntaje panel controller.
     private void EnsureScorePanelController()
     {
         if (scorePanelController == null)
@@ -1485,6 +1534,7 @@ public class PanelController : MonoBehaviour
         AutoDiscoverScorePanel();
     }
 
+    // Gestiona auto detectar creditos boton.
     private void AutoDiscoverCreditsButton()
     {
         if (creditsButton != null || panelButtons == null)
@@ -1506,6 +1556,7 @@ public class PanelController : MonoBehaviour
         }
     }
 
+    // Gestiona auto detectar creditos texto raiz.
     private void AutoDiscoverCreditsTextRoot()
     {
         if (creditsTextRoot != null || panelCredits == null)
@@ -1516,6 +1567,7 @@ public class PanelController : MonoBehaviour
         creditsTextRoot = FindChildByName(panelCredits.transform, "Textos") ?? panelCredits.transform;
     }
 
+    // Gestiona auto detectar puntaje panel.
     private void AutoDiscoverScorePanel()
     {
         if (panelScore != null)
@@ -1530,6 +1582,7 @@ public class PanelController : MonoBehaviour
         panelScore = scoreTransform != null ? scoreTransform.gameObject : null;
     }
 
+    // Busca hijo por nombre.
     private Transform FindChildByName(Transform root, string childName)
     {
         if (root == null || string.IsNullOrWhiteSpace(childName))

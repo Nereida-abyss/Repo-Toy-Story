@@ -2,6 +2,7 @@ using UnityEngine;
 
 public static class UIFxUtility
 {
+    // Actualiza panel activo.
     public static void SetPanelActive(GameObject panel, bool isActive, bool animated = true)
     {
         if (panel == null)
@@ -38,6 +39,7 @@ public static class UIFxUtility
         }
     }
 
+    // Oculta inmediato.
     public static void HideImmediate(GameObject panel)
     {
         if (panel != null)

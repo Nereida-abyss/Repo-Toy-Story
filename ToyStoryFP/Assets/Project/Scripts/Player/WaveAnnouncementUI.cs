@@ -19,6 +19,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         ResolveReferences();
     }
 
+    // Muestra oleada.
     public void ShowWave(int waveNumber)
     {
         ResolveReferences();
@@ -33,11 +34,13 @@ public class WaveAnnouncementUI : MonoBehaviour
         SetVisible(true);
     }
 
+    // Oculta oleada.
     public void HideWave()
     {
         SetVisible(false);
     }
 
+    // Resuelve referencias.
     private void ResolveReferences()
     {
         panelRoot ??= gameObject;
@@ -48,6 +51,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         }
     }
 
+    // Actualiza visible.
     private void SetVisible(bool isVisible)
     {
         ResolveReferences();
@@ -60,6 +64,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         UIFxUtility.SetPanelActive(panelRoot, isVisible);
     }
 
+    // Busca texto por exact nombre.
     private TMP_Text FindTextByExactName(string targetName)
     {
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
@@ -75,6 +80,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         return null;
     }
 
+    // Gestiona registro faltante referencias.
     private void LogMissingReferences()
     {
         if (hasLoggedMissingReferences)

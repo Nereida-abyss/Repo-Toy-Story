@@ -20,6 +20,7 @@ public class WaveIntermissionUI : MonoBehaviour
         ResolveReferences();
     }
 
+    // Muestra prompt.
     public void ShowPrompt()
     {
         ResolveReferences();
@@ -34,11 +35,13 @@ public class WaveIntermissionUI : MonoBehaviour
         SetVisible(true);
     }
 
+    // Oculta prompt.
     public void HidePrompt()
     {
         SetVisible(false);
     }
 
+    // Resuelve referencias.
     private void ResolveReferences()
     {
         panelRoot ??= gameObject;
@@ -49,6 +52,7 @@ public class WaveIntermissionUI : MonoBehaviour
         }
     }
 
+    // Actualiza visible.
     private void SetVisible(bool isVisible)
     {
         ResolveReferences();
@@ -61,6 +65,7 @@ public class WaveIntermissionUI : MonoBehaviour
         UIFxUtility.SetPanelActive(panelRoot, isVisible);
     }
 
+    // Busca texto por exact nombre.
     private TMP_Text FindTextByExactName(string targetName)
     {
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
@@ -76,6 +81,7 @@ public class WaveIntermissionUI : MonoBehaviour
         return null;
     }
 
+    // Gestiona registro faltante referencias.
     private void LogMissingReferences()
     {
         if (hasLoggedMissingReferences)

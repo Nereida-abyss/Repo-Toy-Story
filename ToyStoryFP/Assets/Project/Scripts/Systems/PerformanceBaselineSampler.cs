@@ -21,6 +21,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
     private int gc1Inicial;
     private int gc2Inicial;
 
+    // Arranca la configuracion inicial del componente.
     private void Start()
     {
         if (iniciarAutomaticamente)
@@ -29,6 +30,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
         }
     }
 
+    // Actualiza la logica en cada frame.
     private void Update()
     {
         if (!muestreoActivo)
@@ -53,6 +55,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
     }
 
     [ContextMenu("Iniciar Muestreo")]
+    // Gestiona iniciar muestreo.
     public void IniciarMuestreo()
     {
         muestreoActivo = true;
@@ -65,6 +68,7 @@ public class PerformanceBaselineSampler : MonoBehaviour
     }
 
     [ContextMenu("Finalizar Muestreo")]
+    // Gestiona finalizar muestreo.
     public void FinalizarMuestreo()
     {
         if (!muestreoActivo)

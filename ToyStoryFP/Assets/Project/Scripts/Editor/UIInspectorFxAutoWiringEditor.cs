@@ -22,17 +22,20 @@ public static class UIInspectorFxAutoWiringEditor
     private static readonly Color ShadowColor = new Color(0.04f, 0.07f, 0.14f, 0.65f);
 
     [MenuItem("Tools/ToyStory/UI/Apply Inspector FX Wiring")]
+    // Aplica inspector efectos wiring.
     public static void ApplyInspectorFxWiring()
     {
         ApplyInspectorFxWiringInternal(verbose: true);
     }
 
     [MenuItem("Tools/ToyStory/UI/Force Reapply Inspector FX Wiring")]
+    // Gestiona force reapply inspector efectos wiring.
     public static void ForceReapplyInspectorFxWiring()
     {
         ApplyInspectorFxWiringInternal(verbose: true);
     }
 
+    // Aplica inspector efectos wiring internal.
     private static void ApplyInspectorFxWiringInternal(bool verbose)
     {
         string originalScenePath = SceneManager.GetActiveScene().path;
@@ -91,6 +94,7 @@ public static class UIInspectorFxAutoWiringEditor
         }
     }
 
+    // Conecta escena.
     private static void WireScene(string scenePath, ref int changes, ref int warnings)
     {
         Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -125,6 +129,7 @@ public static class UIInspectorFxAutoWiringEditor
         }
     }
 
+    // Conecta prefab.
     private static void WirePrefab(string prefabPath, ref int changes, ref int warnings)
     {
         GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
@@ -161,6 +166,7 @@ public static class UIInspectorFxAutoWiringEditor
         PrefabUtility.UnloadPrefabContents(root);
     }
 
+    // Conecta botones en raiz.
     private static bool WireButtonsInRoot(Scene scene, string[] buttonNames, ref int changes, ref int warnings)
     {
         bool changed = false;
@@ -174,6 +180,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Conecta paneles en raiz.
     private static bool WirePanelsInRoot(Scene scene, string[] panelNames, ref int changes, ref int warnings)
     {
         bool changed = false;
@@ -187,6 +194,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica estilo a texto en raiz.
     private static bool StyleTextInRoot(Scene scene, string[] textNames, Color color, bool isTitle, ref int changes)
     {
         bool changed = false;
@@ -200,6 +208,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Conecta botones en transform.
     private static bool WireButtonsInTransform(Transform root, string[] buttonNames, ref int changes, ref int warnings)
     {
         bool changed = false;
@@ -240,6 +249,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Conecta paneles en transform.
     private static bool WirePanelsInTransform(Transform root, string[] panelNames, ref int changes, ref int warnings)
     {
         bool changed = false;
@@ -292,6 +302,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica boton estilo.
     private static bool ApplyButtonStyle(Button button, ref int changes)
     {
         bool changed = false;
@@ -322,6 +333,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica boton efectos defaults.
     private static bool ApplyButtonFxDefaults(UIButtonFx buttonFx, ref int changes)
     {
         SerializedObject serialized = new SerializedObject(buttonFx);
@@ -346,6 +358,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica panel efectos defaults.
     private static bool ApplyPanelFxDefaults(UIPanelFx panelFx, CanvasGroup canvasGroup, ref int changes)
     {
         SerializedObject serialized = new SerializedObject(panelFx);
@@ -371,6 +384,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica boton texto estilo.
     private static bool ApplyButtonTextStyle(Transform buttonRoot, ref int changes)
     {
         bool changed = false;
@@ -427,6 +441,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Aplica estilo a texto en transform.
     private static bool StyleTextInTransform(Transform root, string[] textNames, Color color, bool isTitle, ref int changes)
     {
         bool changed = false;
@@ -493,6 +508,7 @@ public static class UIInspectorFxAutoWiringEditor
         return changed;
     }
 
+    // Busca por nombre.
     private static Transform FindByName(Transform root, string targetName)
     {
         if (root == null || string.IsNullOrWhiteSpace(targetName))
@@ -521,6 +537,7 @@ public static class UIInspectorFxAutoWiringEditor
         return null;
     }
 
+    // Actualiza serializado bool.
     private static bool SetSerializedBool(SerializedObject serialized, string propertyName, bool value)
     {
         SerializedProperty property = serialized.FindProperty(propertyName);
@@ -534,6 +551,7 @@ public static class UIInspectorFxAutoWiringEditor
         return true;
     }
 
+    // Actualiza serializado float.
     private static bool SetSerializedFloat(SerializedObject serialized, string propertyName, float value)
     {
         SerializedProperty property = serialized.FindProperty(propertyName);
@@ -547,6 +565,7 @@ public static class UIInspectorFxAutoWiringEditor
         return true;
     }
 
+    // Actualiza serializado color.
     private static bool SetSerializedColor(SerializedObject serialized, string propertyName, Color value)
     {
         SerializedProperty property = serialized.FindProperty(propertyName);
@@ -560,6 +579,7 @@ public static class UIInspectorFxAutoWiringEditor
         return true;
     }
 
+    // Actualiza serializado object.
     private static bool SetSerializedObject(SerializedObject serialized, string propertyName, Object value)
     {
         SerializedProperty property = serialized.FindProperty(propertyName);

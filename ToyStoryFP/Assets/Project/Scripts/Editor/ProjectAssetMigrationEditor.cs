@@ -47,6 +47,7 @@ public static class ProjectAssetMigrationEditor
     };
 
     [MenuItem("Tools/ToyStory/Proyecto/Migracion/Previsualizar Migracion Legacy -> Project")]
+    // Gestiona vista previa migracion.
     public static void PreviewMigration()
     {
         string report = GenerateMigrationReport(previewOnly: true);
@@ -54,6 +55,7 @@ public static class ProjectAssetMigrationEditor
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Migracion/Ejecutar Migracion Legacy -> Project")]
+    // Gestiona execute migracion.
     public static void ExecuteMigration()
     {
         string migrationReport = GenerateMigrationReport(previewOnly: false);
@@ -64,6 +66,7 @@ public static class ProjectAssetMigrationEditor
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Migracion/Limpiar Carpetas Legacy")]
+    // Gestiona execute legacy limpieza only.
     public static void ExecuteLegacyCleanupOnly()
     {
         string report = CleanupLegacyFolders();
@@ -72,6 +75,7 @@ public static class ProjectAssetMigrationEditor
         GameDebug.Info("MigracionProyecto", report);
     }
 
+    // Gestiona generate migracion reporte.
     public static string GenerateMigrationReport(bool previewOnly)
     {
         List<string> lines = new List<string>();
@@ -142,6 +146,7 @@ public static class ProjectAssetMigrationEditor
         return string.Join("\n", lines);
     }
 
+    // Gestiona limpieza legacy carpetas.
     public static string CleanupLegacyFolders()
     {
         List<string> lines = new List<string>();
@@ -186,6 +191,7 @@ public static class ProjectAssetMigrationEditor
         return string.Join("\n", lines);
     }
 
+    // Asegura carpeta exists.
     private static void EnsureFolderExists(string path)
     {
         if (AssetDatabase.IsValidFolder(path))
@@ -209,6 +215,7 @@ public static class ProjectAssetMigrationEditor
         }
     }
 
+    // Comprueba si non meta archivos.
     private static bool HasNonMetaFiles(string assetFolderPath)
     {
         if (string.IsNullOrWhiteSpace(assetFolderPath))

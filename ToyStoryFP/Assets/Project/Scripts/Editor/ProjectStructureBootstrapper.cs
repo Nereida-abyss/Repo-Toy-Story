@@ -38,6 +38,7 @@ public static class ProjectStructureBootstrapper
     };
 
     [MenuItem("Tools/ToyStory/Proyecto/Estructura/Crear O Validar Estructura Base")]
+    // Gestiona crear o validar estructura.
     public static void CrearOValidarEstructura()
     {
         int creadas = 0;
@@ -69,6 +70,7 @@ public static class ProjectStructureBootstrapper
             $"Se crearon {creadas} carpetas nuevas. Revisar migracion de assets legacy en el editor.");
     }
 
+    // Gestiona crear ruta recursiva.
     private static void CrearRutaRecursiva(string ruta)
     {
         string[] partes = ruta.Split('/');

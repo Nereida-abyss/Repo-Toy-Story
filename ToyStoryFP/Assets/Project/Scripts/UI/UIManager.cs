@@ -36,11 +36,13 @@ public class UIManager : MonoBehaviour
         ApplyPauseState(IsPaused);
     }
 
+    // Gestiona abrir pausa.
     public void AbrirPausa()
     {
         ApplyPauseState(true);
     }
 
+    // Gestiona cerrar pausa.
     public void CerrarPausa()
     {
         ApplyPauseState(false);
@@ -73,11 +75,13 @@ public class UIManager : MonoBehaviour
         PauseStateChanged?.Invoke(false);
     }
 
+    // Alterna pausa.
     private void TogglePausa()
     {
         ApplyPauseState(!IsPaused);
     }
 
+    // Aplica pausa estado.
     private void ApplyPauseState(bool paused)
     {
         bool previousPauseState = IsPaused;
@@ -109,11 +113,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // Comprueba si alternar pausa.
     private bool CanTogglePause()
     {
         return panelPause != null || panelUI != null;
     }
 
+    // Asegura event system.
     private void EnsureEventSystem()
     {
         if (EventSystem.current != null)

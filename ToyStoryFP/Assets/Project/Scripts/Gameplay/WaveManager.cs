@@ -156,6 +156,7 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Clear();
     }
 
+    // Secuencia de oleada bucle.
     private IEnumerator WaveLoop()
     {
         currentState = WaveRuntimeState.InitialDelay;
@@ -164,6 +165,7 @@ public class WaveManager : MonoBehaviour
         StartNextWave();
     }
 
+    // Inicia siguiente oleada.
     private void StartNextWave()
     {
         if (currentState == WaveRuntimeState.WaveInProgress)
@@ -193,6 +195,7 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
 
+    // Genera oleada corrutina.
     private IEnumerator SpawnWaveCoroutine(int waveIndex)
     {
         int enemiesToSpawn = GetEnemyCountForWave(waveIndex);
@@ -211,6 +214,7 @@ public class WaveManager : MonoBehaviour
         isSpawningCurrentWave = false;
     }
 
+    // Genera enemigo.
     private void SpawnEnemy(int waveIndex)
     {
         if (!TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint spawnPoint))
@@ -238,6 +242,7 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Add(enemyHealth);
     }
 
+    // Gestiona enemigo muerto.
     private void HandleEnemyDied(PlayerHealthScript enemyHealth)
     {
         if (enemyHealth == null)
@@ -249,6 +254,7 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Remove(enemyHealth);
     }
 
+    // Refresca escena referencias.
     private void RefreshSceneReferences()
     {
         spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsSortMode.None);
@@ -256,6 +262,7 @@ public class WaveManager : MonoBehaviour
         ResolveAnnouncementUi();
     }
 
+    // Resuelve anuncio UI.
     private void ResolveAnnouncementUi()
     {
         if (waveAnnouncementUi != null && waveIntermissionUi != null && waveTimersUi != null)
@@ -284,6 +291,7 @@ public class WaveManager : MonoBehaviour
         hasLoggedMissingPlayerUi = false;
     }
 
+    // Comprueba si hay puntos de spawn.
     private bool HasSpawnPoints()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
@@ -300,6 +308,7 @@ public class WaveManager : MonoBehaviour
         return true;
     }
 
+    // Comprueba si valido enemigo prefab.
     private bool HasValidEnemyPrefab()
     {
         if (enemyPrefab == null)
@@ -316,6 +325,7 @@ public class WaveManager : MonoBehaviour
         return true;
     }
 
+    // Obtiene un punto de spawn aleatorio.
     private EnemySpawnPoint GetRandomSpawnPoint()
     {
         if (!HasSpawnPoints())
@@ -327,6 +337,7 @@ public class WaveManager : MonoBehaviour
         return spawnPoints[index];
     }
 
+    // Intenta resolver spawn posicion.
     private bool TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint resolvedSpawnPoint)
     {
         spawnPosition = Vector3.zero;
@@ -356,11 +367,13 @@ public class WaveManager : MonoBehaviour
         return false;
     }
 
+    // Obtiene enemigo conteo para oleada.
     private int GetEnemyCountForWave(int waveIndex)
     {
         return Mathf.Max(1, baseEnemyCount + ((waveIndex - 1) * additionalEnemiesPerWave));
     }
 
+    // Aplica ronda escalado a enemigo.
     private void ApplyRoundScalingToEnemy(GameObject spawnedEnemy, int waveIndex)
     {
         if (spawnedEnemy == null)
@@ -384,6 +397,7 @@ public class WaveManager : MonoBehaviour
         enemyController.ApplyRoundScaling(roundScaling.HealthMultiplier, roundScaling.DamageMultiplier);
     }
 
+    // Obtiene una captura del escalado por ronda.
     private EnemyRoundScalingSnapshot GetRoundScalingSnapshot(int waveIndex)
     {
         int waveOffset = Mathf.Max(0, waveIndex - 1);
@@ -399,6 +413,7 @@ public class WaveManager : MonoBehaviour
         return new EnemyRoundScalingSnapshot(healthMultiplier, damageMultiplier);
     }
 
+    // Obtiene effective ronda multiplier.
     private static float GetEffectiveRoundMultiplier(float multiplierPerRound, float maxMultiplier, int waveOffset)
     {
         float sanitizedPerRound = Mathf.Max(1f, multiplierPerRound);
@@ -407,6 +422,7 @@ public class WaveManager : MonoBehaviour
         return Mathf.Min(sanitizedMax, compoundedMultiplier);
     }
 
+    // Comprueba si oleada finished.
     private bool HasWaveFinished()
     {
         PruneDeadEnemies();
@@ -415,6 +431,7 @@ public class WaveManager : MonoBehaviour
             && aliveEnemies.Count == 0;
     }
 
+    // Inicia intermedio.
     private void BeginIntermission()
     {
         currentState = WaveRuntimeState.Intermission;
@@ -428,6 +445,7 @@ public class WaveManager : MonoBehaviour
         RefreshTimersUi();
     }
 
+    // Oculta intermedio prompt.
     private void HideIntermissionPrompt()
     {
         ResolveAnnouncementUi();
@@ -437,6 +455,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Muestra oleada anuncio.
     private void ShowWaveAnnouncement(int waveNumber)
     {
         ResolveAnnouncementUi();
@@ -447,6 +466,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Oculta oleada anuncio.
     private void HideWaveAnnouncement()
     {
         remainingWaveAnnouncementTime = 0f;
@@ -457,6 +477,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Actualiza oleada anuncio temporizador.
     private void UpdateWaveAnnouncementTimer(bool isPaused)
     {
         if (remainingWaveAnnouncementTime <= 0f || isPaused)
@@ -472,6 +493,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Refresca temporizadores UI.
     private void RefreshTimersUi()
     {
         ResolveAnnouncementUi();
@@ -481,6 +503,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Reinicia runtime estado.
     private void ResetRuntimeState()
     {
         StopAllCoroutines();
@@ -496,6 +519,7 @@ public class WaveManager : MonoBehaviour
         HideTransientUi(false);
     }
 
+    // Oculta transient UI.
     private void HideTransientUi(bool resolveMissingReferences)
     {
         if (resolveMissingReferences)
@@ -523,6 +547,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Gestiona prune dead enemigos.
     private void PruneDeadEnemies()
     {
         if (aliveEnemies.Count == 0)
@@ -554,6 +579,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    // Resuelve jugador controller.
     private PlayerController ResolvePlayerController()
     {
         if (cachedPlayerController != null)
@@ -571,6 +597,7 @@ public class WaveManager : MonoBehaviour
         return cachedPlayerController;
     }
 
+    // Gestiona registro faltante jugador UI warning.
     private void LogMissingPlayerUiWarning(string message)
     {
         if (hasLoggedMissingPlayerUi)

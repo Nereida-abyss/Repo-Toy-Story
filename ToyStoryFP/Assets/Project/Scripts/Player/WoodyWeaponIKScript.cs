@@ -81,6 +81,7 @@ public class WoodyWeaponIKScript : MonoBehaviour
         ApplyHint(AvatarIKHint.RightElbow, rightHint, rightHintWeight * weightMultiplier);
     }
 
+    // Obtiene activo arma.
     private WeaponScript GetActiveWeapon()
     {
         if (weaponLoadout == null)
@@ -106,6 +107,7 @@ public class WoodyWeaponIKScript : MonoBehaviour
         return weapons.Length > 0 ? weapons[0] : null;
     }
 
+    // Resuelve objetivos.
     private void ResolveTargets(Transform activeWeaponRoot)
     {
         weaponRoot = activeWeaponRoot;
@@ -135,6 +137,7 @@ public class WoodyWeaponIKScript : MonoBehaviour
         rightHint = FindNamedChild(weaponRoot, rightHintName);
     }
 
+    // Aplica goal.
     private void ApplyGoal(AvatarIKGoal goal, Transform target, float weight)
     {
         if (target == null)
@@ -150,6 +153,7 @@ public class WoodyWeaponIKScript : MonoBehaviour
         animator.SetIKRotation(goal, target.rotation);
     }
 
+    // Aplica hint.
     private void ApplyHint(AvatarIKHint hint, Transform target, float weight)
     {
         if (target == null)
@@ -162,6 +166,7 @@ public class WoodyWeaponIKScript : MonoBehaviour
         animator.SetIKHintPosition(hint, target.position);
     }
 
+    // Busca named hijo.
     private static Transform FindNamedChild(Transform parent, string childName)
     {
         foreach (Transform child in parent.GetComponentsInChildren<Transform>(true))

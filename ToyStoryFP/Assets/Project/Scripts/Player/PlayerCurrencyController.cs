@@ -21,6 +21,7 @@ public class PlayerCurrencyController : MonoBehaviour
         NotifyCoinsChanged();
     }
 
+    // Gestiona add monedas.
     public void AddCoins(int amount)
     {
         if (amount <= 0)
@@ -34,6 +35,7 @@ public class PlayerCurrencyController : MonoBehaviour
         NotifyCoinsChanged();
     }
 
+    // Intenta spend monedas.
     public bool TrySpendCoins(int amount)
     {
         if (amount <= 0)
@@ -52,6 +54,7 @@ public class PlayerCurrencyController : MonoBehaviour
         return true;
     }
 
+    // Notifica monedas cambios.
     private void NotifyCoinsChanged()
     {
         CoinsChanged?.Invoke(this);

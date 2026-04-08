@@ -17,6 +17,7 @@ public static class GameDebug
 
     [Conditional("UNITY_EDITOR")]
     [Conditional("DEVELOPMENT_BUILD")]
+    // Gestiona info.
     public static void Info(string sistema, string mensaje, Object contexto = null)
     {
         if (!MostrarLogsInfo)
@@ -35,6 +36,7 @@ public static class GameDebug
         UnityDebug.Log(textoFinal);
     }
 
+    // Gestiona advertencia.
     public static void Advertencia(string sistema, string mensaje, Object contexto = null)
     {
         string textoFinal = FormatearMensaje(sistema, mensaje);
@@ -48,6 +50,7 @@ public static class GameDebug
         UnityDebug.LogWarning(textoFinal);
     }
 
+    // Gestiona error.
     public static void Error(string sistema, string mensaje, Object contexto = null)
     {
         string textoFinal = FormatearMensaje(sistema, mensaje);
@@ -61,6 +64,7 @@ public static class GameDebug
         UnityDebug.LogError(textoFinal);
     }
 
+    // Gestiona formatear mensaje.
     private static string FormatearMensaje(string sistema, string mensaje)
     {
         string sistemaSeguro = string.IsNullOrWhiteSpace(sistema) ? SistemaPorDefecto : sistema.Trim();

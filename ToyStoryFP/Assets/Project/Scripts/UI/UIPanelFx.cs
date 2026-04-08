@@ -39,11 +39,13 @@ public class UIPanelFx : MonoBehaviour
     private bool suppressOpenAnimation;
     private bool missingCanvasGroupWarningShown;
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         InitializeIfNeeded();
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         InitializeIfNeeded();
@@ -56,12 +58,14 @@ public class UIPanelFx : MonoBehaviour
         suppressOpenAnimation = false;
     }
 
+    // Libera listeners y estado al deshabilitar el objeto.
     private void OnDisable()
     {
         StopActiveRoutine();
         suppressOpenAnimation = false;
     }
 
+    // Configura theme.
     public void ConfigureTheme(
         bool themedPlayOpenOnEnable,
         float themedOpenDuration,
@@ -78,6 +82,7 @@ public class UIPanelFx : MonoBehaviour
         closeScale = themedCloseScale;
     }
 
+    // Configura audio.
     public void ConfigureAudio(
         bool themedAudioEnabled,
         float themedOpenVolume,
@@ -96,6 +101,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
+    // Gestiona show.
     public void Show(bool instant = false)
     {
         InitializeIfNeeded();
@@ -112,6 +118,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
+    // Gestiona hide.
     public void Hide(bool instant = false)
     {
         InitializeIfNeeded();
@@ -140,6 +147,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = StartCoroutine(PlayCloseRoutine());
     }
 
+    // Reproduce abrir.
     public void PlayOpen()
     {
         InitializeIfNeeded();
@@ -153,6 +161,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = StartCoroutine(PlayOpenRoutine());
     }
 
+    // Inicializa si needed.
     private void InitializeIfNeeded()
     {
         if (initialized)
@@ -178,6 +187,7 @@ public class UIPanelFx : MonoBehaviour
         initialized = true;
     }
 
+    // Reproduce abrir rutina.
     private IEnumerator PlayOpenRoutine()
     {
         float duration = Mathf.Max(0.01f, openDuration);
@@ -208,6 +218,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
+    // Reproduce close rutina.
     private IEnumerator PlayCloseRoutine()
     {
         float duration = Mathf.Max(0.01f, closeDuration);
@@ -239,6 +250,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
+    // Aplica abrir estado inmediato.
     private void ApplyOpenStateImmediate()
     {
         if (!initialized)
@@ -255,6 +267,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
+    // Alterna raycast.
     private void ToggleRaycast(bool enabled)
     {
         if (canvasGroup == null || !disableRaycastWhileAnimating)
@@ -266,6 +279,7 @@ public class UIPanelFx : MonoBehaviour
         canvasGroup.blocksRaycasts = enabled;
     }
 
+    // Detiene activo rutina.
     private void StopActiveRoutine()
     {
         if (activeRoutine == null)
@@ -277,6 +291,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
+    // Gestiona ease salida cubic.
     private float EaseOutCubic(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -284,12 +299,14 @@ public class UIPanelFx : MonoBehaviour
         return 1f - inverse * inverse * inverse;
     }
 
+    // Gestiona ease en cubic.
     private float EaseInCubic(float t)
     {
         float clamped = Mathf.Clamp01(t);
         return clamped * clamped * clamped;
     }
 
+    // Gestiona ease salida back.
     private float EaseOutBack(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -298,6 +315,7 @@ public class UIPanelFx : MonoBehaviour
         return 1f + adjusted * adjusted * ((overshoot + 1f) * adjusted + overshoot);
     }
 
+    // Reproduce panel sound.
     private void PlayPanelSound(AudioClip clip, float volume)
     {
         if (!enableAudio || clip == null)
@@ -315,6 +333,7 @@ public class UIPanelFx : MonoBehaviour
         source.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 
+    // Resuelve audio origen.
     private AudioSource ResolveAudioSource()
     {
         if (audioSource != null)
@@ -341,6 +360,7 @@ public class UIPanelFx : MonoBehaviour
         return sharedAudioSource;
     }
 
+    // Obtiene respaldo abrir clip.
     private AudioClip GetFallbackOpenClip()
     {
         if (!useAudioManagerFallback)
@@ -363,6 +383,7 @@ public class UIPanelFx : MonoBehaviour
         return cachedFallbackOpenClip;
     }
 
+    // Obtiene respaldo close clip.
     private AudioClip GetFallbackCloseClip()
     {
         if (!useAudioManagerFallback)
@@ -379,6 +400,7 @@ public class UIPanelFx : MonoBehaviour
         return cachedFallbackCloseClip;
     }
 
+    // Busca audio clip en gestor.
     private AudioClip FindAudioClipInManager(string token)
     {
         if (AudioManager.Instance == null || AudioManager.Instance.sfxList == null)

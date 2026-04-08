@@ -47,6 +47,7 @@ public class GameplayIntroFade : MonoBehaviour
         }
     }
 
+    // Secuencia de fade en rutina.
     private IEnumerator FadeInRoutine()
     {
         float duration = Mathf.Max(0.01f, fadeDuration);
@@ -78,6 +79,7 @@ public class GameplayIntroFade : MonoBehaviour
         CleanupUiFadeTargets();
     }
 
+    // Asegura posterior processing volumen.
     private void EnsurePostProcessingVolume()
     {
         cameraData = GetComponent<UniversalAdditionalCameraData>();
@@ -117,6 +119,7 @@ public class GameplayIntroFade : MonoBehaviour
         introVolume.profile = runtimeProfile;
     }
 
+    // Aplica fade estado.
     private void ApplyFadeState(float normalized)
     {
         if (vignette == null || colorAdjustments == null || introVolume == null)
@@ -133,11 +136,13 @@ public class GameplayIntroFade : MonoBehaviour
         colorAdjustments.postExposure.Override(Mathf.Lerp(startPostExposure, endPostExposure, eased));
     }
 
+    // Guarda en cache UI fade objetivos.
     private void CacheUiFadeTargets()
     {
         uiFadeTargets = UIFadeUtility.ResolveActiveCanvasTargets(gameObject.scene);
     }
 
+    // Aplica UI fade estado.
     private void ApplyUiFadeState(float normalized)
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -160,6 +165,7 @@ public class GameplayIntroFade : MonoBehaviour
         }
     }
 
+    // Restaura UI fade objetivos.
     private void RestoreUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -180,6 +186,7 @@ public class GameplayIntroFade : MonoBehaviour
         }
     }
 
+    // Gestiona limpieza UI fade objetivos.
     private void CleanupUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)

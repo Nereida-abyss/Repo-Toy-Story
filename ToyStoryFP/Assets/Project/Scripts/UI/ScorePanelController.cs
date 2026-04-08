@@ -22,6 +22,7 @@ public class ScorePanelController : MonoBehaviour
 
     private bool listenersBound;
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         ResolveUiReferences();
@@ -29,16 +30,19 @@ public class ScorePanelController : MonoBehaviour
         ClosePanelImmediate();
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         BindListeners();
     }
 
+    // Libera listeners y estado al deshabilitar el objeto.
     private void OnDisable()
     {
         UnbindListeners();
     }
 
+    // Actualiza la logica en cada frame.
     private void Update()
     {
         if (panelScoreRoot == null || !panelScoreRoot.activeSelf)
@@ -52,6 +56,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
+    // Configura si needed.
     public void ConfigureIfNeeded(GameObject previousPanel, GameObject existingScorePanel)
     {
         if (previousPanelToHide == null)
@@ -69,6 +74,7 @@ public class ScorePanelController : MonoBehaviour
         ClosePanelImmediate();
     }
 
+    // Abre panel.
     public void OpenPanel()
     {
         ResolveUiReferences();
@@ -89,6 +95,7 @@ public class ScorePanelController : MonoBehaviour
         UIFxUtility.SetPanelActive(panelScoreRoot, true);
     }
 
+    // Cierra panel.
     public void ClosePanel()
     {
         if (panelScoreRoot != null)
@@ -102,6 +109,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
+    // Cierra panel inmediato.
     private void ClosePanelImmediate()
     {
         if (panelScoreRoot != null)
@@ -110,6 +118,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
+    // Refresca best estadisticas.
     private void RefreshBestStats()
     {
         RunStatsStore.GetLastRunStats(out int coins, out int wave, out int bots);
@@ -130,6 +139,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
+    // Conecta listeners.
     private void BindListeners()
     {
         if (listenersBound)
@@ -162,6 +172,7 @@ public class ScorePanelController : MonoBehaviour
         listenersBound = true;
     }
 
+    // Desconecta listeners.
     private void UnbindListeners()
     {
         if (scoreButton != null)
@@ -177,6 +188,7 @@ public class ScorePanelController : MonoBehaviour
         listenersBound = false;
     }
 
+    // Resuelve UI referencias.
     private void ResolveUiReferences()
     {
         Transform canvasRoot = ResolveCanvasRoot();
@@ -227,6 +239,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
+    // Busca texto under panel.
     private TMP_Text FindTextUnderPanel(string nameToFind)
     {
         if (panelScoreRoot == null || string.IsNullOrWhiteSpace(nameToFind))
@@ -249,6 +262,7 @@ public class ScorePanelController : MonoBehaviour
         return null;
     }
 
+    // Resuelve canvas raiz.
     private Transform ResolveCanvasRoot()
     {
         if (endMenuCanvasRoot != null)
@@ -274,6 +288,7 @@ public class ScorePanelController : MonoBehaviour
         return endMenuCanvasRoot;
     }
 
+    // Busca hijo por nombre.
     private Transform FindChildByName(Transform root, string nameToFind)
     {
         if (root == null || string.IsNullOrWhiteSpace(nameToFind))

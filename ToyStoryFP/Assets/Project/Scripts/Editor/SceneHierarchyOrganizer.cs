@@ -51,6 +51,7 @@ public static class SceneHierarchyOrganizer
     };
 
     [MenuItem("Tools/ToyStory/Proyecto/Jerarquia/Validar Escena Activa")]
+    // Gestiona validar escena activa.
     public static void ValidarEscenaActiva()
     {
         Scene escena = SceneManager.GetActiveScene();
@@ -59,6 +60,7 @@ public static class SceneHierarchyOrganizer
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Jerarquia/Organizar Escena Activa")]
+    // Gestiona organizar escena activa.
     public static void OrganizarEscenaActiva()
     {
         Scene escena = SceneManager.GetActiveScene();
@@ -67,6 +69,7 @@ public static class SceneHierarchyOrganizer
     }
 
     [MenuItem("Tools/ToyStory/Proyecto/Jerarquia/Organizar MainMenu + GamePlay + EndMenu")]
+    // Gestiona organizar escenas principales.
     public static void OrganizarEscenasPrincipales()
     {
         string escenaOriginal = SceneManager.GetActiveScene().path;
@@ -95,11 +98,13 @@ public static class SceneHierarchyOrganizer
         GameDebug.Info("Jerarquia", resumen.ToString());
     }
 
+    // Gestiona analyze escena.
     public static string AnalyzeScene(Scene escena, bool aplicarCambios, bool aplicarRenombresObjetivo)
     {
         return AnalizarEscena(escena, aplicarCambios, aplicarRenombresObjetivo);
     }
 
+    // Gestiona analizar escena.
     private static string AnalizarEscena(Scene escena, bool aplicarCambios, bool aplicarRenombresObjetivo)
     {
         if (!escena.IsValid() || !escena.isLoaded)
@@ -172,6 +177,7 @@ public static class SceneHierarchyOrganizer
         return $"movimientos={movimientos}, renombres={renombres}, legacyDetectados={legacyDetectados}";
     }
 
+    // Gestiona aplicar renombres objetivo.
     private static int AplicarRenombresObjetivo(Scene escena, Dictionary<string, Transform> raices)
     {
         int renombrados = 0;
@@ -250,6 +256,7 @@ public static class SceneHierarchyOrganizer
         return resultado;
     }
 
+    // Gestiona ordenar raices.
     private static void OrdenarRaices(Scene escena)
     {
         string[] ordenRoots =
@@ -286,6 +293,7 @@ public static class SceneHierarchyOrganizer
         }
     }
 
+    // Gestiona resolver categoria raiz.
     private static string ResolverCategoriaRaiz(GameObject obj, string sceneName)
     {
         string nombre = obj.name.ToLowerInvariant();
@@ -338,6 +346,7 @@ public static class SceneHierarchyOrganizer
         return RootWorld;
     }
 
+    // Gestiona tiene componente con sufijo.
     private static bool TieneComponenteConSufijo(GameObject obj, string sufijo)
     {
         Component[] components = obj.GetComponentsInChildren<Component>(true);
@@ -362,6 +371,7 @@ public static class SceneHierarchyOrganizer
         return false;
     }
 
+    // Gestiona tiene nombre legacy.
     private static bool TieneNombreLegacy(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
@@ -385,6 +395,7 @@ public static class SceneHierarchyOrganizer
         return false;
     }
 
+    // Gestiona normalizar nombre.
     private static string NormalizarNombre(string original)
     {
         if (string.IsNullOrWhiteSpace(original))
@@ -439,6 +450,7 @@ public static class SceneHierarchyOrganizer
         return pascal.ToString();
     }
 
+    // Gestiona remover diacriticos.
     private static string RemoverDiacriticos(string texto)
     {
         string normalizado = texto.Normalize(NormalizationForm.FormD);

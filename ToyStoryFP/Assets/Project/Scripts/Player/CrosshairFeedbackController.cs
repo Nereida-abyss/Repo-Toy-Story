@@ -31,6 +31,7 @@ public class CrosshairFeedbackController : MonoBehaviour
 
     public static CrosshairFeedbackController Instance { get; private set; }
 
+    // Asegura en reticula.
     public static CrosshairFeedbackController EnsureOnCrosshair(Transform crosshairTransform)
     {
         if (crosshairTransform == null)
@@ -63,6 +64,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         UpdateMarker(ref deathMarkerTimer, deathMarkerDuration, deathMarkerCanvasGroup, deathMarkerRoot, deathBaseScale, deathMarkerScalePunch);
     }
 
+    // Reproduce hit marcador.
     public void PlayHitMarker()
     {
         EnsureMarkers();
@@ -71,6 +73,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         hitMarkerRoot.localScale = hitBaseScale * hitMarkerScalePunch;
     }
 
+    // Reproduce death marcador.
     public void PlayDeathMarker()
     {
         EnsureMarkers();
@@ -79,6 +82,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         deathMarkerRoot.localScale = deathBaseScale * deathMarkerScalePunch;
     }
 
+    // Asegura markers.
     private void EnsureMarkers()
     {
         if (hitMarkerRoot == null)
@@ -94,6 +98,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         }
     }
 
+    // Asegura marcador raiz.
     private RectTransform EnsureMarkerRoot(string markerName, Color color, float size, float thickness, out CanvasGroup canvasGroup)
     {
         Transform existingMarker = FindChildByName(markerName);
@@ -129,6 +134,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         return markerRoot;
     }
 
+    // Busca hijo por nombre.
     private Transform FindChildByName(string targetName)
     {
         if (string.IsNullOrWhiteSpace(targetName))
@@ -151,6 +157,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         return null;
     }
 
+    // Crea marcador stroke.
     private void CreateMarkerStroke(RectTransform parent, string strokeName, Color color, float size, float thickness, float rotation)
     {
         GameObject strokeObject = new GameObject(strokeName, typeof(RectTransform), typeof(Image));
@@ -168,6 +175,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         strokeImage.color = color;
     }
 
+    // Actualiza marcador.
     private void UpdateMarker(
         ref float timer,
         float totalDuration,
@@ -197,6 +205,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         markerRoot.localScale = baseScale * scale;
     }
 
+    // Actualiza marcador alpha.
     private void SetMarkerAlpha(CanvasGroup canvasGroup, float alpha)
     {
         if (canvasGroup != null)
@@ -205,6 +214,7 @@ public class CrosshairFeedbackController : MonoBehaviour
         }
     }
 
+    // Obtiene white sprite.
     private static Sprite GetWhiteSprite()
     {
         if (whiteSprite != null)

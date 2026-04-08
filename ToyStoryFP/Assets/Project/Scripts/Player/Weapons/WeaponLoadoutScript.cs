@@ -102,6 +102,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Refresca armas.
     public void RefreshWeapons()
     {
         allWeapons = CollectDirectChildWeapons();
@@ -159,6 +160,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         SetWeaponIndexImmediate(equippedWeaponIndex);
     }
 
+    // Inicia ejecucion equipamiento.
     public void BeginRunLoadout()
     {
         if (allWeapons.Length == 0)
@@ -213,6 +215,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         initialLoadoutResolved = true;
     }
 
+    // Intenta compra arma.
     public bool TryPurchaseWeapon(string weaponId, PlayerCurrencyController currency, bool autoEquip, out string failReason)
     {
         failReason = string.Empty;
@@ -277,12 +280,14 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
+    // Comprueba si arma desbloqueada.
     public bool IsWeaponUnlocked(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
         return !string.IsNullOrEmpty(normalizedWeaponId) && unlockedWeaponIds.Contains(normalizedWeaponId);
     }
 
+    // Obtiene arma tienda entradas.
     public IReadOnlyList<WeaponShopEntry> GetWeaponShopEntries()
     {
         shopEntries.Clear();
@@ -308,6 +313,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return shopEntries;
     }
 
+    // Intenta ciclo arma.
     public bool TryCycleWeapon(int direction)
     {
         if (unlockedWeapons.Length <= 1 || IsSwitchingWeapon)
@@ -332,6 +338,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
+    // Inicia arma cambio.
     private void StartWeaponSwitch(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= unlockedWeapons.Length || nextIndex == equippedWeaponIndex)
@@ -361,6 +368,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Actualiza bajada.
     private void UpdateLowering(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -383,6 +391,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Completa bajada.
     private void CompleteLowering()
     {
         if (targetWeaponIndex < 0 || targetWeaponIndex >= unlockedWeapons.Length)
@@ -408,6 +417,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Actualiza subida.
     private void UpdateRaising(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -430,6 +440,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Finaliza arma cambio.
     private void FinishWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -447,6 +458,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
+    // Gestiona la cancelacion del cambio de arma.
     private void CancelWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -457,6 +469,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
+    // Actualiza arma indice inmediato.
     private void SetWeaponIndexImmediate(int index, bool initializeSilently = false)
     {
         if (unlockedWeapons.Length == 0)
@@ -490,6 +503,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
+    // Asegura que el arma equipada este visible.
     private void EnsureEquippedWeaponVisible()
     {
         if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
@@ -542,6 +556,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         visibleWeapon = equippedWeapon;
     }
 
+    // Gestiona activate only.
     private void ActivateOnly(int index)
     {
         WeaponScript activeWeapon =
@@ -565,24 +580,28 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Obtiene lower duracion.
     private float GetLowerDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchLowerRatio) / totalRatio);
     }
 
+    // Obtiene raise duracion.
     private float GetRaiseDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchRaiseRatio) / totalRatio);
     }
 
+    // Gestiona smooth phase.
     private float SmoothPhase(float value)
     {
         value = Mathf.Clamp01(value);
         return value * value * (3f - 2f * value);
     }
 
+    // Recopila direct hijo armas.
     private WeaponScript[] CollectDirectChildWeapons()
     {
         if (weaponCamera == null)
@@ -607,6 +626,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return directChildWeapons.ToArray();
     }
 
+    // Construye definition maps.
     private void BuildDefinitionMaps()
     {
         definitionsById.Clear();
@@ -681,6 +701,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
+    // Gestiona rebuild desbloqueada armas.
     private void RebuildUnlockedWeapons()
     {
         List<WeaponScript> unlocked = new List<WeaponScript>(allWeapons.Length);
@@ -709,6 +730,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         unlockedWeapons = unlocked.ToArray();
     }
 
+    // Resuelve activo indice.
     private int ResolveActiveIndex(WeaponScript[] pool)
     {
         if (pool == null || pool.Length == 0)
@@ -738,6 +760,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return equippedWeaponIndex >= 0 && equippedWeaponIndex < pool.Length ? equippedWeaponIndex : 0;
     }
 
+    // Resuelve arma id.
     private string ResolveWeaponId(WeaponScript weapon)
     {
         if (weapon == null)
@@ -759,6 +782,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return fallbackId;
     }
 
+    // Resuelve starting arma indice.
     private int ResolveStartingWeaponIndex()
     {
         string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
@@ -774,6 +798,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return 0;
     }
 
+    // Busca desbloqueada arma indice.
     private int FindUnlockedWeaponIndex(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
@@ -793,6 +818,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return -1;
     }
 
+    // Resuelve respaldo arma id.
     private string ResolveFallbackWeaponId()
     {
         string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
@@ -812,6 +838,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return string.Empty;
     }
 
+    // Busca arma por nombre.
     private WeaponScript FindWeaponByName(string weaponName)
     {
         string normalizedName = NormalizeWeaponId(weaponName);
@@ -832,11 +859,13 @@ public class WeaponLoadoutScript : MonoBehaviour
         return null;
     }
 
+    // Gestiona normalize arma id.
     private string NormalizeWeaponId(string rawWeaponId)
     {
         return string.IsNullOrWhiteSpace(rawWeaponId) ? string.Empty : rawWeaponId.Trim();
     }
 
+    // Gestiona deactivate todos armas.
     private void DeactivateAllWeapons()
     {
         for (int i = 0; i < allWeapons.Length; i++)

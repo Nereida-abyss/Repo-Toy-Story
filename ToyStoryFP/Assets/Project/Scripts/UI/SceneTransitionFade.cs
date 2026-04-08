@@ -29,6 +29,7 @@ public class SceneTransitionFade : MonoBehaviour
     private bool hasStartedSceneLoad;
     private List<UIFadeUtility.FadeTarget> uiFadeTargets = new List<UIFadeUtility.FadeTarget>();
 
+    // Intenta fade salida and load escena.
     public static bool TryFadeOutAndLoadScene(string sceneName)
     {
         if (string.IsNullOrWhiteSpace(sceneName))
@@ -74,6 +75,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
+    // Resuelve objetivo camara.
     private static Camera ResolveTargetCamera()
     {
         if (Camera.main != null && Camera.main.isActiveAndEnabled)
@@ -96,6 +98,7 @@ public class SceneTransitionFade : MonoBehaviour
         return null;
     }
 
+    // Inicia fade.
     private void BeginFade(string sceneName)
     {
         if (fadeCoroutine != null)
@@ -112,6 +115,7 @@ public class SceneTransitionFade : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeOutAndLoadSceneRoutine(sceneName));
     }
 
+    // Secuencia de fade salida and load escena rutina.
     private IEnumerator FadeOutAndLoadSceneRoutine(string sceneName)
     {
         float duration = Mathf.Max(0.01f, fadeDuration);
@@ -132,6 +136,7 @@ public class SceneTransitionFade : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
+    // Asegura posterior processing volumen.
     private void EnsurePostProcessingVolume()
     {
         cameraData = GetComponent<UniversalAdditionalCameraData>();
@@ -172,6 +177,7 @@ public class SceneTransitionFade : MonoBehaviour
         transitionVolume.profile = runtimeProfile;
     }
 
+    // Aplica fade estado.
     private void ApplyFadeState(float normalized)
     {
         if (vignette == null || colorAdjustments == null || transitionVolume == null)
@@ -188,12 +194,14 @@ public class SceneTransitionFade : MonoBehaviour
         colorAdjustments.postExposure.Override(Mathf.Lerp(startPostExposure, endPostExposure, eased));
     }
 
+    // Gestiona escena loaded.
     private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         isTransitioning = false;
         SceneManager.sceneLoaded -= HandleSceneLoaded;
     }
 
+    // Restaura original posterior processing estado.
     private void RestoreOriginalPostProcessingState()
     {
         if (cameraData != null)
@@ -202,11 +210,13 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
+    // Guarda en cache UI fade objetivos.
     private void CacheUiFadeTargets()
     {
         uiFadeTargets = UIFadeUtility.ResolveActiveCanvasTargets(gameObject.scene);
     }
 
+    // Aplica UI fade estado.
     private void ApplyUiFadeState(float normalized)
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -229,6 +239,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
+    // Restaura UI fade objetivos.
     private void RestoreUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -249,6 +260,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
+    // Gestiona limpieza UI fade objetivos.
     private void CleanupUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)

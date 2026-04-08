@@ -22,16 +22,19 @@ public class EnemyAudioController : MonoBehaviour
         Apply3DSettings();
     }
 
+    // Reproduce alerta.
     public void PlayAlert()
     {
         PlayOneShot(alertClip, alertVolume, 0.01f);
     }
 
+    // Reproduce arma disparo.
     public void PlayWeaponFire(AudioClip clip, float volume, float pitchRandomness)
     {
         PlayOneShot(clip, volume, pitchRandomness > 0f ? pitchRandomness : firePitchRandomness);
     }
 
+    // Resuelve audio origen.
     private void ResolveAudioSource()
     {
         if (audioSource == null)
@@ -45,6 +48,7 @@ public class EnemyAudioController : MonoBehaviour
         }
     }
 
+    // Aplica 3 d ajustes.
     private void Apply3DSettings()
     {
         if (audioSource == null)
@@ -60,6 +64,7 @@ public class EnemyAudioController : MonoBehaviour
         audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
     }
 
+    // Reproduce one disparo.
     private void PlayOneShot(AudioClip clip, float volume, float pitchRandomness)
     {
         if (audioSource == null || clip == null || volume <= 0f)

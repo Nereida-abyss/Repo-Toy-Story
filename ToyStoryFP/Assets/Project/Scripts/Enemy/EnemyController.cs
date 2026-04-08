@@ -154,6 +154,7 @@ public class EnemyController : MonoBehaviour
     void OnDisable() => tacticsCoordinator?.UnregisterEnemy(this);
     void OnDestroy() => tacticsCoordinator?.UnregisterEnemy(this);
 
+    // Aplica el escalado por ronda.
     public void ApplyRoundScaling(float healthMultiplier, float damageMultiplier)
     {
         CacheBaseScalingStats();
@@ -170,6 +171,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    // Notifica daño recibido del jugador.
     public void NotifyDamagedByPlayer(Transform aggressor, Vector3 hitPoint)
     {
         if (healthScript != null && !healthScript.IsAlive)
@@ -198,6 +200,7 @@ public class EnemyController : MonoBehaviour
         tacticsCoordinator?.BroadcastAggro(this, lastKnownPlayerPosition, allyAlertRadius, aggressor);
     }
 
+    // Notifica aliado alerta.
     public void NotifyAllyAlert(Vector3 playerPosition, Transform aggressor)
     {
         if (aggressor != null)
@@ -212,6 +215,7 @@ public class EnemyController : MonoBehaviour
         if (currentState != AIState.Combat) SetState(AIState.Investigate, true);
     }
 
+    // Actualiza la prioridad de evitacion.
     public void SetAvoidancePriority(int priority)
     {
         if (navMeshAgent != null) navMeshAgent.avoidancePriority = Mathf.Clamp(priority, 0, 99);
@@ -252,6 +256,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    // Actualiza temporizadores.
     private void UpdateTimers(bool canSeeTarget)
     {
         if (!canSeeTarget && loseSightTimer > 0f) loseSightTimer -= Time.deltaTime;
@@ -264,6 +269,7 @@ public class EnemyController : MonoBehaviour
         if (stuckCheckTimer > 0f) stuckCheckTimer -= Time.deltaTime;
     }
 
+    // Actualiza el estado de alerta.
     private void UpdateAwarenessState(bool hasTarget, bool canSeeTarget)
     {
         if (isEnraged)
@@ -325,6 +331,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    // Gestiona patrulla.
     private void HandlePatrol()
     {
         ResetAttackWarmup();
@@ -332,6 +339,7 @@ public class EnemyController : MonoBehaviour
         UpdateMovementPresentation(GetMovementFacingDirection());
     }
 
+    // Gestiona investigacion.
     private void HandleInvestigate()
     {
         ResetAttackWarmup();
@@ -362,6 +370,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    // Gestiona combate.
     private void HandleCombat(bool canSeeTarget, Vector3 flatDirection, float flatDistance)
     {
         if (isEnraged)
@@ -427,6 +436,7 @@ public class EnemyController : MonoBehaviour
         if (weaponScript != null) weaponScript.TryFire(GetTargetAimPoint());
     }
 
+    // Gestiona enfurecido combate.
     private void HandleEnragedCombat(bool canSeeTarget, Vector3 flatDirection, float flatDistance)
     {
         if (!IsEnragedTargetValid())
@@ -484,6 +494,7 @@ public class EnemyController : MonoBehaviour
         if (weaponScript != null) weaponScript.TryFire(GetTargetAimPoint());
     }
 
+    // Refresca el destino visible de combate.
     private void RefreshVisibleCombatDestination(Vector3 flatDirection, float flatDistance)
     {
         if (TryResolveCombatMovePoint(flatDirection, flatDistance, out Vector3 destination))
@@ -495,6 +506,7 @@ public class EnemyController : MonoBehaviour
         RefreshCombatDestination();
     }
 
+    // Refresca enfurecido destino.
     private void RefreshEnragedDestination()
     {
         if (target == null && !hasLastKnownPlayerPosition)
@@ -513,6 +525,7 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(center, combatMovePointRefreshInterval);
     }
 
+    // Refresca combate destino.
     private void RefreshCombatDestination()
     {
         Vector3 center = target != null ? target.position : (hasLastKnownPlayerPosition ? lastKnownPlayerPosition : transform.position);
@@ -520,6 +533,7 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(destination);
     }
 
+    // Refresca investigacion destino.
     private void RefreshInvestigateDestination()
     {
         Vector3 center = hasLastKnownPlayerPosition ? lastKnownPlayerPosition : transform.position;
@@ -527,6 +541,7 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(destination);
     }
 
+    // Intenta resolver combate destino.
     private bool TryResolveCombatDestination(Vector3 center, out Vector3 destination)
     {
         ResolveCoordinator();
@@ -540,6 +555,7 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(center, slotOuterRadius, out destination);
     }
 
+    // Intenta resolver investigacion destino.
     private bool TryResolveInvestigateDestination(Vector3 center, out Vector3 destination)
     {
         ResolveCoordinator();
@@ -553,6 +569,7 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(center, slotOuterRadius, out destination);
     }
 
+    // Intenta resolver respaldo destino.
     private bool TryResolveFallbackDestination(Vector3 center, float radius, out Vector3 destination)
     {
         float searchRadius = Mathf.Max(0.35f, radius);
@@ -573,11 +590,13 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
+    // Actualiza tactical destino.
     private void SetTacticalDestination(Vector3 destination)
     {
         SetTacticalDestination(destination, slotRefreshInterval);
     }
 
+    // Actualiza tactical destino.
     private void SetTacticalDestination(Vector3 destination, float refreshInterval)
     {
         tacticalDestination = destination;
@@ -587,11 +606,13 @@ public class EnemyController : MonoBehaviour
         ResetNavigationRecoveryState();
     }
 
+    // Comprueba si refresco tactical destino.
     private bool ShouldRefreshTacticalDestination()
     {
         return forceDestinationRefresh || !hasTacticalDestination || destinationRefreshTimer <= 0f;
     }
 
+    // Gestiona force destino refresco.
     private void ForceDestinationRefresh()
     {
         forceDestinationRefresh = true;
@@ -599,6 +620,7 @@ public class EnemyController : MonoBehaviour
         ResetNavigationRecoveryState();
     }
 
+    // Supervisa navegacion recovery.
     private void MonitorNavigationRecovery(bool canSeeTarget)
     {
         if (!hasTacticalDestination || !IsNavigationAvailable())
@@ -640,6 +662,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    // Gestiona probe wall ahead.
     private bool ProbeWallAhead()
     {
         Vector3 probeDirection = GetDirectionToCurrentDestination();
@@ -662,6 +685,7 @@ public class EnemyController : MonoBehaviour
         return target == null || (hit.transform != target && !hit.transform.IsChildOf(target));
     }
 
+    // Reinicia navegacion recovery estado.
     private void ResetNavigationRecoveryState()
     {
         timeWithoutProgress = 0f;
@@ -669,6 +693,7 @@ public class EnemyController : MonoBehaviour
         stuckCheckTimer = 0f;
     }
 
+    // Actualiza movimiento presentation.
     private void UpdateMovementPresentation(Vector3 facingDirection)
     {
         movementScript.SetMoveInput(Vector2.zero);
@@ -687,6 +712,7 @@ public class EnemyController : MonoBehaviour
             animationMoveThreshold);
     }
 
+    // Actualiza measured planar velocity.
     private void UpdateMeasuredPlanarVelocity()
     {
         Vector3 currentPosition = transform.position;
@@ -696,12 +722,14 @@ public class EnemyController : MonoBehaviour
         lastMeasuredPosition = currentPosition;
     }
 
+    // Reinicia measured motion.
     private void ResetMeasuredMotion()
     {
         lastMeasuredPosition = transform.position;
         measuredPlanarVelocity = Vector3.zero;
     }
 
+    // Actualiza combate movimiento decision.
     private void UpdateCombatMovementDecision(float flatDistance)
     {
         if (combatDecisionTimer > 0f)
@@ -737,6 +765,7 @@ public class EnemyController : MonoBehaviour
         combatDecisionTimer = Mathf.Max(0.1f, combatDecisionInterval);
     }
 
+    // Intenta resolver combate movimiento punto.
     private bool TryResolveCombatMovePoint(Vector3 flatDirection, float flatDistance, out Vector3 destination)
     {
         destination = transform.position;
@@ -817,6 +846,7 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(target.position, slotOuterRadius, out destination);
     }
 
+    // Obtiene combate facing direccion.
     private Vector3 GetCombatFacingDirection(Vector3 visibleTargetDirection)
     {
         Vector3 direction = Vector3.ProjectOnPlane(visibleTargetDirection, Vector3.up);
@@ -828,6 +858,7 @@ public class EnemyController : MonoBehaviour
         return GetMovementFacingDirection();
     }
 
+    // Obtiene movimiento facing direccion.
     private Vector3 GetMovementFacingDirection()
     {
         Vector3 direction = Vector3.ProjectOnPlane(measuredPlanarVelocity, Vector3.up);
@@ -843,6 +874,7 @@ public class EnemyController : MonoBehaviour
         return lastMovementDirection.sqrMagnitude > 0.0001f ? lastMovementDirection : transform.forward;
     }
 
+    // Obtiene actual combate side sign.
     private int GetCurrentCombatSideSign()
     {
         if (currentCombatMovementMode == CombatMovementMode.StrafeLeft) return -1;
@@ -850,6 +882,7 @@ public class EnemyController : MonoBehaviour
         return preferredCombatSideSign < 0 ? -1 : 1;
     }
 
+    // Obtiene direccion a actual destino.
     private Vector3 GetDirectionToCurrentDestination()
     {
         return hasTacticalDestination
@@ -857,6 +890,7 @@ public class EnemyController : MonoBehaviour
             : Vector3.zero;
     }
 
+    // Obtiene direccion a ultimo known jugador posicion.
     private Vector3 GetDirectionToLastKnownPlayerPosition()
     {
         return hasLastKnownPlayerPosition
@@ -864,6 +898,7 @@ public class EnemyController : MonoBehaviour
             : Vector3.zero;
     }
 
+    // Intenta resolver objetivo.
     private bool TryResolveTarget()
     {
         if (target == null)
@@ -881,6 +916,7 @@ public class EnemyController : MonoBehaviour
         return cachedTargetHealth == null || cachedTargetHealth.IsAlive;
     }
 
+    // Guarda en cache objetivo vida.
     private void CacheTargetHealth()
     {
         if (target == null)
@@ -899,6 +935,7 @@ public class EnemyController : MonoBehaviour
         cachedTargetHealth = target.GetComponent<PlayerHealthScript>();
     }
 
+    // Resuelve jugador controller.
     private PlayerController ResolvePlayerController()
     {
         if (cachedPlayerController != null) return cachedPlayerController;
@@ -907,11 +944,13 @@ public class EnemyController : MonoBehaviour
         return cachedPlayerController;
     }
 
+    // Resuelve coordinator.
     private void ResolveCoordinator()
     {
         if (tacticsCoordinator == null) tacticsCoordinator = EnemyTacticsCoordinator.Resolve();
     }
 
+    // Resuelve alerta indicator.
     private void ResolveAlertIndicator()
     {
         alertIndicator = GetComponentInChildren<EnemyAlertIndicator>(true);
@@ -926,6 +965,7 @@ public class EnemyController : MonoBehaviour
         alertIndicator.Configure(anchor, GetAlertHeightOffset());
     }
 
+    // Configura navegacion.
     private void ConfigureNavigation()
     {
         if (navMeshAgent == null) return;
@@ -940,6 +980,7 @@ public class EnemyController : MonoBehaviour
         EnsureAgentOnNavMesh();
     }
 
+    // Comprueba si line of sight.
     private bool HasLineOfSight()
     {
         if (target == null) return false;
@@ -959,6 +1000,7 @@ public class EnemyController : MonoBehaviour
         return true;
     }
 
+    // Comprueba si see actual objetivo.
     private bool CanSeeCurrentTarget()
     {
         if (!TryResolveTarget() || target == null) return false;
@@ -966,11 +1008,13 @@ public class EnemyController : MonoBehaviour
         return flatDirection.magnitude <= GetDetectionRange() && HasLineOfSight();
     }
 
+    // Obtiene eye origin.
     private Vector3 GetEyeOrigin()
     {
         return eyeOrigin != null ? eyeOrigin.position : transform.position + Vector3.up * GetEyeHeight();
     }
 
+    // Actualiza estado.
     private void SetState(AIState nextState, bool playPulse)
     {
         bool changedState = currentState != nextState;
@@ -1008,17 +1052,20 @@ public class EnemyController : MonoBehaviour
         UpdateAgentSpeedByState();
     }
 
+    // Gestiona remember jugador posicion.
     private void RememberPlayerPosition(Vector3 worldPosition)
     {
         lastKnownPlayerPosition = worldPosition;
         hasLastKnownPlayerPosition = true;
     }
 
+    // Limpia ultimo known jugador posicion.
     private void ClearLastKnownPlayerPosition()
     {
         hasLastKnownPlayerPosition = false;
     }
 
+    // Activa enfurecido estado.
     private void EnterEnragedState(Transform playerTarget)
     {
         if (playerTarget == null)
@@ -1038,6 +1085,7 @@ public class EnemyController : MonoBehaviour
         SetState(AIState.Combat, true);
     }
 
+    // Desactiva enfurecido estado.
     private void ExitEnragedState()
     {
         isEnraged = false;
@@ -1055,6 +1103,7 @@ public class EnemyController : MonoBehaviour
         StopNavigation();
     }
 
+    // Comprueba si enfurecido objetivo valido.
     private bool IsEnragedTargetValid()
     {
         if (!isEnraged)
@@ -1071,6 +1120,7 @@ public class EnemyController : MonoBehaviour
         return cachedTargetHealth == null || cachedTargetHealth.IsAlive;
     }
 
+    // Reinicia combate movimiento estado.
     private void ResetCombatMovementState()
     {
         combatDecisionTimer = 0f;
@@ -1080,29 +1130,43 @@ public class EnemyController : MonoBehaviour
             : CombatMovementMode.StrafeRight;
     }
 
+    // Obtiene detection range.
     private float GetDetectionRange() => detectionRange > 0f ? detectionRange : DefaultDetectionRange;
+    // Obtiene lose sight grace time.
     private float GetLoseSightGraceTime() => loseSightGraceTime > 0f ? loseSightGraceTime : DefaultLoseSightGraceTime;
+    // Obtiene eye height.
     private float GetEyeHeight() => eyeHeight > 0f ? eyeHeight : DefaultEyeHeight;
+    // Obtiene alerta height offset.
     private float GetAlertHeightOffset() => alertHeightOffset > 0f ? alertHeightOffset : DefaultAlertHeightOffset;
+    // Obtiene stopping distancia.
     private float GetStoppingDistance() => stoppingDistance > 0f ? stoppingDistance : DefaultStoppingDistance;
+    // Obtiene attack range.
     private float GetAttackRange() => attackRange > 0f ? attackRange : DefaultAttackRange;
+    // Obtiene patrulla punto reach threshold.
     private float GetPatrolPointReachThreshold() => patrolPointReachThreshold > 0f ? patrolPointReachThreshold : DefaultPatrolPointReachThreshold;
+    // Obtiene patrulla retarget delay.
     private float GetPatrolRetargetDelay() => patrolRetargetDelay > 0f ? patrolRetargetDelay : DefaultPatrolRetargetDelay;
+    // Obtiene patrulla search radius.
     private float GetPatrolSearchRadius() => patrolSearchRadius > 0f ? patrolSearchRadius : DefaultPatrolSearchRadius;
+    // Obtiene patrulla min travel distancia.
     private float GetPatrolMinTravelDistance() => patrolMinTravelDistance > 0f ? patrolMinTravelDistance : DefaultPatrolMinTravelDistance;
+    // Obtiene effective stopping distancia.
     private float GetEffectiveStoppingDistance() => Mathf.Max(0.05f, Mathf.Min(GetStoppingDistance(), GetAttackRange()));
 
+    // Reinicia attack warmup.
     private void ResetAttackWarmup()
     {
         attackWarmupTimer = attackWarmup;
     }
 
+    // Obtiene objetivo aim punto.
     private Vector3 GetTargetAimPoint()
     {
         if (target == null) return transform.position + (transform.forward * Mathf.Max(0.1f, GetAttackRange()));
         return target.position + Vector3.up * targetAimHeight;
     }
 
+    // Actualiza patrulla navegacion.
     private void UpdatePatrolNavigation()
     {
         if (!EnsureAgentOnNavMesh())
@@ -1129,6 +1193,7 @@ public class EnemyController : MonoBehaviour
         if (!TrySetNextPatrolDestination()) patrolRetargetTimer = GetPatrolRetargetDelay();
     }
 
+    // Intenta set siguiente patrulla destino.
     private bool TrySetNextPatrolDestination()
     {
         if (navMeshAgent == null) return false;
@@ -1156,6 +1221,7 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
+    // Actualiza agente destino.
     private bool SetAgentDestination(Vector3 destination, float desiredStoppingDistance)
     {
         if (!EnsureAgentOnNavMesh()) return false;
@@ -1164,12 +1230,14 @@ public class EnemyController : MonoBehaviour
         return navMeshAgent.SetDestination(destination);
     }
 
+    // Comprueba si reached destino.
     private bool HasReachedDestination(float reachThreshold)
     {
         if (!IsNavigationAvailable() || navMeshAgent.pathPending || !navMeshAgent.hasPath) return false;
         return navMeshAgent.remainingDistance <= Mathf.Max(0.01f, reachThreshold);
     }
 
+    // Detiene navegacion.
     private void StopNavigation()
     {
         if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
@@ -1177,6 +1245,7 @@ public class EnemyController : MonoBehaviour
         navMeshAgent.ResetPath();
     }
 
+    // Asegura agente en nav mesh.
     private bool EnsureAgentOnNavMesh()
     {
         if (navMeshAgent == null) return false;
@@ -1191,10 +1260,14 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
+    // Comprueba si navegacion available.
     private bool IsNavigationAvailable() => navMeshAgent != null && navMeshAgent.isOnNavMesh;
+    // Obtiene planar agente velocity.
     private Vector3 GetPlanarAgentVelocity() => IsNavigationAvailable() ? Vector3.ProjectOnPlane(navMeshAgent.velocity, Vector3.up) : Vector3.zero;
+    // Obtiene area mask.
     private int GetAreaMask() => navMeshAgent != null ? navMeshAgent.areaMask : NavMesh.AllAreas;
 
+    // Guarda en cache base escalado estadisticas.
     private void CacheBaseScalingStats()
     {
         if (baseScalingStatsCached) return;
@@ -1203,6 +1276,7 @@ public class EnemyController : MonoBehaviour
         baseScalingStatsCached = true;
     }
 
+    // Actualiza agente speed por estado.
     private void UpdateAgentSpeedByState()
     {
         if (navMeshAgent == null)

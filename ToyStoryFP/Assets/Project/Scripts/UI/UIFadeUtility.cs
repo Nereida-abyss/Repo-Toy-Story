@@ -25,6 +25,7 @@ public static class UIFadeUtility
             OriginalIgnoreParentGroups = group.ignoreParentGroups;
         }
 
+        // Gestiona preparar para fade.
         public void PrepareForFade()
         {
             if (Group == null)
@@ -36,6 +37,7 @@ public static class UIFadeUtility
             Group.blocksRaycasts = false;
         }
 
+        // Actualiza alpha.
         public void SetAlpha(float alpha)
         {
             if (Group == null)
@@ -46,6 +48,7 @@ public static class UIFadeUtility
             Group.alpha = alpha;
         }
 
+        // Gestiona restore.
         public void Restore()
         {
             if (Group == null)
@@ -59,6 +62,7 @@ public static class UIFadeUtility
             Group.ignoreParentGroups = OriginalIgnoreParentGroups;
         }
 
+        // Gestiona limpieza.
         public void Cleanup()
         {
             if (CreatedCanvasGroup && Group != null)
@@ -68,6 +72,7 @@ public static class UIFadeUtility
         }
     }
 
+    // Resuelve activo canvas objetivos.
     public static List<FadeTarget> ResolveActiveCanvasTargets(Scene scene)
     {
         List<FadeTarget> targets = new List<FadeTarget>();

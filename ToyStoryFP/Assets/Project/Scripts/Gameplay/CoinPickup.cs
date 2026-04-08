@@ -23,6 +23,7 @@ public class CoinPickup : MonoBehaviour
     private Transform visualRoot;
     private bool collected;
 
+    // Gestiona spawn.
     public static CoinPickup Spawn(Vector3 worldPosition, int value)
     {
         GameObject coinObject = new GameObject("CoinPickup");
@@ -67,6 +68,7 @@ public class CoinPickup : MonoBehaviour
         TryCollect(other);
     }
 
+    // Configura runtime moneda.
     private void ConfigureRuntimeCoin()
     {
         basePosition = transform.position;
@@ -97,6 +99,7 @@ public class CoinPickup : MonoBehaviour
         EnsureVisual();
     }
 
+    // Intenta collect.
     private void TryCollect(Collider other)
     {
         if (collected)
@@ -128,6 +131,7 @@ public class CoinPickup : MonoBehaviour
         Destroy(gameObject);
     }
 
+    // Asegura visual.
     private void EnsureVisual()
     {
         if (visualRoot == null)
@@ -165,6 +169,7 @@ public class CoinPickup : MonoBehaviour
         }
     }
 
+    // Obtiene shared moneda material.
     private static Material GetSharedCoinMaterial()
     {
         if (sharedCoinMaterial != null)
@@ -190,6 +195,7 @@ public class CoinPickup : MonoBehaviour
         return sharedCoinMaterial;
     }
 
+    // Aplica ignore raycast layer.
     private static void ApplyIgnoreRaycastLayer(GameObject target)
     {
         if (target == null)
@@ -207,6 +213,7 @@ public class CoinPickup : MonoBehaviour
         target.layer = ignoreRaycastLayer;
     }
 
+    // Busca hijo por nombre.
     private Transform FindChildByName(string childName)
     {
         if (string.IsNullOrWhiteSpace(childName))

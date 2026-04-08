@@ -13,6 +13,7 @@ public static class RunStatsStore
     private static int currentRunWave;
     private static int currentRunBotsKilled;
 
+    // Inicia ejecucion.
     public static void BeginRun()
     {
         currentRunCoins = 0;
@@ -20,6 +21,7 @@ public static class RunStatsStore
         currentRunBotsKilled = 0;
     }
 
+    // Actualiza monedas.
     public static void UpdateCoins(int currentCoins)
     {
         currentRunCoins = Mathf.Max(0, currentCoins);
@@ -33,6 +35,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
+    // Actualiza oleada.
     public static void UpdateWave(int waveIndex)
     {
         currentRunWave = Mathf.Max(0, waveIndex);
@@ -46,6 +49,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
+    // Gestiona register bot kill.
     public static void RegisterBotKill()
     {
         currentRunBotsKilled++;
@@ -59,6 +63,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
+    // Gestiona commit ultimo ejecucion.
     public static void CommitLastRun()
     {
         PlayerPrefs.SetInt(LastCoinsKey, Mathf.Max(0, currentRunCoins));
@@ -67,6 +72,7 @@ public static class RunStatsStore
         PlayerPrefs.Save();
     }
 
+    // Obtiene ultimo ejecucion estadisticas.
     public static void GetLastRunStats(out int coins, out int wave, out int bots)
     {
         coins = Mathf.Max(0, PlayerPrefs.GetInt(LastCoinsKey, 0));
@@ -74,6 +80,7 @@ public static class RunStatsStore
         bots = Mathf.Max(0, PlayerPrefs.GetInt(LastBotsKilledKey, 0));
     }
 
+    // Obtiene best estadisticas.
     public static void GetBestStats(out int maxCoins, out int maxWave, out int maxBotsKilled)
     {
         maxCoins = GetMaxCoins();
@@ -81,16 +88,19 @@ public static class RunStatsStore
         maxBotsKilled = GetMaxBotsKilled();
     }
 
+    // Obtiene maximo monedas.
     private static int GetMaxCoins()
     {
         return Mathf.Max(0, PlayerPrefs.GetInt(MaxCoinsKey, 0));
     }
 
+    // Obtiene maximo oleada.
     private static int GetMaxWave()
     {
         return Mathf.Max(0, PlayerPrefs.GetInt(MaxWaveKey, 0));
     }
 
+    // Obtiene maximo bots killed.
     private static int GetMaxBotsKilled()
     {
         return Mathf.Max(0, PlayerPrefs.GetInt(MaxBotsKilledKey, 0));

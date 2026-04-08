@@ -76,6 +76,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshAmmo();
     }
 
+    // Resuelve referencias.
     private void ResolveReferences()
     {
         playerHealth = GetComponentInParent<PlayerHealthScript>();
@@ -94,6 +95,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
+    // Resuelve UI referencias.
     private void ResolveUiReferences()
     {
         if (healthFillImage == null)
@@ -127,6 +129,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
+    // Gestiona warn si UI referencias are faltante.
     private void WarnIfUiReferencesAreMissing()
     {
         if (loggedMissingUiReferences)
@@ -171,6 +174,7 @@ public class PlayerHUDController : MonoBehaviour
         GameDebug.Advertencia("HUD", $"PlayerHUDController tiene referencias faltantes bajo {name}: {missingReferences}", this);
     }
 
+    // Conecta eventos.
     private void BindEvents()
     {
         UnbindEvents();
@@ -197,6 +201,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
+    // Desconecta eventos.
     private void UnbindEvents()
     {
         if (playerHealth != null)
@@ -221,6 +226,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
+    // Gestiona vida cambios.
     private void HandleHealthChanged(PlayerHealthScript health)
     {
         if (health == null)
@@ -242,6 +248,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshHealthText();
     }
 
+    // Gestiona actual arma cambios.
     private void HandleCurrentWeaponChanged(WeaponScript newWeapon)
     {
         if (observedWeapon != null)
@@ -259,16 +266,19 @@ public class PlayerHUDController : MonoBehaviour
         RefreshAmmo();
     }
 
+    // Gestiona monedas cambios.
     private void HandleCoinsChanged(PlayerCurrencyController currency)
     {
         RefreshCoins();
     }
 
+    // Gestiona arma estado cambios.
     private void HandleWeaponStateChanged(WeaponScript weapon)
     {
         RefreshAmmo();
     }
 
+    // Refresca todos inmediato.
     private void RefreshAllImmediate()
     {
         displayedHealthNormalized = playerHealth != null ? playerHealth.HealthNormalized : 1f;
@@ -285,6 +295,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshCoins();
     }
 
+    // Actualiza vida animacion.
     private void UpdateHealthAnimation()
     {
         if (playerHealth == null || healthFillImage == null)
@@ -300,6 +311,7 @@ public class PlayerHUDController : MonoBehaviour
         healthFillImage.fillAmount = displayedHealthNormalized;
     }
 
+    // Refresca vida texto.
     private void RefreshHealthText()
     {
         if (healthText == null)
@@ -316,6 +328,7 @@ public class PlayerHUDController : MonoBehaviour
         healthText.text = $"HP {playerHealth.CurrentHealth}/{playerHealth.MaxHealth}";
     }
 
+    // Refresca ammo.
     private void RefreshAmmo()
     {
         if (ammoText == null || reloadText == null)
@@ -354,6 +367,7 @@ public class PlayerHUDController : MonoBehaviour
         reloadText.text = currentWeapon.IsReloading ? "RELOADING" : string.Empty;
     }
 
+    // Refresca monedas.
     private void RefreshCoins()
     {
         if (coinsText == null)
@@ -365,6 +379,7 @@ public class PlayerHUDController : MonoBehaviour
         coinsText.text = $"COINS {currentCoins}";
     }
 
+    // Inicializa daño feedback visuals.
     private void InitializeDamageFeedbackVisuals()
     {
         damageFeedbackCooldownTimer = 0f;
@@ -379,6 +394,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
+    // Actualiza daño feedback animacion.
     private void UpdateDamageFeedbackAnimation()
     {
         if (damageFeedbackCooldownTimer > 0f)
@@ -390,6 +406,7 @@ public class PlayerHUDController : MonoBehaviour
         UpdateHealthPulse();
     }
 
+    // Actualiza daño flash.
     private void UpdateDamageFlash()
     {
         if (damageFlashImage == null)
@@ -429,6 +446,7 @@ public class PlayerHUDController : MonoBehaviour
         SetDamageFlashAlpha(alpha01);
     }
 
+    // Actualiza vida pulse.
     private void UpdateHealthPulse()
     {
         if (healthFillImage == null)
@@ -449,6 +467,7 @@ public class PlayerHUDController : MonoBehaviour
         healthFillImage.rectTransform.localScale = healthFillBaseScale * scaleMultiplier;
     }
 
+    // Reproduce daño feedback.
     private void PlayDamageFeedback(int damageApplied)
     {
         if (damageApplied <= 0)
@@ -466,11 +485,13 @@ public class PlayerHUDController : MonoBehaviour
         playerAudio?.PlayHurt();
     }
 
+    // Obtiene daño flash total duracion.
     private float GetDamageFlashTotalDuration()
     {
         return Mathf.Max(0.05f, Mathf.Max(0f, damageFlashFadeIn) + Mathf.Max(0f, damageFlashHold) + Mathf.Max(0.001f, damageFlashFadeOut));
     }
 
+    // Actualiza daño flash alpha.
     private void SetDamageFlashAlpha(float alpha01)
     {
         if (damageFlashImage == null)

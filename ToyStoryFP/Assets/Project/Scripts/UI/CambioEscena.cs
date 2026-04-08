@@ -8,22 +8,26 @@ public class CambioEscena : MonoBehaviour
     private const string GamePlaySceneName = "GamePlay";
     private const string EndMenuSceneName = "EndMenu";
 
+    // Inicia juego.
     public void StartGame()
     {
         LoadSceneSafely(GamePlaySceneName);
     }
 
+    // Gestiona volver al menu.
     public void VolverAlMenu()
     {
         LoadSceneSafely(MainMenuSceneName);
     }
 
+    // Gestiona restart juego play.
     public void RestartGamePlay()
     {
         string escenaActual = SceneManager.GetActiveScene().name;
         LoadSceneSafely(escenaActual);
     }
 
+    // Gestiona siguiente escena.
     public void NextScene()
     {
         int siguiente = SceneManager.GetActiveScene().buildIndex + 1;
@@ -43,11 +47,13 @@ public class CambioEscena : MonoBehaviour
         }
     }
 
+    // Gestiona end juego.
     public void EndGame()
     {
         LoadSceneSafely(EndMenuSceneName);
     }
 
+    // Desactiva juego.
     public void ExitGame()
     {
         GameDebug.Info("Escenas", "Has cerrado el juego");
@@ -59,6 +65,7 @@ public class CambioEscena : MonoBehaviour
         #endif
     }
 
+    // Carga escena safely.
     public static bool LoadSceneSafely(string sceneName)
     {
         if (string.IsNullOrWhiteSpace(sceneName))
@@ -77,6 +84,7 @@ public class CambioEscena : MonoBehaviour
         return true;
     }
 
+    // Gestiona preparar para escena change.
     private static void PrepareForSceneChange()
     {
         Time.timeScale = 1f;

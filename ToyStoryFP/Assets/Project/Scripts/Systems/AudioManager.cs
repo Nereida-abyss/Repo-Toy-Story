@@ -18,6 +18,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private int mainMenuMusicIndex = 0;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.05f;
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -29,7 +30,7 @@ public class AudioManager : MonoBehaviour
         Instance = this;
 
         // DontDestroyOnLoad solo funciona en objetos raiz.
-        // Si el manager esta anidado en la jerarquia, lo desacoplamos primero.
+        // Si el gestor esta anidado en la jerarquia, lo desacoplamos primero.
         if (transform.parent != null)
         {
             transform.SetParent(null, true);
@@ -39,21 +40,25 @@ public class AudioManager : MonoBehaviour
         EnsureAudioSources();
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    // Libera listeners y estado al deshabilitar el objeto.
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    // Arranca la configuracion inicial del componente.
     private void Start()
     {
         EnsureMainMenuMusic();
     }
 
+    // Gestiona el evento de escena loaded.
     private void OnSceneLoaded(Scene _, LoadSceneMode __)
     {
         if (!keepMainMenuMusicInAllScenes)
@@ -64,6 +69,7 @@ public class AudioManager : MonoBehaviour
         EnsureMainMenuMusic();
     }
 
+    // Reproduce music.
     public void PlayMusic(int musicIndex)
     {
         EnsureAudioSources();
@@ -92,6 +98,7 @@ public class AudioManager : MonoBehaviour
         musicSource.Play();
     }
 
+    // Reproduce SFX.
     public void PlaySFX(int sfxIndex)
     {
         EnsureAudioSources();
@@ -109,6 +116,7 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(sfxList[sfxIndex]);
     }
 
+    // Asegura main menu music.
     private void EnsureMainMenuMusic()
     {
         EnsureAudioSources();
@@ -138,6 +146,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // Asegura audio sources.
     private void EnsureAudioSources()
     {
         if (musicSource != null && sfxSource != null)

@@ -43,6 +43,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private float lastHoverSfxTime = -100f;
     private bool listenerBound;
 
+    // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
         button = GetComponent<Button>();
@@ -56,23 +57,27 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
+    // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
         BindButtonListener();
         RestoreVisualStateImmediate();
     }
 
+    // Libera listeners y estado al deshabilitar el objeto.
     private void OnDisable()
     {
         UnbindButtonListener();
         RestoreVisualStateImmediate();
     }
 
+    // Actualiza la logica en cada frame.
     private void Update()
     {
         AnimateVisual();
     }
 
+    // Configura theme.
     public void ConfigureTheme(
         Color themedNormalColor,
         Color themedHoverColor,
@@ -91,6 +96,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         enableAudio = themedAudioEnabled;
     }
 
+    // Configura audio.
     public void ConfigureAudio(
         float themedHoverVolume,
         float themedClickVolume,
@@ -111,24 +117,28 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
+    // Actualiza audio clips.
     public void SetAudioClips(AudioClip hover, AudioClip click)
     {
         hoverClip = hover;
         clickClip = click;
     }
 
+    // Gestiona el evento de puntero enter.
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
         TryPlayHoverSound();
     }
 
+    // Gestiona el evento de puntero exit.
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
         isPressed = false;
     }
 
+    // Gestiona el evento de puntero down.
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!IsLeftMouse(eventData))
@@ -139,6 +149,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         isPressed = true;
     }
 
+    // Gestiona el evento de puntero up.
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!IsLeftMouse(eventData))
@@ -149,6 +160,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         isPressed = false;
     }
 
+    // Conecta boton listener.
     private void BindButtonListener()
     {
         if (button == null || listenerBound)
@@ -161,6 +173,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = true;
     }
 
+    // Desconecta boton listener.
     private void UnbindButtonListener()
     {
         if (button == null)
@@ -172,6 +185,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = false;
     }
 
+    // Gestiona boton clicked.
     private void HandleButtonClicked()
     {
         if (!enableAudio)
@@ -183,6 +197,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         PlayOneShot(clip, clickVolume);
     }
 
+    // Anima visual.
     private void AnimateVisual()
     {
         if (rectTransform == null)
@@ -225,6 +240,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         targetGraphic.color = Color.Lerp(targetGraphic.color, targetColor, lerpT);
     }
 
+    // Restaura visual estado inmediato.
     private void RestoreVisualStateImmediate()
     {
         isHovered = false;
@@ -241,6 +257,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
+    // Intenta play hover sound.
     private void TryPlayHoverSound()
     {
         if (!enableAudio)
@@ -261,11 +278,13 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         PlayOneShot(clip, hoverVolume);
     }
 
+    // Comprueba si left mouse.
     private bool IsLeftMouse(PointerEventData eventData)
     {
         return eventData == null || eventData.button == PointerEventData.InputButton.Left;
     }
 
+    // Reproduce one disparo.
     private void PlayOneShot(AudioClip clip, float volume)
     {
         if (clip == null)
@@ -287,6 +306,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         source.pitch = 1f;
     }
 
+    // Resuelve audio origen.
     private AudioSource ResolveAudioSource()
     {
         if (audioSource != null)
@@ -313,6 +333,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return sharedAudioSource;
     }
 
+    // Obtiene respaldo click clip.
     private AudioClip GetFallbackClickClip()
     {
         if (!useAudioManagerFallback)
@@ -329,6 +350,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return cachedFallbackClickClip;
     }
 
+    // Obtiene respaldo hover clip.
     private AudioClip GetFallbackHoverClip()
     {
         if (!useAudioManagerFallback)
@@ -351,6 +373,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return cachedFallbackHoverClip;
     }
 
+    // Busca audio clip en gestor.
     private AudioClip FindAudioClipInManager(string token)
     {
         if (AudioManager.Instance == null || AudioManager.Instance.sfxList == null)
