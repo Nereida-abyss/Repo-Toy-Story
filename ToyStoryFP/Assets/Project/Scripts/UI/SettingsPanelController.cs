@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,6 +6,13 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class SettingsPanelController : MonoBehaviour
 {
+    private enum FullscreenChangeOrigin
+    {
+        Startup,
+        Button,
+        HotkeyF11
+    }
+
     private const string FullscreenKey = "settings.fullscreen";
     private const string MasterVolumeKey = "settings.masterVolume";
     private const string MasterMutedKey = "settings.masterMuted";
@@ -13,6 +21,7 @@ public class SettingsPanelController : MonoBehaviour
     private const float DefaultLookSensitivity = 2f;
     private const float MinLookSensitivity = 0.5f;
     private const float MaxLookSensitivity = 5f;
+    private static readonly HashSet<SettingsPanelController> ActiveInstances = new HashSet<SettingsPanelController>();
 
     [SerializeField] private Button closeButton;
     [SerializeField] private Button fullscreenButton;
@@ -31,9 +40,10 @@ public class SettingsPanelController : MonoBehaviour
     private bool isFullscreen;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    // Aplica guardado ajustes en startup.
+    // Arranca el listener global y aplica el fullscreen guardado antes de cargar escenas.
     private static void ApplySavedSettingsOnStartup()
     {
+        FullscreenHotkeyListener.EnsureInstance();
         ApplySavedSettings();
     }
 
@@ -46,9 +56,16 @@ public class SettingsPanelController : MonoBehaviour
     // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
+        ActiveInstances.Add(this);
         LoadSavedSettings();
         ApplyCurrentSettings();
         RefreshUI();
+    }
+
+    // Libera el registro al desactivar el panel.
+    private void OnDisable()
+    {
+        ActiveInstances.Remove(this);
     }
 
     // Abre panel.
@@ -82,12 +99,7 @@ public class SettingsPanelController : MonoBehaviour
     // Alterna fullscreen.
     public void ToggleFullscreen()
     {
-        isFullscreen = !isFullscreen;
-        PlayerPrefs.SetInt(FullscreenKey, isFullscreen ? 1 : 0);
-        PlayerPrefs.Save();
-
-        Screen.fullScreen = isFullscreen;
-        RefreshUI();
+        ToggleFullscreen(FullscreenChangeOrigin.Button);
     }
 
     // Gestiona el evento de master volumen cambios.
@@ -130,18 +142,18 @@ public class SettingsPanelController : MonoBehaviour
     // Aplica guardado ajustes.
     public static void ApplySavedSettings()
     {
-        bool fullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
+        bool fullscreen = ResolveFullscreenPreference();
         float volume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, DefaultVolume));
         bool muted = PlayerPrefs.GetInt(MasterMutedKey, 0) == 1;
 
-        Screen.fullScreen = fullscreen;
+        ApplyFullscreenState(fullscreen, FullscreenChangeOrigin.Startup, savePreference: false, logChange: true);
         AudioListener.volume = muted ? 0f : volume;
     }
 
     // Carga guardado ajustes.
     private void LoadSavedSettings()
     {
-        isFullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
+        isFullscreen = ResolveFullscreenPreference();
         masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, DefaultVolume));
         masterMuted = PlayerPrefs.GetInt(MasterMutedKey, 0) == 1;
         lookSensitivity = Mathf.Clamp(
@@ -171,10 +183,7 @@ public class SettingsPanelController : MonoBehaviour
     // Refresca UI.
     private void RefreshUI()
     {
-        if (fullscreenStateText != null)
-        {
-            fullscreenStateText.text = isFullscreen ? "ON" : "OFF";
-        }
+        RefreshFullscreenUi();
 
         if (masterVolumeSlider != null)
         {
@@ -208,6 +217,151 @@ public class SettingsPanelController : MonoBehaviour
         if (closeButton == null || fullscreenButton == null || fullscreenStateText == null || masterVolumeSlider == null || muteButton == null || lookSensitivitySlider == null || lookSensitivityValueText == null)
         {
             GameDebug.Advertencia("Settings", "Faltan una o mas referencias UI en SettingsPanelController.", this);
+        }
+    }
+
+    // Alterna fullscreen usando el mismo flujo tanto para botón como para F11.
+    private static void ToggleFullscreen(FullscreenChangeOrigin origin)
+    {
+        ApplyFullscreenState(!Screen.fullScreen, origin, savePreference: true, logChange: true);
+    }
+
+    // Punto de entrada para el atajo global F11.
+    internal static void ToggleFullscreenFromHotkey()
+    {
+        ToggleFullscreen(FullscreenChangeOrigin.HotkeyF11);
+    }
+
+    // Aplica el estado real, lo guarda si toca y mantiene la UI sincronizada.
+    private static void ApplyFullscreenState(bool fullscreen, FullscreenChangeOrigin origin, bool savePreference, bool logChange)
+    {
+        if (savePreference)
+        {
+            PlayerPrefs.SetInt(FullscreenKey, fullscreen ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+
+        Screen.fullScreen = fullscreen;
+        RefreshRegisteredFullscreenUi(fullscreen);
+
+        if (logChange)
+        {
+            GameDebug.Info("Settings", $"Fullscreen {GetFullscreenStateLabel(fullscreen)} aplicado desde {GetFullscreenOriginLabel(origin)}.");
+        }
+    }
+
+    // Lee la preferencia guardada y cae al estado actual si no había nada persistido.
+    private static bool ResolveFullscreenPreference()
+    {
+        return PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
+    }
+
+    // Refresca el texto local de fullscreen.
+    private void RefreshFullscreenUi()
+    {
+        if (fullscreenStateText != null)
+        {
+            fullscreenStateText.text = GetFullscreenStateLabel(isFullscreen);
+        }
+    }
+
+    // Sincroniza cualquier panel de ajustes abierto en ese momento.
+    private static void RefreshRegisteredFullscreenUi(bool fullscreen)
+    {
+        if (ActiveInstances.Count == 0)
+        {
+            return;
+        }
+
+        List<SettingsPanelController> missingInstances = null;
+
+        foreach (SettingsPanelController instance in ActiveInstances)
+        {
+            if (instance == null)
+            {
+                missingInstances ??= new List<SettingsPanelController>();
+                missingInstances.Add(instance);
+                continue;
+            }
+
+            instance.isFullscreen = fullscreen;
+            instance.RefreshFullscreenUi();
+        }
+
+        if (missingInstances == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < missingInstances.Count; i++)
+        {
+            ActiveInstances.Remove(missingInstances[i]);
+        }
+    }
+
+    // Devuelve el texto visible del estado de fullscreen.
+    private static string GetFullscreenStateLabel(bool fullscreen)
+    {
+        return fullscreen ? "ON" : "OFF";
+    }
+
+    // Traduce el origen del cambio a un texto corto para debug.
+    private static string GetFullscreenOriginLabel(FullscreenChangeOrigin origin)
+    {
+        switch (origin)
+        {
+            case FullscreenChangeOrigin.Button:
+                return "Button";
+            case FullscreenChangeOrigin.HotkeyF11:
+                return "F11";
+            default:
+                return "Startup";
+        }
+    }
+}
+
+internal sealed class FullscreenHotkeyListener : MonoBehaviour
+{
+    private static FullscreenHotkeyListener instance;
+
+    // Asegura una única instancia global del listener entre escenas.
+    internal static void EnsureInstance()
+    {
+        if (instance != null)
+        {
+            return;
+        }
+
+        instance = FindFirstObjectByType<FullscreenHotkeyListener>();
+
+        if (instance != null)
+        {
+            return;
+        }
+
+        GameObject listenerObject = new GameObject("FullscreenHotkeyListener");
+        instance = listenerObject.AddComponent<FullscreenHotkeyListener>();
+    }
+
+    // Mantiene viva una sola copia del listener durante todo el juego.
+    private void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    // Escucha F11 y delega el cambio real al controlador de ajustes.
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            SettingsPanelController.ToggleFullscreenFromHotkey();
         }
     }
 }
