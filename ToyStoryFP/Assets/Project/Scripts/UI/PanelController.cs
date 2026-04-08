@@ -156,6 +156,15 @@ public class PanelController : MonoBehaviour
             return;
         }
 
+        if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
+        {
+            GameDebug.Advertencia(
+                "EndMenu",
+                "No se pudo iniciar la secuencia porque el objeto Controlador esta inactivo o deshabilitado.",
+                this);
+            return;
+        }
+
         activeSequence = StartCoroutine(RunManagedSequence(routine));
     }
 
