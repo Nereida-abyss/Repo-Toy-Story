@@ -14,6 +14,8 @@ public class SettingsPanelController : MonoBehaviour
     }
 
     private const string FullscreenKey = "settings.fullscreen";
+    private const string WindowedWidthKey = "settings.windowedWidth";
+    private const string WindowedHeightKey = "settings.windowedHeight";
     private const string MasterVolumeKey = "settings.masterVolume";
     private const string MasterMutedKey = "settings.masterMuted";
     private const string LookSensitivityKey = "settings.lookSensitivity";
@@ -21,6 +23,9 @@ public class SettingsPanelController : MonoBehaviour
     private const float DefaultLookSensitivity = 2f;
     private const float MinLookSensitivity = 0.5f;
     private const float MaxLookSensitivity = 5f;
+    private const int DefaultWindowedWidth = 1024;
+    private const int DefaultWindowedHeight = 768;
+    private const int MinimumWindowedDimension = 320;
     private static readonly HashSet<SettingsPanelController> ActiveInstances = new HashSet<SettingsPanelController>();
 
     [SerializeField] private Button closeButton;
@@ -165,7 +170,7 @@ public class SettingsPanelController : MonoBehaviour
     // Aplica actual ajustes.
     private void ApplyCurrentSettings()
     {
-        Screen.fullScreen = isFullscreen;
+        ApplyFullscreenMode(isFullscreen);
         ApplyAudioSettings();
 
         if (MouseLookScript.instance != null)
@@ -223,7 +228,7 @@ public class SettingsPanelController : MonoBehaviour
     // Alterna fullscreen usando el mismo flujo tanto para botón como para F11.
     private static void ToggleFullscreen(FullscreenChangeOrigin origin)
     {
-        ApplyFullscreenState(!Screen.fullScreen, origin, savePreference: true, logChange: true);
+        ApplyFullscreenState(!ResolveCurrentFullscreenState(), origin, savePreference: true, logChange: true);
     }
 
     // Punto de entrada para el atajo global F11.
@@ -235,13 +240,14 @@ public class SettingsPanelController : MonoBehaviour
     // Aplica el estado real, lo guarda si toca y mantiene la UI sincronizada.
     private static void ApplyFullscreenState(bool fullscreen, FullscreenChangeOrigin origin, bool savePreference, bool logChange)
     {
+        ApplyFullscreenMode(fullscreen);
+
         if (savePreference)
         {
             PlayerPrefs.SetInt(FullscreenKey, fullscreen ? 1 : 0);
             PlayerPrefs.Save();
         }
 
-        Screen.fullScreen = fullscreen;
         RefreshRegisteredFullscreenUi(fullscreen);
 
         if (logChange)
@@ -253,7 +259,71 @@ public class SettingsPanelController : MonoBehaviour
     // Lee la preferencia guardada y cae al estado actual si no había nada persistido.
     private static bool ResolveFullscreenPreference()
     {
-        return PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
+        return PlayerPrefs.GetInt(FullscreenKey, ResolveCurrentFullscreenState() ? 1 : 0) == 1;
+    }
+
+    // Considera fullscreen cualquier modo que no sea ventana.
+    private static bool ResolveCurrentFullscreenState()
+    {
+        return Screen.fullScreenMode != FullScreenMode.Windowed;
+    }
+
+    // Aplica de forma explícita el modo de pantalla correcto.
+    private static void ApplyFullscreenMode(bool fullscreen)
+    {
+        if (fullscreen)
+        {
+            CaptureCurrentWindowedSizeIfNeeded();
+            Resolution desktopResolution = Screen.currentResolution;
+            Screen.SetResolution(
+                Mathf.Max(DefaultWindowedWidth, desktopResolution.width),
+                Mathf.Max(DefaultWindowedHeight, desktopResolution.height),
+                FullScreenMode.FullScreenWindow);
+            return;
+        }
+
+        Vector2Int windowedSize = ResolveWindowedSize();
+        Screen.SetResolution(windowedSize.x, windowedSize.y, FullScreenMode.Windowed);
+    }
+
+    // Guarda el último tamaño de ventana útil antes de entrar en fullscreen.
+    private static void CaptureCurrentWindowedSizeIfNeeded()
+    {
+        if (ResolveCurrentFullscreenState())
+        {
+            return;
+        }
+
+        int currentWidth = Mathf.Max(Screen.width, 0);
+        int currentHeight = Mathf.Max(Screen.height, 0);
+
+        if (currentWidth < MinimumWindowedDimension || currentHeight < MinimumWindowedDimension)
+        {
+            return;
+        }
+
+        PlayerPrefs.SetInt(WindowedWidthKey, currentWidth);
+        PlayerPrefs.SetInt(WindowedHeightKey, currentHeight);
+        PlayerPrefs.Save();
+    }
+
+    // Recupera el tamaño de ventana guardado o usa un fallback seguro.
+    private static Vector2Int ResolveWindowedSize()
+    {
+        int width = PlayerPrefs.GetInt(WindowedWidthKey, DefaultWindowedWidth);
+        int height = PlayerPrefs.GetInt(WindowedHeightKey, DefaultWindowedHeight);
+
+        if (width < MinimumWindowedDimension)
+        {
+            width = DefaultWindowedWidth;
+        }
+
+        if (height < MinimumWindowedDimension)
+        {
+            height = DefaultWindowedHeight;
+        }
+
+        return new Vector2Int(width, height);
     }
 
     // Refresca el texto local de fullscreen.
