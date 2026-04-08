@@ -228,7 +228,7 @@ public class SettingsPanelController : MonoBehaviour
     // Alterna fullscreen usando el mismo flujo tanto para botón como para F11.
     private static void ToggleFullscreen(FullscreenChangeOrigin origin)
     {
-        ApplyFullscreenState(!ResolveCurrentFullscreenState(), origin, savePreference: true, logChange: true);
+        ApplyFullscreenState(!ResolveFullscreenPreference(), origin, savePreference: true, logChange: true);
     }
 
     // Punto de entrada para el atajo global F11.
@@ -275,6 +275,7 @@ public class SettingsPanelController : MonoBehaviour
         {
             CaptureCurrentWindowedSizeIfNeeded();
             Resolution desktopResolution = Screen.currentResolution;
+            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
             Screen.SetResolution(
                 Mathf.Max(DefaultWindowedWidth, desktopResolution.width),
                 Mathf.Max(DefaultWindowedHeight, desktopResolution.height),
@@ -283,6 +284,7 @@ public class SettingsPanelController : MonoBehaviour
         }
 
         Vector2Int windowedSize = ResolveWindowedSize();
+        Screen.fullScreenMode = FullScreenMode.Windowed;
         Screen.SetResolution(windowedSize.x, windowedSize.y, FullScreenMode.Windowed);
     }
 
