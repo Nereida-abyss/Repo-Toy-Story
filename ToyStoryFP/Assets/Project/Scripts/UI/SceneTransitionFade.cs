@@ -29,7 +29,7 @@ public class SceneTransitionFade : MonoBehaviour
     private bool hasStartedSceneLoad;
     private List<UIFadeUtility.FadeTarget> uiFadeTargets = new List<UIFadeUtility.FadeTarget>();
 
-    // Intenta fade salida and load escena.
+    // Punto de entrada para salir con fade y cargar una escena nueva sin cortes bruscos.
     public static bool TryFadeOutAndLoadScene(string sceneName)
     {
         if (string.IsNullOrWhiteSpace(sceneName))
@@ -75,7 +75,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
-    // Resuelve objetivo cámara.
+    // Decide qué cámara debe recibir el efecto de fade.
     private static Camera ResolveTargetCamera()
     {
         if (Camera.main != null && Camera.main.isActiveAndEnabled)
@@ -98,7 +98,7 @@ public class SceneTransitionFade : MonoBehaviour
         return null;
     }
 
-    // Inicia fade.
+    // Arranca la transición si no hay otra corriendo ya.
     private void BeginFade(string sceneName)
     {
         if (fadeCoroutine != null)
@@ -115,7 +115,8 @@ public class SceneTransitionFade : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeOutAndLoadSceneRoutine(sceneName));
     }
 
-    // Secuencia de fade salida and load escena rutina.
+    // Secuencia completa del cambio de escena:
+    // prepara objetivos, aplica fade, carga la escena y después restaura el estado.
     private IEnumerator FadeOutAndLoadSceneRoutine(string sceneName)
     {
         float duration = Mathf.Max(0.01f, fadeDuration);
@@ -136,7 +137,7 @@ public class SceneTransitionFade : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-    // Asegura posterior processing volumen.
+    // Garantiza el volumen de postproceso que usa el fade antes de empezar a animar.
     private void EnsurePostProcessingVolume()
     {
         cameraData = GetComponent<UniversalAdditionalCameraData>();
@@ -177,7 +178,7 @@ public class SceneTransitionFade : MonoBehaviour
         transitionVolume.profile = runtimeProfile;
     }
 
-    // Aplica fade estado.
+    // Aplica el valor de fade a cámara y postproceso en un único punto.
     private void ApplyFadeState(float normalized)
     {
         if (vignette == null || colorAdjustments == null || transitionVolume == null)
@@ -194,14 +195,14 @@ public class SceneTransitionFade : MonoBehaviour
         colorAdjustments.postExposure.Override(Mathf.Lerp(startPostExposure, endPostExposure, eased));
     }
 
-    // Gestiona escena loaded.
+    // Cuando la escena termina de cargar, restauramos el flag global y soltamos el evento.
     private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         isTransitioning = false;
         SceneManager.sceneLoaded -= HandleSceneLoaded;
     }
 
-    // Restaura original posterior processing estado.
+    // Devuelve el postproceso a su configuración original después del fade.
     private void RestoreOriginalPostProcessingState()
     {
         if (cameraData != null)
@@ -210,13 +211,13 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
-    // Guarda en cache UI fade objetivos.
+    // Guarda las piezas de UI que también deben desvanecerse durante la transición.
     private void CacheUiFadeTargets()
     {
         uiFadeTargets = UIFadeUtility.ResolveActiveCanvasTargets(gameObject.scene);
     }
 
-    // Aplica UI fade estado.
+    // Aplica el mismo fade a la UI cacheada para que la escena se vaya de forma uniforme.
     private void ApplyUiFadeState(float normalized)
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -239,7 +240,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
-    // Restaura UI fade objetivos.
+    // Devuelve la UI al alpha normal cuando la transición ha terminado.
     private void RestoreUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)
@@ -260,7 +261,7 @@ public class SceneTransitionFade : MonoBehaviour
         }
     }
 
-    // Gestiona limpieza UI fade objetivos.
+    // Limpia referencias de fade UI que ya no existen o han cambiado de escena.
     private void CleanupUiFadeTargets()
     {
         if (uiFadeTargets == null || uiFadeTargets.Count == 0)

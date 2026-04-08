@@ -71,7 +71,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         RestoreVisualStateImmediate();
     }
 
-    // Actualiza la lógica en cada frame.
+    // Mantiene viva la animación visual del botón mientras haya transición en curso.
     private void Update()
     {
         AnimateVisual();
@@ -117,28 +117,28 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
-    // Actualiza audio clips.
+    // Completa clips vacíos con opciones de respaldo para no dejar botones mudos.
     public void SetAudioClips(AudioClip hover, AudioClip click)
     {
         hoverClip = hover;
         clickClip = click;
     }
 
-    // Gestiona el evento de puntero enter.
+    // Reacción al entrar con el puntero: marca hover y dispara feedback.
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
         TryPlayHoverSound();
     }
 
-    // Gestiona el evento de puntero exit.
+    // Reacción al salir con el puntero: limpia hover y devuelve el botón a reposo.
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
         isPressed = false;
     }
 
-    // Gestiona el evento de puntero down.
+    // Reacción al pulsar: registra el botón del ratón y activa la pose de presión.
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!IsLeftMouse(eventData))
@@ -149,7 +149,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         isPressed = true;
     }
 
-    // Gestiona el evento de puntero up.
+    // Reacción al soltar: solo reproduce click si la liberación corresponde al botón válido.
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!IsLeftMouse(eventData))
@@ -160,7 +160,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         isPressed = false;
     }
 
-    // Conecta botón listener.
+    // Engancha el onClick del Button una sola vez para no duplicar sonidos.
     private void BindButtonListener()
     {
         if (button == null || listenerBound)
@@ -173,7 +173,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = true;
     }
 
-    // Desconecta botón listener.
+    // Desengancha el listener al desactivar el componente.
     private void UnbindButtonListener()
     {
         if (button == null)
@@ -185,7 +185,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         listenerBound = false;
     }
 
-    // Gestiona botón clicked.
+    // Feedback centralizado del click, tanto para ratón como para activación por UI.
     private void HandleButtonClicked()
     {
         if (!enableAudio)
@@ -197,7 +197,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         PlayOneShot(clip, clickVolume);
     }
 
-    // Anima visual.
+    // Interpola escala y color para que el botón no cambie de estado a saltos.
     private void AnimateVisual()
     {
         if (rectTransform == null)
@@ -240,7 +240,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         targetGraphic.color = Color.Lerp(targetGraphic.color, targetColor, lerpT);
     }
 
-    // Restaura visual estado inmediato.
+    // Fuerza el estado visual final sin esperar a la animación.
     private void RestoreVisualStateImmediate()
     {
         isHovered = false;
@@ -257,7 +257,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
-    // Intenta play hover sound.
+    // Lanza el sonido de hover solo si toca, evitando repetirlo de forma molesta.
     private void TryPlayHoverSound()
     {
         if (!enableAudio)
@@ -278,13 +278,13 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         PlayOneShot(clip, hoverVolume);
     }
 
-    // Comprueba si left mouse.
+    // Acepta solo clic izquierdo como pulsación válida de ratón.
     private bool IsLeftMouse(PointerEventData eventData)
     {
         return eventData == null || eventData.button == PointerEventData.InputButton.Left;
     }
 
-    // Reproduce one disparo.
+    // Reproduce un sonido UI usando la mejor ruta de audio disponible.
     private void PlayOneShot(AudioClip clip, float volume)
     {
         if (clip == null)
@@ -306,7 +306,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         source.pitch = 1f;
     }
 
-    // Resuelve audio origen.
+    // Busca de dónde sacar el audio: fuente propia, heredada o compartida.
     private AudioSource ResolveAudioSource()
     {
         if (audioSource != null)
@@ -333,7 +333,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return sharedAudioSource;
     }
 
-    // Obtiene respaldo click clip.
+    // Intenta encontrar un clip de click de respaldo en el AudioManager.
     private AudioClip GetFallbackClickClip()
     {
         if (!useAudioManagerFallback)
@@ -350,7 +350,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return cachedFallbackClickClip;
     }
 
-    // Obtiene respaldo hover clip.
+    // Intenta encontrar un clip de hover de respaldo en el AudioManager.
     private AudioClip GetFallbackHoverClip()
     {
         if (!useAudioManagerFallback)
@@ -373,7 +373,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return cachedFallbackHoverClip;
     }
 
-    // Busca audio clip en gestor.
+    // Busca un clip por nombre usando una palabra clave simple.
     private AudioClip FindAudioClipInManager(string token)
     {
         if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)

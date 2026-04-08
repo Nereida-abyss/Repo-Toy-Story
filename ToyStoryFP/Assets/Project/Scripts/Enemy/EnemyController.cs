@@ -215,7 +215,7 @@ public class EnemyController : MonoBehaviour
         if (currentState != AIState.Combat) SetState(AIState.Investigate, true);
     }
 
-    // Actualiza la prioridad de evitar.
+    // Ajusta la prioridad de evasión del NavMeshAgent para que no todos empujen igual.
     public void SetAvoidancePriority(int priority)
     {
         if (navMeshAgent != null) navMeshAgent.avoidancePriority = Mathf.Clamp(priority, 0, 99);
@@ -256,7 +256,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // Actualiza temporizadores.
+    // Aquí bajamos todos los relojes internos del enemigo.
+    // Cada reloj decide cuándo puede volver a pensar, disparar o refrescar su ruta.
     private void UpdateTimers(bool canSeeTarget)
     {
         if (!canSeeTarget && loseSightTimer > 0f) loseSightTimer -= Time.deltaTime;
@@ -269,7 +270,9 @@ public class EnemyController : MonoBehaviour
         if (stuckCheckTimer > 0f) stuckCheckTimer -= Time.deltaTime;
     }
 
-    // Actualiza el estado de alerta.
+    // Este bloque decide en qué estado mental está el enemigo.
+    // Primero resuelve el caso especial de "enfurecido", luego comprueba si ve al jugador,
+    // y por último decide si sigue peleando, busca la última posición conocida o vuelve a patrullar.
     private void UpdateAwarenessState(bool hasTarget, bool canSeeTarget)
     {
         if (isEnraged)
@@ -331,7 +334,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // Gestiona patrulla.
+    // En patrulla no hace nada sofisticado: reinicia el ataque, sigue su ruta
+    // y orienta la animación según el movimiento real del agente.
     private void HandlePatrol()
     {
         ResetAttackWarmup();
@@ -339,7 +343,8 @@ public class EnemyController : MonoBehaviour
         UpdateMovementPresentation(GetMovementFacingDirection());
     }
 
-    // Gestiona estado de alerta buscando.
+    // Investigar significa ir al último sitio donde parecía estar el jugador.
+    // Si llega allí y no encuentra nada durante un rato, vuelve a patrullar.
     private void HandleInvestigate()
     {
         ResetAttackWarmup();
@@ -370,7 +375,9 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // Gestiona combate.
+    // Este es el combate "normal".
+    // Piensa en él como un enemigo que intenta mantener una buena distancia,
+    // moverse sin quedarse clavado y solo disparar cuando de verdad está encarado al jugador.
     private void HandleCombat(bool canSeeTarget, Vector3 flatDirection, float flatDistance)
     {
         if (isEnraged)
@@ -436,7 +443,8 @@ public class EnemyController : MonoBehaviour
         if (weaponScript != null) weaponScript.TryFire(GetTargetAimPoint());
     }
 
-    // Gestiona enfurecido combate (Modo Tecojoterajo).
+    // En modo enfurecido deja de buscar una posición elegante y se vuelve más insistente.
+    // Empuja hacia delante casi todo el tiempo para no perder presión sobre el jugador.
     private void HandleEnragedCombat(bool canSeeTarget, Vector3 flatDirection, float flatDistance)
     {
         if (!IsEnragedTargetValid())
@@ -494,7 +502,8 @@ public class EnemyController : MonoBehaviour
         if (weaponScript != null) weaponScript.TryFire(GetTargetAimPoint());
     }
 
-    // Refresca el destino visible de combate.
+    // Si el jugador está visible, intentamos una posición táctica pequeña y rápida.
+    // Si no encontramos una buena, caemos al destino de combate más estable.
     private void RefreshVisibleCombatDestination(Vector3 flatDirection, float flatDistance)
     {
         if (TryResolveCombatMovePoint(flatDirection, flatDistance, out Vector3 destination))
@@ -506,7 +515,8 @@ public class EnemyController : MonoBehaviour
         RefreshCombatDestination();
     }
 
-    // Refresca enfurecido destino.
+    // Enfurecido busca un punto cercano que le permita seguir empujando.
+    // Si no hay punto válido, al menos apunta directamente al centro del objetivo.
     private void RefreshEnragedDestination()
     {
         if (target == null && !hasLastKnownPlayerPosition)
@@ -525,7 +535,8 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(center, combatMovePointRefreshInterval);
     }
 
-    // Refresca combate destino.
+    // Pide una "ranura" de combate alrededor del jugador para repartir enemigos.
+    // Si el coordinador no puede dar una, usa un plan de respaldo.
     private void RefreshCombatDestination()
     {
         Vector3 center = target != null ? target.position : (hasLastKnownPlayerPosition ? lastKnownPlayerPosition : transform.position);
@@ -533,7 +544,7 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(destination);
     }
 
-    // Refresca busqueda destino.
+    // Durante investigación hace lo mismo que en combate, pero alrededor de la última pista conocida.
     private void RefreshInvestigateDestination()
     {
         Vector3 center = hasLastKnownPlayerPosition ? lastKnownPlayerPosition : transform.position;
@@ -541,7 +552,8 @@ public class EnemyController : MonoBehaviour
         SetTacticalDestination(destination);
     }
 
-    // Intenta resolver combate destino.
+    // Primero intenta una posición coordinada con otros enemigos.
+    // Si eso falla, prueba una posición libre y simple en NavMesh.
     private bool TryResolveCombatDestination(Vector3 center, out Vector3 destination)
     {
         ResolveCoordinator();
@@ -555,7 +567,8 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(center, slotOuterRadius, out destination);
     }
 
-    // Intenta resolver busqueda destino.
+    // Para investigar reutiliza la misma idea: repartir posiciones para que varios enemigos
+    // no se amontonen todos en el mismo punto.
     private bool TryResolveInvestigateDestination(Vector3 center, out Vector3 destination)
     {
         ResolveCoordinator();
@@ -569,7 +582,8 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(center, slotOuterRadius, out destination);
     }
 
-    // Intenta resolver respaldo destino.
+    // Este es el plan B universal.
+    // Prueba varios puntos aleatorios alrededor del centro hasta encontrar uno navegable.
     private bool TryResolveFallbackDestination(Vector3 center, float radius, out Vector3 destination)
     {
         float searchRadius = Mathf.Max(0.35f, radius);
@@ -590,13 +604,14 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
-    // Actualiza tactical destino.
+    // Guarda un destino táctico con el tiempo mínimo que debe durar antes de volver a pensar.
     private void SetTacticalDestination(Vector3 destination)
     {
         SetTacticalDestination(destination, slotRefreshInterval);
     }
 
-    // Actualiza tactical destino.
+    // Al guardar un destino también limpiamos el estado de "atascado",
+    // porque desde aquí empezamos a medir el progreso otra vez desde cero.
     private void SetTacticalDestination(Vector3 destination, float refreshInterval)
     {
         tacticalDestination = destination;
@@ -606,13 +621,14 @@ public class EnemyController : MonoBehaviour
         ResetNavigationRecoveryState();
     }
 
-    // Comprueba si refresco tactical destino.
+    // Recalculamos destino cuando nos lo fuerzan, cuando no tenemos uno
+    // o cuando ha caducado el tiempo de refresco.
     private bool ShouldRefreshTacticalDestination()
     {
         return forceDestinationRefresh || !hasTacticalDestination || destinationRefreshTimer <= 0f;
     }
 
-    // Gestiona force destino refresco.
+    // Esto marca el destino actual como sospechoso para obligar a buscar otro.
     private void ForceDestinationRefresh()
     {
         forceDestinationRefresh = true;
@@ -620,7 +636,9 @@ public class EnemyController : MonoBehaviour
         ResetNavigationRecoveryState();
     }
 
-    // Supervisa investigar recovery.
+    // Aquí comprobamos si el agente avanza de verdad.
+    // Si la ruta está rota, no progresa o se queda pegado a una pared,
+    // forzamos un nuevo destino para que no parezca "tonto" o bloqueado.
     private void MonitorNavigationRecovery(bool canSeeTarget)
     {
         if (!hasTacticalDestination || !IsNavigationAvailable())
@@ -662,7 +680,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // Gestiona probe wall ahead.
+    // Lanza una sonda corta hacia delante para detectar paredes.
+    // Solo la usamos cuando no vemos al jugador, porque si no podríamos confundir al propio objetivo con un obstáculo.
     private bool ProbeWallAhead()
     {
         Vector3 probeDirection = GetDirectionToCurrentDestination();
@@ -685,7 +704,7 @@ public class EnemyController : MonoBehaviour
         return target == null || (hit.transform != target && !hit.transform.IsChildOf(target));
     }
 
-    // Reinicia investigar recovery estado.
+    // Borra las medidas de atasco para empezar una observación nueva.
     private void ResetNavigationRecoveryState()
     {
         timeWithoutProgress = 0f;
@@ -693,7 +712,8 @@ public class EnemyController : MonoBehaviour
         stuckCheckTimer = 0f;
     }
 
-    // Actualiza movimiento presentation.
+    // La navegación decide hacia dónde ir, pero este método traduce eso a "cómo se ve".
+    // Gira el personaje y empuja la animación usando la velocidad medida de verdad.
     private void UpdateMovementPresentation(Vector3 facingDirection)
     {
         movementScript.SetMoveInput(Vector2.zero);
@@ -712,7 +732,7 @@ public class EnemyController : MonoBehaviour
             animationMoveThreshold);
     }
 
-    // Actualiza measured planar velocity.
+    // Calcula la velocidad real en plano comparando la posición de este frame con la del anterior.
     private void UpdateMeasuredPlanarVelocity()
     {
         Vector3 currentPosition = transform.position;
@@ -722,14 +742,16 @@ public class EnemyController : MonoBehaviour
         lastMeasuredPosition = currentPosition;
     }
 
-    // Reinicia measured motion.
+    // Reinicia la medición para evitar saltos falsos cuando cambiamos de estado o reactivamos el enemigo.
     private void ResetMeasuredMotion()
     {
         lastMeasuredPosition = transform.position;
         measuredPlanarVelocity = Vector3.zero;
     }
 
-    // Actualiza combate movimiento decision.
+    // Esta decisión es la "personalidad táctica" del enemigo.
+    // Si está lejos avanza, si está demasiado cerca retrocede y,
+    // si está en buena distancia, alterna lados para que no se quede quieto delante del jugador.
     private void UpdateCombatMovementDecision(float flatDistance)
     {
         if (combatDecisionTimer > 0f)
@@ -765,7 +787,9 @@ public class EnemyController : MonoBehaviour
         combatDecisionTimer = Mathf.Max(0.1f, combatDecisionInterval);
     }
 
-    // Intenta resolver combate movimiento punto.
+    // Aquí construimos el punto exacto al que quiere moverse durante el combate.
+    // Primero pedimos ayuda al coordinador para no chocar con otros enemigos.
+    // Si no puede resolverlo, improvisamos una posición razonable alrededor del jugador.
     private bool TryResolveCombatMovePoint(Vector3 flatDirection, float flatDistance, out Vector3 destination)
     {
         destination = transform.position;
@@ -846,7 +870,7 @@ public class EnemyController : MonoBehaviour
         return TryResolveFallbackDestination(target.position, slotOuterRadius, out destination);
     }
 
-    // Obtiene combate facing dirección.
+    // Si vemos al jugador miramos hacia él; si no, reutilizamos la mejor dirección de movimiento disponible.
     private Vector3 GetCombatFacingDirection(Vector3 visibleTargetDirection)
     {
         Vector3 direction = Vector3.ProjectOnPlane(visibleTargetDirection, Vector3.up);
@@ -858,7 +882,9 @@ public class EnemyController : MonoBehaviour
         return GetMovementFacingDirection();
     }
 
-    // Obtiene movimiento facing dirección.
+    // Si no tenemos una dirección clara hacia el jugador,
+    // usamos primero la velocidad real, luego el destino táctico
+    // y por último la última dirección conocida para no girar al azar.
     private Vector3 GetMovementFacingDirection()
     {
         Vector3 direction = Vector3.ProjectOnPlane(measuredPlanarVelocity, Vector3.up);
@@ -874,7 +900,7 @@ public class EnemyController : MonoBehaviour
         return lastMovementDirection.sqrMagnitude > 0.0001f ? lastMovementDirection : transform.forward;
     }
 
-    // Obtiene actual combate side sign.
+    // Resume hacia qué lado prefiere moverse ahora mismo durante el combate.
     private int GetCurrentCombatSideSign()
     {
         if (currentCombatMovementMode == CombatMovementMode.StrafeLeft) return -1;
@@ -882,7 +908,7 @@ public class EnemyController : MonoBehaviour
         return preferredCombatSideSign < 0 ? -1 : 1;
     }
 
-    // Obtiene dirección a actual destino.
+    // Devuelve una dirección plana hacia el destino táctico actual.
     private Vector3 GetDirectionToCurrentDestination()
     {
         return hasTacticalDestination
@@ -890,7 +916,7 @@ public class EnemyController : MonoBehaviour
             : Vector3.zero;
     }
 
-    // Obtiene dirección a ultimo known jugador posición.
+    // Devuelve una dirección plana hacia la última posición conocida del jugador.
     private Vector3 GetDirectionToLastKnownPlayerPosition()
     {
         return hasLastKnownPlayerPosition
@@ -980,7 +1006,7 @@ public class EnemyController : MonoBehaviour
         EnsureAgentOnNavMesh();
     }
 
-    // Comprueba si line of sight.
+    // Comprueba si hay visión limpia entre los ojos del enemigo y el punto de apuntado del objetivo.
     private bool HasLineOfSight()
     {
         if (target == null) return false;
@@ -1000,7 +1026,7 @@ public class EnemyController : MonoBehaviour
         return true;
     }
 
-    // Comprueba si see actual objetivo.
+    // Atajo para saber si el objetivo actual está vivo, cerca y sin obstáculos delante.
     private bool CanSeeCurrentTarget()
     {
         if (!TryResolveTarget() || target == null) return false;
@@ -1008,13 +1034,14 @@ public class EnemyController : MonoBehaviour
         return flatDirection.magnitude <= GetDetectionRange() && HasLineOfSight();
     }
 
-    // Obtiene eye origin.
+    // Define desde dónde "mira" el enemigo al lanzar raycasts de visión.
     private Vector3 GetEyeOrigin()
     {
         return eyeOrigin != null ? eyeOrigin.position : transform.position + Vector3.up * GetEyeHeight();
     }
 
-    // Actualiza estado.
+    // Cambia de estado y hace toda la limpieza asociada en un único sitio.
+    // Así evitamos que cada transición tenga que recordar qué timers, rutas o audio debe resetear.
     private void SetState(AIState nextState, bool playPulse)
     {
         bool changedState = currentState != nextState;
@@ -1052,7 +1079,7 @@ public class EnemyController : MonoBehaviour
         UpdateAgentSpeedByState();
     }
 
-    // Gestiona remember jugador posición.
+    // Guarda la última pista fiable de dónde estaba el jugador.
     private void RememberPlayerPosition(Vector3 worldPosition)
     {
         lastKnownPlayerPosition = worldPosition;
@@ -1103,7 +1130,7 @@ public class EnemyController : MonoBehaviour
         StopNavigation();
     }
 
-    // Comprueba si enfurecido objetivo valido.
+    // Valida que el modo enfurecido siga teniendo un objetivo real y vivo.
     private bool IsEnragedTargetValid()
     {
         if (!isEnraged)
@@ -1130,27 +1157,16 @@ public class EnemyController : MonoBehaviour
             : CombatMovementMode.StrafeRight;
     }
 
-    // Obtiene detection range.
     private float GetDetectionRange() => detectionRange > 0f ? detectionRange : DefaultDetectionRange;
-    // Obtiene lose sight grace time.
     private float GetLoseSightGraceTime() => loseSightGraceTime > 0f ? loseSightGraceTime : DefaultLoseSightGraceTime;
-    // Obtiene eye height.
     private float GetEyeHeight() => eyeHeight > 0f ? eyeHeight : DefaultEyeHeight;
-    // Obtiene alerta height offset.
     private float GetAlertHeightOffset() => alertHeightOffset > 0f ? alertHeightOffset : DefaultAlertHeightOffset;
-    // Obtiene stopping distancia.
     private float GetStoppingDistance() => stoppingDistance > 0f ? stoppingDistance : DefaultStoppingDistance;
-    // Obtiene attack range.
     private float GetAttackRange() => attackRange > 0f ? attackRange : DefaultAttackRange;
-    // Obtiene patrulla punto reach threshold.
     private float GetPatrolPointReachThreshold() => patrolPointReachThreshold > 0f ? patrolPointReachThreshold : DefaultPatrolPointReachThreshold;
-    // Obtiene patrulla retarget delay.
     private float GetPatrolRetargetDelay() => patrolRetargetDelay > 0f ? patrolRetargetDelay : DefaultPatrolRetargetDelay;
-    // Obtiene patrulla search radius.
     private float GetPatrolSearchRadius() => patrolSearchRadius > 0f ? patrolSearchRadius : DefaultPatrolSearchRadius;
-    // Obtiene patrulla min travel distancia.
     private float GetPatrolMinTravelDistance() => patrolMinTravelDistance > 0f ? patrolMinTravelDistance : DefaultPatrolMinTravelDistance;
-    // Obtiene effective stopping distancia.
     private float GetEffectiveStoppingDistance() => Mathf.Max(0.05f, Mathf.Min(GetStoppingDistance(), GetAttackRange()));
 
     // Reinicia attack warmup.
@@ -1159,14 +1175,15 @@ public class EnemyController : MonoBehaviour
         attackWarmupTimer = attackWarmup;
     }
 
-    // Obtiene objetivo aim punto.
+    // El enemigo no apunta al suelo del objetivo, sino a una altura útil para que el tiro se vea lógico.
     private Vector3 GetTargetAimPoint()
     {
         if (target == null) return transform.position + (transform.forward * Mathf.Max(0.1f, GetAttackRange()));
         return target.position + Vector3.up * targetAimHeight;
     }
 
-    // Actualiza patrulla navegación.
+    // Mantiene viva la patrulla: comprueba si llegó, espera si hace falta
+    // y busca un nuevo punto cuando toca.
     private void UpdatePatrolNavigation()
     {
         if (!EnsureAgentOnNavMesh())
@@ -1221,7 +1238,7 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
-    // Actualiza agente destino.
+    // Envía un destino al agente usando la distancia de frenado adecuada para este momento.
     private bool SetAgentDestination(Vector3 destination, float desiredStoppingDistance)
     {
         if (!EnsureAgentOnNavMesh()) return false;
@@ -1230,7 +1247,7 @@ public class EnemyController : MonoBehaviour
         return navMeshAgent.SetDestination(destination);
     }
 
-    // Comprueba si reached destino.
+    // Solo cuenta como llegado si la navegación está estable y la distancia restante es pequeña.
     private bool HasReachedDestination(float reachThreshold)
     {
         if (!IsNavigationAvailable() || navMeshAgent.pathPending || !navMeshAgent.hasPath) return false;
@@ -1260,11 +1277,8 @@ public class EnemyController : MonoBehaviour
         return false;
     }
 
-    // Comprueba si navegación available.
     private bool IsNavigationAvailable() => navMeshAgent != null && navMeshAgent.isOnNavMesh;
-    // Obtiene planar agente velocity.
     private Vector3 GetPlanarAgentVelocity() => IsNavigationAvailable() ? Vector3.ProjectOnPlane(navMeshAgent.velocity, Vector3.up) : Vector3.zero;
-    // Obtiene area mask.
     private int GetAreaMask() => navMeshAgent != null ? navMeshAgent.areaMask : NavMesh.AllAreas;
 
     // Guarda en cache base escalado estadísticas.
@@ -1276,7 +1290,7 @@ public class EnemyController : MonoBehaviour
         baseScalingStatsCached = true;
     }
 
-    // Actualiza agente speed por estado.
+    // Ajusta la velocidad del agente según el estado actual y cualquier bonus temporal por daño.
     private void UpdateAgentSpeedByState()
     {
         if (navMeshAgent == null)

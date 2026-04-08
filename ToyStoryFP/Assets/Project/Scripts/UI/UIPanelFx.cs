@@ -101,7 +101,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
-    // Gestiona show.
+    // Muestra el panel con su animación de entrada y deja la interacción lista al terminar.
     public void Show(bool instant = false)
     {
         InitializeIfNeeded();
@@ -118,7 +118,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
-    // Gestiona hide.
+    // Oculta el panel con animación o de golpe si no hay condiciones para animar.
     public void Hide(bool instant = false)
     {
         InitializeIfNeeded();
@@ -147,7 +147,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = StartCoroutine(PlayCloseRoutine());
     }
 
-    // Reproduce abrir.
+    // Arranca la apertura y corta cualquier rutina anterior para no mezclar estados.
     public void PlayOpen()
     {
         InitializeIfNeeded();
@@ -161,7 +161,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = StartCoroutine(PlayOpenRoutine());
     }
 
-    // Inicializa si needed.
+    // Prepara referencias y estado solo la primera vez que haga falta.
     private void InitializeIfNeeded()
     {
         if (initialized)
@@ -187,7 +187,7 @@ public class UIPanelFx : MonoBehaviour
         initialized = true;
     }
 
-    // Reproduce abrir rutina.
+    // Corrutina de apertura: anima alpha, escala y raycasts hasta dejar el panel listo.
     private IEnumerator PlayOpenRoutine()
     {
         float duration = Mathf.Max(0.01f, openDuration);
@@ -218,7 +218,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
-    // Reproduce close rutina.
+    // Corrutina de cierre: revierte la apertura y decide cuándo bloquear interacción.
     private IEnumerator PlayCloseRoutine()
     {
         float duration = Mathf.Max(0.01f, closeDuration);
@@ -250,7 +250,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
-    // Aplica abrir estado inmediato.
+    // Fuerza el estado visual final sin animación, útil para sincronizar o reparar el panel.
     private void ApplyOpenStateImmediate()
     {
         if (!initialized)
@@ -267,7 +267,7 @@ public class UIPanelFx : MonoBehaviour
         }
     }
 
-    // Alterna raycast.
+    // Activa o bloquea interacción del panel según su visibilidad real.
     private void ToggleRaycast(bool enabled)
     {
         if (canvasGroup == null || !disableRaycastWhileAnimating)
@@ -279,7 +279,7 @@ public class UIPanelFx : MonoBehaviour
         canvasGroup.blocksRaycasts = enabled;
     }
 
-    // Detiene activo rutina.
+    // Corta la corrutina activa antes de arrancar otra para no mezclar dos animaciones.
     private void StopActiveRoutine()
     {
         if (activeRoutine == null)
@@ -291,7 +291,7 @@ public class UIPanelFx : MonoBehaviour
         activeRoutine = null;
     }
 
-    // Gestiona ease salida cubic.
+    // Curva suave que sale rápido y aterriza despacio.
     private float EaseOutCubic(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -299,14 +299,14 @@ public class UIPanelFx : MonoBehaviour
         return 1f - inverse * inverse * inverse;
     }
 
-    // Gestiona ease en cubic.
+    // Curva suave que arranca despacio y acelera hacia el final.
     private float EaseInCubic(float t)
     {
         float clamped = Mathf.Clamp01(t);
         return clamped * clamped * clamped;
     }
 
-    // Gestiona ease salida back.
+    // Curva con pequeño rebote para que la entrada se sienta más viva.
     private float EaseOutBack(float t)
     {
         float clamped = Mathf.Clamp01(t);
@@ -315,7 +315,7 @@ public class UIPanelFx : MonoBehaviour
         return 1f + adjusted * adjusted * ((overshoot + 1f) * adjusted + overshoot);
     }
 
-    // Reproduce panel sound.
+    // Reproduce el sonido del panel usando la mejor fuente disponible.
     private void PlayPanelSound(AudioClip clip, float volume)
     {
         if (!enableAudio || clip == null)
@@ -333,7 +333,7 @@ public class UIPanelFx : MonoBehaviour
         source.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 
-    // Resuelve audio origen.
+    // Busca un AudioSource local o uno compartido para poder lanzar sonidos UI.
     private AudioSource ResolveAudioSource()
     {
         if (audioSource != null)
@@ -360,7 +360,7 @@ public class UIPanelFx : MonoBehaviour
         return sharedAudioSource;
     }
 
-    // Obtiene respaldo abrir clip.
+    // Intenta sacar un clip de apertura de respaldo desde el AudioManager.
     private AudioClip GetFallbackOpenClip()
     {
         if (!useAudioManagerFallback)
@@ -383,7 +383,7 @@ public class UIPanelFx : MonoBehaviour
         return cachedFallbackOpenClip;
     }
 
-    // Obtiene respaldo close clip.
+    // Intenta sacar un clip de cierre de respaldo desde el AudioManager.
     private AudioClip GetFallbackCloseClip()
     {
         if (!useAudioManagerFallback)
@@ -400,7 +400,7 @@ public class UIPanelFx : MonoBehaviour
         return cachedFallbackCloseClip;
     }
 
-    // Busca audio clip en gestor.
+    // Busca un clip en el AudioManager comparando por palabra clave en el nombre.
     private AudioClip FindAudioClipInManager(string token)
     {
         if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)

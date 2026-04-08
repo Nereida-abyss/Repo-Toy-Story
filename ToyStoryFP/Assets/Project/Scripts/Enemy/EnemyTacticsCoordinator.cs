@@ -11,7 +11,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
     private readonly Dictionary<EnemyController, int> reservedSlotIndices = new Dictionary<EnemyController, int>();
     private readonly Dictionary<EnemyController, int> reservedCombatSideSigns = new Dictionary<EnemyController, int>();
 
-    // Gestiona resolver.
+    // Busca el coordinador activo y lo deja cacheado.
+    // Piensa en él como el "árbitro" que reparte posiciones para que los enemigos no se estorben.
     public static EnemyTacticsCoordinator Resolve()
     {
         if (cachedInstance != null)
@@ -43,7 +44,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         }
     }
 
-    // Gestiona register enemigo.
+    // Registra al enemigo en el sistema táctico y le asigna una prioridad de evasión.
+    // Esa prioridad ayuda a que la navegación no trate a todos igual y se apelotonen menos.
     public void RegisterEnemy(EnemyController enemy, int avoidancePriorityMin, int avoidancePriorityMax)
     {
         if (enemy == null)
@@ -59,7 +61,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         enemy.SetAvoidancePriority(Random.Range(clampedMin, clampedMax + 1));
     }
 
-    // Gestiona unregister enemigo.
+    // Saca al enemigo del registro y libera sus reservas tácticas.
     public void UnregisterEnemy(EnemyController enemy)
     {
         if (enemy == null)
@@ -72,7 +74,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         reservedCombatSideSigns.Remove(enemy);
     }
 
-    // Gestiona broadcast aggro.
+    // Cuando un enemigo ve peligro, avisa a sus aliados cercanos.
+    // Así varios enemigos pueden enterarse del jugador sin que todos lo vean directamente.
     public void BroadcastAggro(EnemyController source, Vector3 playerPosition, float radius, Transform aggressor)
     {
         CleanupRegistry();
@@ -94,7 +97,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         }
     }
 
-    // Gestiona solicitud combate ranura.
+    // Pide una ranura de combate alrededor del jugador.
+    // Internamente usa la misma lógica base que investigación para repartir espacios.
     public bool RequestCombatSlot(
         EnemyController requester,
         Vector3 center,
@@ -108,7 +112,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return RequestSlot(requester, center, innerRadius, outerRadius, innerCount, outerCount, areaMask, out slotPosition);
     }
 
-    // Gestiona solicitud investigación punto.
+    // Igual que combate, pero pensado para rodear una pista o última posición conocida.
     public bool RequestInvestigatePoint(
         EnemyController requester,
         Vector3 center,
@@ -122,7 +126,9 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return RequestSlot(requester, center, innerRadius, outerRadius, innerCount, outerCount, areaMask, out slotPosition);
     }
 
-    // Gestiona solicitud combate movimiento punto.
+    // Esta petición busca un punto corto de movimiento durante el combate.
+    // Intenta poner al enemigo a un lado del jugador, con un pequeño "desorden" estable,
+    // para que varios enemigos no hagan exactamente el mismo baile.
     public bool RequestCombatMovePoint(
         EnemyController requester,
         Vector3 playerPosition,
@@ -206,7 +212,9 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return true;
     }
 
-    // Gestiona solicitud ranura.
+    // Este es el corazón del reparto de posiciones.
+    // Construye anillos alrededor del centro, prueba cada hueco en NavMesh
+    // y elige el que menos choque con reservas o enemigos cercanos.
     private bool RequestSlot(
         EnemyController requester,
         Vector3 center,
@@ -286,7 +294,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return true;
     }
 
-    // Obtiene ranura definition.
+    // Convierte un índice de ranura en radio y ángulo dentro de los anillos interior y exterior.
     private void GetSlotDefinition(
         int slotIndex,
         int innerCount,
@@ -308,7 +316,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         angleDegrees = ((360f / outerCount) * outerIndex) + (180f / outerCount);
     }
 
-    // Intenta muestra ranura.
+    // Comprueba si una posición candidata cae en un punto navegable del NavMesh.
     private bool TrySampleSlot(Vector3 candidatePosition, int areaMask, out Vector3 sampledPosition)
     {
         sampledPosition = candidatePosition;
@@ -322,7 +330,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return false;
     }
 
-    // Obtiene reservation penalty.
+    // Penaliza las ranuras ya ocupadas o demasiado cerca de otro enemigo.
+    // No prohíbe usarlas al 100 %, pero las vuelve menos atractivas para el selector.
     private float GetReservationPenalty(EnemyController requester, int slotIndex, Vector3 candidatePosition)
     {
         float penalty = 0f;
@@ -350,7 +359,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return penalty;
     }
 
-    // Obtiene combate movimiento penalty.
+    // Hace algo parecido para los movimientos cortos de combate:
+    // evita repetir el mismo lado y evita puntos demasiado pegados a otros enemigos.
     private float GetCombatMovePenalty(EnemyController requester, int sideSign, Vector3 candidatePosition)
     {
         float penalty = 0f;
@@ -378,7 +388,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return penalty;
     }
 
-    // Obtiene deterministic jitter.
+    // Da a cada enemigo un pequeño desplazamiento estable usando su InstanceID.
+    // Así no cambian de lado por puro azar cada frame.
     private float GetDeterministicJitter(EnemyController requester, float jitterRadius)
     {
         if (requester == null || jitterRadius <= 0f)
@@ -391,7 +402,8 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         return Mathf.Lerp(-jitterRadius, jitterRadius, normalized);
     }
 
-    // Gestiona limpieza registry.
+    // Limpia enemigos destruidos del registro principal y de sus reservas.
+    // Esto evita que un enemigo borrado siga "ocupando sitio" en el sistema táctico.
     private void CleanupRegistry()
     {
         registeredEnemies.RemoveWhere(enemy => enemy == null);
@@ -429,7 +441,7 @@ public class EnemyTacticsCoordinator : MonoBehaviour
         CleanupCombatReservations();
     }
 
-    // Gestiona limpieza combate reservations.
+    // Limpia solo las reservas de lados de combate que pertenecen a enemigos ya destruidos.
     private void CleanupCombatReservations()
     {
         if (reservedCombatSideSigns.Count == 0)

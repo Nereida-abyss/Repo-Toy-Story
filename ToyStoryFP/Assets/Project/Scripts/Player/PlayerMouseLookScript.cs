@@ -135,7 +135,7 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Actualiza sensitivity.
+    // Guarda una sensibilidad segura dentro de los límites permitidos.
     public void SetSensitivity(float value)
     {
         float clampedSensitivity = Mathf.Clamp(value, MinLookSensitivity, MaxLookSensitivity);
@@ -143,7 +143,7 @@ public class MouseLookScript : MonoBehaviour
     }
 
 
-    // Gestiona lock cursor.
+    // Encierra el cursor para que la cámara no pierda el control al mover el ratón.
     public void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -182,7 +182,7 @@ public class MouseLookScript : MonoBehaviour
 
             if (mouseDelta.sqrMagnitude > spikeThreshold * spikeThreshold)
             {
-                // Ignore abnormal mouse spikes right after closing pause/ajustes.
+                // Ignora picos raros del ratón justo al salir de pausa o ajustes.
                 ResetLookInputBuffers();
                 return;
             }
@@ -224,7 +224,7 @@ public class MouseLookScript : MonoBehaviour
 
     }
 
-    // Gestiona subscribe pausa estado eventos.
+    // Se engancha al evento de pausa una sola vez para no duplicar avisos.
     private void SubscribePauseStateEvents()
     {
         if (pauseEventSubscribed)
@@ -236,7 +236,7 @@ public class MouseLookScript : MonoBehaviour
         pauseEventSubscribed = true;
     }
 
-    // Gestiona unsubscribe pausa estado eventos.
+    // Se desengancha del evento al desactivar el componente para no dejar suscripciones colgadas.
     private void UnsubscribePauseStateEvents()
     {
         if (!pauseEventSubscribed)
@@ -248,7 +248,7 @@ public class MouseLookScript : MonoBehaviour
         pauseEventSubscribed = false;
     }
 
-    // Inicializa pausa estado tracking.
+    // Toma una foto inicial del estado de pausa y limpia temporizadores de protección.
     private void InitializePauseStateTracking()
     {
         bool pausedNow = UIManager.IsGamePaused;
@@ -269,7 +269,9 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Gestiona pausa estado cambios.
+    // Este bloque decide qué guardar al pausar y qué restaurar al volver.
+    // La idea es que la cámara y el cuerpo vuelvan exactamente al mismo sitio
+    // sin saltos bruscos ni giros raros al cerrar el menú.
     private void HandlePauseStateChanged(bool paused)
     {
         if (pauseStateInitialized && paused == lastKnownPauseState)
@@ -313,7 +315,7 @@ public class MouseLookScript : MonoBehaviour
         pausePoseCapturedThisCycle = false;
     }
 
-    // Reinicia look entrada buffers.
+    // Borra la inercia del ratón y del recoil acumulado para empezar desde un estado limpio.
     private void ResetLookInputBuffers()
     {
         _smoothMouse = Vector2.zero;
@@ -323,7 +325,8 @@ public class MouseLookScript : MonoBehaviour
         anticipationDropVelocity = 0f;
     }
 
-    // Gestiona capture pausa pose snapshot.
+    // Guarda una foto completa de la pose actual antes de pausar:
+    // raíz, cámara, cuerpo y acumuladores de giro.
     private void CapturePausePoseSnapshot()
     {
         if (pausePoseCapturedThisCycle)
@@ -346,7 +349,8 @@ public class MouseLookScript : MonoBehaviour
         pausePoseCapturedThisCycle = true;
     }
 
-    // Restaura pausa pose snapshot.
+    // Restaura la foto guardada al salir de pausa.
+    // Esto evita que la cámara reaparezca descolocada o con física residual.
     private void RestorePausePoseSnapshot()
     {
         if (!pausePoseSnapshot.isValid)
@@ -383,7 +387,7 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Resuelve pausa pose raíz.
+    // Decide cuál es la raíz que se debe congelar y restaurar durante la pausa.
     private Transform ResolvePausePoseRoot()
     {
         if (pausePoseRoot != null)
@@ -394,7 +398,8 @@ public class MouseLookScript : MonoBehaviour
         return transform.root != null ? transform.root : transform;
     }
 
-    // Resuelve pausa pose raíz rigidbody.
+    // Busca el Rigidbody que puede seguir girando mientras el juego está pausado.
+    // Si existe, luego lo frenamos para que la vuelta al juego no pegue un latigazo.
     private Rigidbody ResolvePausePoseRootRigidbody(Transform snapshotRoot)
     {
         if (snapshotRoot == null)
@@ -417,7 +422,7 @@ public class MouseLookScript : MonoBehaviour
         return pausePoseRootRigidbody;
     }
 
-    // Reproduce salto preparación dip.
+    // Baja un poco la cámara antes del salto para que el cuerpo parezca coger impulso.
     public void PlayJumpPreparationDip(float downwardAngle, float duration)
     {
         if (duration <= 0f)
@@ -431,7 +436,7 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(ResetJumpPreparationDip), duration);
     }
 
-    // Reproduce salto cámara secuencia.
+    // Arranca la secuencia principal del salto: subir y luego caer suavemente.
     public void PlayJumpCameraSequence()
     {
         ReleaseJumpAnticipationDrop();
@@ -440,13 +445,14 @@ public class MouseLookScript : MonoBehaviour
         jumpCameraOffset = 0f;
     }
 
-    // Reproduce salto lift.
+    // Alias simple para lanzar la animación vertical del salto.
     public void PlayJumpLift()
     {
         PlayJumpCameraSequence();
     }
 
-    // Reproduce salto anticipación soltar.
+    // Hace una pequeña bajada previa al salto.
+    // Piensa en ella como agachar un poco la cámara antes de empujar hacia arriba.
     public void PlayJumpAnticipationDrop(float anticipationDuration)
     {
         if (anticipationDuration <= 0f || anticipationDropHeight <= 0f)
@@ -461,34 +467,36 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(BeginAnticipationDropReturn), anticipationDuration);
     }
 
-    // Gestiona release salto anticipación soltar.
+    // Suelta la bajada previa y empieza a devolver la cámara a su altura normal.
     public void ReleaseJumpAnticipationDrop()
     {
         CancelInvoke(nameof(BeginAnticipationDropReturn));
         BeginAnticipationDropReturn();
     }
 
-    // Aplica retroceso.
+    // Suma recoil a cámara en vertical y horizontal.
+    // No mueve la cámara de golpe: deja que luego vuelva suave a su sitio.
     public void ApplyRecoil(float pitchKick, float yawKick)
     {
         recoilPitchOffset += pitchKick;
         recoilYawOffset += yawKick;
     }
 
-    // Reinicia salto preparación dip.
+    // Borra la inclinación previa al salto.
     private void ResetJumpPreparationDip()
     {
         jumpPreparationPitchOffset = 0f;
     }
 
-    // Inicia anticipación soltar return.
+    // Empieza el regreso suave de la bajada previa del salto.
     private void BeginAnticipationDropReturn()
     {
         anticipationDropTarget = 0f;
         anticipationDropSmoothTime = Mathf.Max(0.01f, anticipationDropReturnDuration);
     }
 
-    // Actualiza cámara vertical offsets.
+    // Mezcla todos los offsets verticales de salto y anticipación
+    // y los aplica a la posición local de la cámara.
     private void UpdateCameraVerticalOffsets()
     {
         anticipationDropOffset = Mathf.SmoothDamp(
@@ -504,7 +512,7 @@ public class MouseLookScript : MonoBehaviour
         transform.localPosition = desiredPosition;
     }
 
-    // Actualiza salto cámara offset.
+    // Resuelve en qué fase del salto estamos y cuánto debe subir o bajar la cámara.
     private void UpdateJumpCameraOffset()
     {
         if (jumpCameraPhase == JumpCameraPhase.None)

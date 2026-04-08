@@ -156,7 +156,9 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Clear();
     }
 
-    // Secuencia de oleada bucle.
+    // Este bucle arranca la partida de oleadas.
+    // Primero respeta el retraso inicial para dar tiempo al jugador
+    // y después lanza la primera oleada.
     private IEnumerator WaveLoop()
     {
         currentState = WaveRuntimeState.InitialDelay;
@@ -165,7 +167,9 @@ public class WaveManager : MonoBehaviour
         StartNextWave();
     }
 
-    // Inicia siguiente oleada.
+    // Aquí empieza una oleada nueva de verdad.
+    // Limpia restos de la anterior, valida que existan prefab y puntos de aparición,
+    // reinicia contadores y avisa a la UI antes de comenzar a generar enemigos.
     private void StartNextWave()
     {
         if (currentState == WaveRuntimeState.WaveInProgress)
@@ -195,7 +199,9 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
 
-    // Genera oleada currutina.
+    // Esta corrutina reparte la generación en pequeños intervalos.
+    // Así los enemigos no aparecen todos en el mismo frame
+    // y la oleada mantiene un ritmo más controlado.
     private IEnumerator SpawnWaveCoroutine(int waveIndex)
     {
         int enemiesToSpawn = GetEnemyCountForWave(waveIndex);
@@ -214,7 +220,9 @@ public class WaveManager : MonoBehaviour
         isSpawningCurrentWave = false;
     }
 
-    // Genera enemigo.
+    // Genera un enemigo solo si encuentra una posición válida en NavMesh.
+    // Después le aplica el escalado de la ronda y se suscribe a su muerte
+    // para que el contador de la oleada no se quede desfasado.
     private void SpawnEnemy(int waveIndex)
     {
         if (!TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint spawnPoint))
@@ -242,7 +250,8 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Add(enemyHealth);
     }
 
-    // Gestiona enemigo muerto.
+    // Cuando un enemigo muere lo sacamos de la lista viva y quitamos la suscripción.
+    // Si no hiciéramos esto, la oleada podría creer que aún queda alguien por derrotar.
     private void HandleEnemyDied(PlayerHealthScript enemyHealth)
     {
         if (enemyHealth == null)
@@ -254,7 +263,9 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Remove(enemyHealth);
     }
 
-    // Refresca escena referencias.
+    // Rebusca referencias dinámicas de la escena.
+    // Sirve para recuperar puntos de spawn y HUD si la escena se recarga
+    // o si el jugador/UI todavía no existían al arrancar este componente.
     private void RefreshSceneReferences()
     {
         spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsSortMode.None);
@@ -262,7 +273,8 @@ public class WaveManager : MonoBehaviour
         ResolveAnnouncementUi();
     }
 
-    // Resuelve anuncio UI.
+    // Intenta localizar los paneles de UI de oleadas dentro del jugador activo.
+    // Se hace bajo demanda para no romper la partida si la UI aparece un poco más tarde.
     private void ResolveAnnouncementUi()
     {
         if (waveAnnouncementUi != null && waveIntermissionUi != null && waveTimersUi != null)
@@ -291,7 +303,8 @@ public class WaveManager : MonoBehaviour
         hasLoggedMissingPlayerUi = false;
     }
 
-    // Comprueba si hay puntos de spawn.
+    // Valida que la escena tenga al menos un punto donde puedan aparecer enemigos.
+    // El aviso solo se lanza una vez para no llenar la consola de ruido.
     private bool HasSpawnPoints()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
@@ -308,7 +321,8 @@ public class WaveManager : MonoBehaviour
         return true;
     }
 
-    // Comprueba si valido enemigo prefab.
+    // Valida que exista un prefab de enemigo asignado.
+    // Igual que arriba, avisa una sola vez para que el error sea claro y no pesado.
     private bool HasValidEnemyPrefab()
     {
         if (enemyPrefab == null)
@@ -325,7 +339,7 @@ public class WaveManager : MonoBehaviour
         return true;
     }
 
-    // Obtiene un punto de spawn aleatorio.
+    // Elige un punto de spawn al azar entre los disponibles.
     private EnemySpawnPoint GetRandomSpawnPoint()
     {
         if (!HasSpawnPoints())
@@ -337,7 +351,9 @@ public class WaveManager : MonoBehaviour
         return spawnPoints[index];
     }
 
-    // Intenta resolver spawn posición.
+    // No nos fiamos ciegamente del punto de spawn.
+    // Probamos varias veces y pedimos a NavMesh una posición utilizable cerca de ese punto
+    // para evitar que el enemigo nazca dentro de una zona rota o no navegable.
     private bool TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint resolvedSpawnPoint)
     {
         spawnPosition = Vector3.zero;
@@ -367,13 +383,13 @@ public class WaveManager : MonoBehaviour
         return false;
     }
 
-    // Obtiene enemigo conteo para oleada.
+    // La fórmula de enemigos es simple: cada oleada suma un extra fijo.
     private int GetEnemyCountForWave(int waveIndex)
     {
         return Mathf.Max(1, baseEnemyCount + ((waveIndex - 1) * additionalEnemiesPerWave));
     }
 
-    // Aplica ronda escalado a enemigo.
+    // Empuja al enemigo recién creado los multiplicadores de vida y daño de esta ronda.
     private void ApplyRoundScalingToEnemy(GameObject spawnedEnemy, int waveIndex)
     {
         if (spawnedEnemy == null)
@@ -397,7 +413,7 @@ public class WaveManager : MonoBehaviour
         enemyController.ApplyRoundScaling(roundScaling.HealthMultiplier, roundScaling.DamageMultiplier);
     }
 
-    // Obtiene una captura del escalado por ronda.
+    // Construye una foto del escalado de esta ronda para no recalcularlo varias veces.
     private EnemyRoundScalingSnapshot GetRoundScalingSnapshot(int waveIndex)
     {
         int waveOffset = Mathf.Max(0, waveIndex - 1);
@@ -413,7 +429,8 @@ public class WaveManager : MonoBehaviour
         return new EnemyRoundScalingSnapshot(healthMultiplier, damageMultiplier);
     }
 
-    // Obtiene effective ronda multiplier.
+    // El multiplicador crece de forma acumulativa por ronda,
+    // pero nunca supera el tope configurado en Inspector.
     private static float GetEffectiveRoundMultiplier(float multiplierPerRound, float maxMultiplier, int waveOffset)
     {
         float sanitizedPerRound = Mathf.Max(1f, multiplierPerRound);
@@ -422,7 +439,8 @@ public class WaveManager : MonoBehaviour
         return Mathf.Min(sanitizedMax, compoundedMultiplier);
     }
 
-    // Comprueba si oleada finished.
+    // Una oleada solo termina cuando ya no quedan spawns pendientes
+    // y también han muerto todos los enemigos vivos.
     private bool HasWaveFinished()
     {
         PruneDeadEnemies();
@@ -431,7 +449,7 @@ public class WaveManager : MonoBehaviour
             && aliveEnemies.Count == 0;
     }
 
-    // Inicia intermedio.
+    // Pasa del combate al descanso entre oleadas y enseña el prompt correspondiente.
     private void BeginIntermission()
     {
         currentState = WaveRuntimeState.Intermission;
@@ -445,7 +463,7 @@ public class WaveManager : MonoBehaviour
         RefreshTimersUi();
     }
 
-    // Oculta intermedio prompt.
+    // Oculta el aviso de descanso si estaba visible.
     private void HideIntermissionPrompt()
     {
         ResolveAnnouncementUi();
@@ -455,7 +473,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Muestra oleada anuncio.
+    // Muestra el rótulo de nueva oleada y arranca su temporizador.
     private void ShowWaveAnnouncement(int waveNumber)
     {
         ResolveAnnouncementUi();
@@ -466,7 +484,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Oculta oleada anuncio.
+    // Fuerza a esconder el rótulo de oleada.
     private void HideWaveAnnouncement()
     {
         remainingWaveAnnouncementTime = 0f;
@@ -477,7 +495,8 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Actualiza oleada anuncio temporizador.
+    // Va descontando el tiempo del rótulo visible.
+    // Si el juego está en pausa, el temporizador se congela para no "comerse" el anuncio.
     private void UpdateWaveAnnouncementTimer(bool isPaused)
     {
         if (remainingWaveAnnouncementTime <= 0f || isPaused)
@@ -493,7 +512,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Refresca temporizadores UI.
+    // Empuja a la UI el estado actual para que el HUD de oleadas siempre enseñe datos frescos.
     private void RefreshTimersUi()
     {
         ResolveAnnouncementUi();
@@ -503,7 +522,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Reinicia runtime estado.
+    // Devuelve el sistema a un estado limpio de inicio.
+    // Esto corta corrutinas, borra contadores y esconde UI temporal
+    // para que no sobrevivan restos de una partida anterior.
     private void ResetRuntimeState()
     {
         StopAllCoroutines();
@@ -519,7 +540,9 @@ public class WaveManager : MonoBehaviour
         HideTransientUi(false);
     }
 
-    // Oculta transient UI.
+    // Esconde la UI temporal de oleadas.
+    // Puede hacerlo resolviendo referencias si hace falta
+    // o usando solo las que ya estaban cacheadas.
     private void HideTransientUi(bool resolveMissingReferences)
     {
         if (resolveMissingReferences)
@@ -547,7 +570,8 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Gestiona prune dead enemigos.
+    // Limpia entradas nulas de la lista de enemigos vivos.
+    // Esto evita que una destrucción inesperada deje la oleada atascada.
     private void PruneDeadEnemies()
     {
         if (aliveEnemies.Count == 0)
@@ -579,7 +603,8 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    // Resuelve jugador controller.
+    // Busca y cachea el PlayerController activo.
+    // Primero intenta la instancia global y después una búsqueda en escena como respaldo.
     private PlayerController ResolvePlayerController()
     {
         if (cachedPlayerController != null)
@@ -597,7 +622,8 @@ public class WaveManager : MonoBehaviour
         return cachedPlayerController;
     }
 
-    // Gestiona registro faltante jugador UI warning.
+    // Lanza una sola advertencia cuando falta la UI del jugador.
+    // Así sabemos qué falla sin inundar la consola cada frame.
     private void LogMissingPlayerUiWarning(string message)
     {
         if (hasLoggedMissingPlayerUi)

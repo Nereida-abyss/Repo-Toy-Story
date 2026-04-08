@@ -36,13 +36,13 @@ public class UIManager : MonoBehaviour
         ApplyPauseState(IsPaused);
     }
 
-    // Gestiona abrir pausa.
+    // Abre la pausa usando el flujo común para no duplicar reglas.
     public void AbrirPausa()
     {
         ApplyPauseState(true);
     }
 
-    // Gestiona cerrar pausa.
+    // Cierra la pausa usando el mismo punto centralizado.
     public void CerrarPausa()
     {
         ApplyPauseState(false);
@@ -75,13 +75,14 @@ public class UIManager : MonoBehaviour
         PauseStateChanged?.Invoke(false);
     }
 
-    // Alterna pausa.
+    // Cambia entre pausa y juego activo según el estado actual.
     private void TogglePausa()
     {
         ApplyPauseState(!IsPaused);
     }
 
-    // Aplica pausa estado.
+    // Este es el punto que realmente cambia el estado de pausa.
+    // Ajusta tiempo, paneles y evento global para que todo el juego reaccione de forma consistente.
     private void ApplyPauseState(bool paused)
     {
         bool previousPauseState = IsPaused;
@@ -113,13 +114,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Comprueba si alternar pausa.
+    // Decide si ahora mismo está permitido abrir o cerrar la pausa.
     private bool CanTogglePause()
     {
         return panelPause != null || panelUI != null;
     }
 
-    // Asegura event system.
+    // Garantiza que exista un EventSystem para que la UI pueda recibir foco e input.
     private void EnsureEventSystem()
     {
         if (EventSystem.current != null)

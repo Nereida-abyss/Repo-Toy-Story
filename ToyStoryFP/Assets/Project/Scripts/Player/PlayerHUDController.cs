@@ -76,7 +76,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshAmmo();
     }
 
-    // Resuelve referencias.
+    // Busca y cachea las piezas de gameplay de las que depende el HUD.
     private void ResolveReferences()
     {
         playerHealth = GetComponentInParent<PlayerHealthScript>();
@@ -95,7 +95,8 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Resuelve UI referencias.
+    // Intenta completar las referencias visuales del HUD por nombre.
+    // Esto hace el prefab m?s resistente si alguna referencia no vino cableada en Inspector.
     private void ResolveUiReferences()
     {
         if (healthFillImage == null)
@@ -129,7 +130,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Gestiona warn si UI referencias are faltante.
+    // Lanza una sola advertencia si faltan piezas importantes del HUD.
     private void WarnIfUiReferencesAreMissing()
     {
         if (loggedMissingUiReferences)
@@ -174,7 +175,7 @@ public class PlayerHUDController : MonoBehaviour
         GameDebug.Advertencia("HUD", $"PlayerHUDController tiene referencias faltantes bajo {name}: {missingReferences}", this);
     }
 
-    // Conecta eventos.
+    // Se engancha a vida, monedas y arma actual para refrescar el HUD cuando algo cambie.
     private void BindEvents()
     {
         UnbindEvents();
@@ -201,7 +202,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Desconecta eventos.
+    // Suelta todas las suscripciones para no dejar eventos colgados al destruir o desactivar el HUD.
     private void UnbindEvents()
     {
         if (playerHealth != null)
@@ -226,7 +227,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Gestiona vida cambios.
+    // Cuando cambia la vida, actualiza texto y dispara feedback visual si hubo daño real.
     private void HandleHealthChanged(PlayerHealthScript health)
     {
         if (health == null)
@@ -248,7 +249,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshHealthText();
     }
 
-    // Gestiona actual arma cambios.
+    // Cambia la suscripción al arma observada y refresca la munición mostrada.
     private void HandleCurrentWeaponChanged(WeaponScript newWeapon)
     {
         if (observedWeapon != null)
@@ -266,19 +267,19 @@ public class PlayerHUDController : MonoBehaviour
         RefreshAmmo();
     }
 
-    // Gestiona monedas cambios.
+    // Refresca el contador de monedas cuando el valor cambia.
     private void HandleCoinsChanged(PlayerCurrencyController currency)
     {
         RefreshCoins();
     }
 
-    // Gestiona arma estado cambios.
+    // Cualquier cambio de estado del arma puede afectar a munición o texto de recarga.
     private void HandleWeaponStateChanged(WeaponScript weapon)
     {
         RefreshAmmo();
     }
 
-    // Refresca todos inmediato.
+    // Fuerza una foto completa del HUD sin animaciones intermedias.
     private void RefreshAllImmediate()
     {
         displayedHealthNormalized = playerHealth != null ? playerHealth.HealthNormalized : 1f;
@@ -295,7 +296,7 @@ public class PlayerHUDController : MonoBehaviour
         RefreshCoins();
     }
 
-    // Actualiza vida animación.
+    // Hace que la barra de vida persiga el valor real poco a poco para que no pegue saltos secos.
     private void UpdateHealthAnimation()
     {
         if (playerHealth == null || healthFillImage == null)
@@ -311,7 +312,7 @@ public class PlayerHUDController : MonoBehaviour
         healthFillImage.fillAmount = displayedHealthNormalized;
     }
 
-    // Refresca vida texto.
+    // Actualiza el texto de vida con un fallback claro si todavía falta la referencia al jugador.
     private void RefreshHealthText()
     {
         if (healthText == null)
@@ -328,7 +329,7 @@ public class PlayerHUDController : MonoBehaviour
         healthText.text = $"HP {playerHealth.CurrentHealth}/{playerHealth.MaxHealth}";
     }
 
-    // Refresca ammo.
+    // Decide qué texto de munición y recarga enseñar según arma, cambio de arma y reserva.
     private void RefreshAmmo()
     {
         if (ammoText == null || reloadText == null)
@@ -367,7 +368,7 @@ public class PlayerHUDController : MonoBehaviour
         reloadText.text = currentWeapon.IsReloading ? "RELOADING" : string.Empty;
     }
 
-    // Refresca monedas.
+    // Actualiza el texto de monedas con el valor actual del run.
     private void RefreshCoins()
     {
         if (coinsText == null)
@@ -379,7 +380,7 @@ public class PlayerHUDController : MonoBehaviour
         coinsText.text = $"COINS {currentCoins}";
     }
 
-    // Inicializa da�o feedback visuals.
+    // Reinicia el estado visual del feedback de daño para empezar desde cero.
     private void InitializeDamageFeedbackVisuals()
     {
         damageFeedbackCooldownTimer = 0f;
@@ -394,7 +395,7 @@ public class PlayerHUDController : MonoBehaviour
         }
     }
 
-    // Actualiza da�o feedback animación.
+    // Hace avanzar las dos capas de feedback de daño: flash y pulso de vida.
     private void UpdateDamageFeedbackAnimation()
     {
         if (damageFeedbackCooldownTimer > 0f)
@@ -406,7 +407,7 @@ public class PlayerHUDController : MonoBehaviour
         UpdateHealthPulse();
     }
 
-    // Actualiza da�o flash.
+    // Controla el panel rojo de daño con entrada, espera y salida.
     private void UpdateDamageFlash()
     {
         if (damageFlashImage == null)
@@ -446,7 +447,7 @@ public class PlayerHUDController : MonoBehaviour
         SetDamageFlashAlpha(alpha01);
     }
 
-    // Actualiza vida pulse.
+    // Hace latir la barra de vida durante un momento cuando llega daño.
     private void UpdateHealthPulse()
     {
         if (healthFillImage == null)
@@ -467,7 +468,7 @@ public class PlayerHUDController : MonoBehaviour
         healthFillImage.rectTransform.localScale = healthFillBaseScale * scaleMultiplier;
     }
 
-    // Reproduce daño feedback.
+    // Activa el feedback de daño y respeta un pequeño cooldown para no saturar visual ni audio.
     private void PlayDamageFeedback(int damageApplied)
     {
         if (damageApplied <= 0)
@@ -485,13 +486,13 @@ public class PlayerHUDController : MonoBehaviour
         playerAudio?.PlayHurt();
     }
 
-    // Obtiene da�o flash total duración.
+    // Suma las tres fases del flash para conocer su duración total real.
     private float GetDamageFlashTotalDuration()
     {
         return Mathf.Max(0.05f, Mathf.Max(0f, damageFlashFadeIn) + Mathf.Max(0f, damageFlashHold) + Mathf.Max(0.001f, damageFlashFadeOut));
     }
 
-    // Actualiza da�o flash alpha.
+    // Aplica el alpha final del flash respetando el color base de la imagen.
     private void SetDamageFlashAlpha(float alpha01)
     {
         if (damageFlashImage == null)

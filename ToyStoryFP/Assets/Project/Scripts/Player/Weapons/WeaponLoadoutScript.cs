@@ -102,7 +102,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Refresca armas.
+    // Relee todas las armas hijas y reconstruye el estado interno del loadout.
+    // Esto sirve para dejar coherentes las listas, la visibilidad y el arma activa
+    // aunque la jerarquía haya cambiado o la partida aún no haya empezado.
     public void RefreshWeapons()
     {
         allWeapons = CollectDirectChildWeapons();
@@ -160,7 +162,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         SetWeaponIndexImmediate(equippedWeaponIndex);
     }
 
-    // Inicia ejecución equipamiento.
+    // Arranca el loadout de una partida nueva.
+    // Primero desbloquea las armas marcadas por defecto y luego garantiza
+    // que siempre exista al menos un arma equipada si el jugador tiene alguna disponible.
     public void BeginRunLoadout()
     {
         if (allWeapons.Length == 0)
@@ -215,7 +219,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         initialLoadoutResolved = true;
     }
 
-    // Intenta compra arma.
+    // Intenta comprar y desbloquear un arma.
+    // Valida el id, cobra la moneda, actualiza la lista de desbloqueadas
+    // y opcionalmente la equipa al instante para que el cambio se note enseguida.
     public bool TryPurchaseWeapon(string weaponId, PlayerCurrencyController currency, bool autoEquip, out string failReason)
     {
         failReason = string.Empty;
@@ -280,14 +286,14 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
-    // Comprueba si arma desbloqueada.
+    // Comprueba si este id ya está en la mochila de armas desbloqueadas.
     public bool IsWeaponUnlocked(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
         return !string.IsNullOrEmpty(normalizedWeaponId) && unlockedWeaponIds.Contains(normalizedWeaponId);
     }
 
-    // Obtiene arma tienda entradas.
+    // Construye la lista de tienda sin duplicados y con el estado de desbloqueo actual.
     public IReadOnlyList<WeaponShopEntry> GetWeaponShopEntries()
     {
         shopEntries.Clear();
@@ -313,7 +319,8 @@ public class WeaponLoadoutScript : MonoBehaviour
         return shopEntries;
     }
 
-    // Intenta ciclo arma.
+    // Cambia al arma siguiente o anterior dentro de las desbloqueadas.
+    // Si solo hay una o estamos en mitad de otra transición, no hace nada.
     public bool TryCycleWeapon(int direction)
     {
         if (unlockedWeapons.Length <= 1 || IsSwitchingWeapon)
@@ -338,7 +345,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
-    // Inicia arma cambio.
+    // Empieza la animación de cambio.
+    // Primero asegura que el arma actual esté visible, la baja,
+    // cancela su recarga y deja preparado el índice objetivo.
     private void StartWeaponSwitch(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= unlockedWeapons.Length || nextIndex == equippedWeaponIndex)
@@ -368,7 +377,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Actualiza bajada.
+    // Fase 1 del cambio: bajar el arma actual hasta esconderla.
     private void UpdateLowering(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -391,7 +400,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Completa bajada.
+    // Cuando el arma ya ha bajado, activamos la nueva y arrancamos la subida.
     private void CompleteLowering()
     {
         if (targetWeaponIndex < 0 || targetWeaponIndex >= unlockedWeapons.Length)
@@ -417,7 +426,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Actualiza subida.
+    // Fase 2 del cambio: subir el arma nueva hasta su pose normal.
     private void UpdateRaising(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -440,7 +449,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Finaliza arma cambio.
+    // Cierra la transición y deja el arma nueva lista para disparar con su pose limpia.
     private void FinishWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -458,7 +467,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Gestiona la cancelación del cambio de arma.
+    // Cancela el cambio y vuelve a un estado seguro sin dejar índices a medias.
     private void CancelWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -469,7 +478,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Actualiza arma indice inmediato.
+    // Equipa un arma sin animación de transición.
+    // Se usa para el arranque, para reparaciones del estado interno
+    // y para cualquier caso donde cambiar "de golpe" sea más seguro.
     private void SetWeaponIndexImmediate(int index, bool initializeSilently = false)
     {
         if (unlockedWeapons.Length == 0)
@@ -503,7 +514,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Asegura que el arma equipada este visible.
+    // Comprueba que solo el arma equipada esté activa y visible.
+    // Si algo externo dejó varias armas encendidas o apagó la correcta,
+    // este método recompone la situación.
     private void EnsureEquippedWeaponVisible()
     {
         if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
@@ -556,7 +569,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         visibleWeapon = equippedWeapon;
     }
 
-    // Gestiona activate only.
+    // Enciende solo el arma indicada y apaga las demás.
     private void ActivateOnly(int index)
     {
         WeaponScript activeWeapon =
@@ -580,28 +593,29 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Obtiene lower duración.
+    // Reparte la duración total del cambio en la parte de bajada.
     private float GetLowerDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchLowerRatio) / totalRatio);
     }
 
-    // Obtiene raise duración.
+    // Reparte la duración total del cambio en la parte de subida.
     private float GetRaiseDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchRaiseRatio) / totalRatio);
     }
 
-    // Gestiona smooth phase.
+    // Suaviza la fase de animación para que el cambio no se vea mecánico.
     private float SmoothPhase(float value)
     {
         value = Mathf.Clamp01(value);
         return value * value * (3f - 2f * value);
     }
 
-    // Recopila direct hijo armas.
+    // Recoge solo las armas que son hijas directas de la cámara de armas.
+    // Así evitamos capturar objetos más profundos que no representan un arma equipada.
     private WeaponScript[] CollectDirectChildWeapons()
     {
         if (weaponCamera == null)
@@ -626,7 +640,9 @@ public class WeaponLoadoutScript : MonoBehaviour
         return directChildWeapons.ToArray();
     }
 
-    // Construye definition maps.
+    // Construye los mapas que relacionan ids, definiciones y componentes reales.
+    // Si falta una definición en Inspector, intenta crear una de respaldo
+    // para que el sistema siga funcionando y además lo deja avisado en consola.
     private void BuildDefinitionMaps()
     {
         definitionsById.Clear();
@@ -701,7 +717,8 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Gestiona rebuild desbloqueada armas.
+    // Reconstruye la lista de armas desbloqueadas usando los ids comprados o permitidos.
+    // Las armas bloqueadas se apagan para que no puedan quedarse visibles por accidente.
     private void RebuildUnlockedWeapons()
     {
         List<WeaponScript> unlocked = new List<WeaponScript>(allWeapons.Length);
@@ -730,7 +747,8 @@ public class WeaponLoadoutScript : MonoBehaviour
         unlockedWeapons = unlocked.ToArray();
     }
 
-    // Resuelve activo indice.
+    // Intenta descubrir qué arma estaba realmente activa.
+    // Si la escena no está perfectamente ordenada, usa el índice equipado o el primero como rescate.
     private int ResolveActiveIndex(WeaponScript[] pool)
     {
         if (pool == null || pool.Length == 0)
@@ -760,7 +778,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return equippedWeaponIndex >= 0 && equippedWeaponIndex < pool.Length ? equippedWeaponIndex : 0;
     }
 
-    // Resuelve arma id.
+    // Traduce un componente de arma a su id estable dentro del sistema de desbloqueo.
     private string ResolveWeaponId(WeaponScript weapon)
     {
         if (weapon == null)
@@ -782,7 +800,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return fallbackId;
     }
 
-    // Resuelve starting arma indice.
+    // Decide con qué arma empieza el jugador al arrancar la partida.
     private int ResolveStartingWeaponIndex()
     {
         string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
@@ -798,7 +816,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return 0;
     }
 
-    // Busca desbloqueada arma indice.
+    // Busca la posición de un arma concreta dentro de la lista desbloqueada.
     private int FindUnlockedWeaponIndex(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
@@ -818,7 +836,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return -1;
     }
 
-    // Resuelve respaldo arma id.
+    // Si no hay arma inicial clara, intenta encontrar una opción segura de respaldo.
     private string ResolveFallbackWeaponId()
     {
         string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
@@ -838,7 +856,7 @@ public class WeaponLoadoutScript : MonoBehaviour
         return string.Empty;
     }
 
-    // Busca arma por nombre.
+    // Busca un componente de arma comparando por nombre normalizado.
     private WeaponScript FindWeaponByName(string weaponName)
     {
         string normalizedName = NormalizeWeaponId(weaponName);
@@ -859,13 +877,13 @@ public class WeaponLoadoutScript : MonoBehaviour
         return null;
     }
 
-    // Gestiona normalize arma id.
+    // Limpia ids vacíos o con espacios para comparar siempre de forma consistente.
     private string NormalizeWeaponId(string rawWeaponId)
     {
         return string.IsNullOrWhiteSpace(rawWeaponId) ? string.Empty : rawWeaponId.Trim();
     }
 
-    // Gestiona deactivate todos armas.
+    // Apaga todas las armas, útil cuando el jugador todavía no tiene ninguna disponible.
     private void DeactivateAllWeapons()
     {
         for (int i = 0; i < allWeapons.Length; i++)

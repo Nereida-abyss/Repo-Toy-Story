@@ -90,7 +90,7 @@ public class WeaponScript : MonoBehaviour
         UpdateVisualRecoil();
     }
 
-    // Intenta disparo.
+    // Disparo simple: usa la dirección natural del arma o de la cámara.
     public bool TryFire()
     {
         if (!CanFire())
@@ -102,7 +102,9 @@ public class WeaponScript : MonoBehaviour
         return FireRay(shotTransform.position, shotTransform.forward);
     }
 
-    // Intenta disparo.
+    // Disparo dirigido a un punto concreto.
+    // Si el punto llega mal calculado, vuelve a la dirección frontal
+    // para que el arma no falle por un vector casi nulo.
     public bool TryFire(Vector3 targetPoint)
     {
         if (!CanFire())
@@ -121,7 +123,8 @@ public class WeaponScript : MonoBehaviour
         return FireRay(shotTransform.position, direction);
     }
 
-    // Intenta recarga.
+    // Arranca la recarga solo si tiene sentido:
+    // arma de jugador, cargador no lleno y munición de reserva disponible.
     public bool TryReload()
     {
         if (!playerOwnedWeapon || isReloading || magazineSize <= 0)
@@ -146,13 +149,14 @@ public class WeaponScript : MonoBehaviour
         return true;
     }
 
-    // Gestiona cancelar recarga.
+    // Corta la recarga y notifica el cambio para que HUD y animación se pongan al día.
     public void CancelReload()
     {
         SetReloadState(false, true);
     }
 
-    // Actualiza jugador owned.
+    // Marca si esta arma pertenece al jugador o a un enemigo.
+    // Eso cambia reglas como munición, audio y feedback.
     public void SetPlayerOwned(bool enabled)
     {
         playerOwnedWeapon = enabled;
@@ -160,7 +164,8 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
-    // Notifica equipada.
+    // Se llama cuando el arma acaba de ser equipada durante la partida.
+    // Reinicia el estado sensible para que no arrastre una recarga o recoil antiguos.
     public void NotifyEquipped()
     {
         SetReloadState(false, true);
@@ -168,7 +173,8 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
-    // Inicializa as equipada at spawn.
+    // Variante silenciosa usada al arrancar la partida.
+    // Deja el arma lista sin disparar eventos o transiciones innecesarias.
     public void InitializeAsEquippedAtSpawn()
     {
         CacheBasePose();
@@ -178,7 +184,8 @@ public class WeaponScript : MonoBehaviour
         ResetVisualRecoil();
     }
 
-    // Actualiza equip animación progress.
+    // Mueve el arma entre su pose normal y su pose "bajada".
+    // La usa el sistema de cambio para esconder una y sacar otra con suavidad.
     public void SetEquipAnimationProgress(float progress, bool lowering)
     {
         progress = Mathf.Clamp01(progress);
@@ -197,7 +204,7 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Reinicia equip pose.
+    // Devuelve el arma a su pose base de equipamiento.
     public void ResetEquipPose()
     {
         equipPositionOffset = Vector3.zero;
@@ -205,14 +212,16 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Actualiza da�o per disparo.
+    // Permite ajustar el daño sin dejar valores inválidos.
     public void SetDamagePerShot(int newDamagePerShot)
     {
         damagePerShot = Mathf.Max(1, newDamagePerShot);
         NotifyStateChanged();
     }
 
-    // Comprueba si disparo.
+    // Esta compuerta decide si el disparo puede salir o no.
+    // Revisa cadencia, recarga y munición, y además gestiona el clic seco
+    // para que el arma reaccione aunque no quede bala.
     private bool CanFire()
     {
         if (Time.time < nextAllowedShotTime)
@@ -247,7 +256,8 @@ public class WeaponScript : MonoBehaviour
         return false;
     }
 
-    // Resuelve disparo transform.
+    // El origen del disparo prefiere cámara o fireOrigin.
+    // Esto hace que la sensación de apuntado sea estable aunque cambie la jerarquía del arma.
     private Transform ResolveShotTransform()
     {
         if (_camera != null)
@@ -258,7 +268,9 @@ public class WeaponScript : MonoBehaviour
         return fireOrigin != null ? fireOrigin : transform;
     }
 
-    // Gestiona disparo ray.
+    // Aquí vive el disparo real por raycast.
+    // Consume munición, reproduce audio, busca impacto, aplica daño
+    // y después lanza feedback visual y de agresividad enemiga.
     private bool FireRay(Vector3 origin, Vector3 direction)
     {
         nextAllowedShotTime = Time.time + (1f / fireRate);
@@ -302,7 +314,8 @@ public class WeaponScript : MonoBehaviour
         return true;
     }
 
-    // Intenta initialize ammo.
+    // Inicializa la munición una sola vez para armas del jugador.
+    // Sirve para que al equiparse por primera vez el cargador arranque lleno.
     private void TryInitializeAmmo()
     {
         if (!playerOwnedWeapon || ammoInitialized)
@@ -316,7 +329,9 @@ public class WeaponScript : MonoBehaviour
         ammoInitialized = true;
     }
 
-    // Actualiza recarga.
+    // Cuenta atrás de la recarga.
+    // Cuando termina, mueve munición de la reserva al cargador
+    // y notifica el cambio de estado.
     private void UpdateReload()
     {
         if (!isReloading)
@@ -349,7 +364,7 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
-    // Actualiza recarga estado.
+    // Centraliza el cambio de estado de recarga para no repartir esa lógica por todo el script.
     private void SetReloadState(bool reloading, bool notifyStateChanged)
     {
         if (isReloading == reloading)
@@ -375,7 +390,8 @@ public class WeaponScript : MonoBehaviour
         }
     }
 
-    // Guarda en cache base pose.
+    // Guarda la pose base del arma.
+    // Todo el recoil y las animaciones se construyen encima de esta referencia.
     private void CacheBasePose()
     {
         if (basePoseCached)
@@ -388,7 +404,7 @@ public class WeaponScript : MonoBehaviour
         basePoseCached = true;
     }
 
-    // Reinicia visual retroceso.
+    // Borra de golpe los offsets de recoil y reaplica la pose limpia.
     private void ResetVisualRecoil()
     {
         recoilPositionOffset = Vector3.zero;
@@ -400,7 +416,8 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Actualiza visual retroceso.
+    // Hace que el recoil visual vuelva poco a poco a cero.
+    // Así el arma no teletransporta su pose al terminar cada disparo.
     private void UpdateVisualRecoil()
     {
         recoilPositionOffset = Vector3.SmoothDamp(
@@ -418,7 +435,8 @@ public class WeaponScript : MonoBehaviour
         ApplyCurrentPose();
     }
 
-    // Aplica cámara retroceso.
+    // Empuja la cámara hacia atrás con un pequeño cabeceo.
+    // Solo se usa en armas del jugador para dar sensación de impacto.
     private void ApplyCameraRecoil()
     {
         if (!playerOwnedWeapon || _camera == null)
@@ -437,7 +455,7 @@ public class WeaponScript : MonoBehaviour
         mouseLook.ApplyRecoil(cameraRecoilPitch, yawKick);
     }
 
-    // Aplica arma retroceso.
+    // Añade recoil visual al modelo del arma.
     private void ApplyWeaponRecoil()
     {
         if (!playerOwnedWeapon)
@@ -452,13 +470,13 @@ public class WeaponScript : MonoBehaviour
             UnityEngine.Random.Range(-weaponRecoilRotation.z, weaponRecoilRotation.z));
     }
 
-    // Notifica estado cambios.
+    // Punto único para avisar al resto del juego de que algo cambió en esta arma.
     private void NotifyStateChanged()
     {
         StateChanged?.Invoke(this);
     }
 
-    // Resuelve jugador audio.
+    // Cachea los controladores de audio del jugador y del enemigo según corresponda.
     private void ResolvePlayerAudio()
     {
         if (playerAudio == null)
@@ -472,7 +490,7 @@ public class WeaponScript : MonoBehaviour
         }
     }
 
-    // Reproduce disparo audio.
+    // Reproduce el sonido de disparo usando el canal correcto para jugador o enemigo.
     private void PlayFireAudio()
     {
         if (fireSound == null)
@@ -491,7 +509,7 @@ public class WeaponScript : MonoBehaviour
         enemyAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
     }
 
-    // Reproduce dry disparo audio.
+    // Reproduce el sonido de cargador vacío del jugador.
     private void PlayDryFireAudio()
     {
         if (!playerOwnedWeapon || dryFireSound == null)
@@ -503,7 +521,7 @@ public class WeaponScript : MonoBehaviour
         playerAudio?.PlayDryFire(dryFireSound, dryFireVolume, dryFirePitchRandomness);
     }
 
-    // Reproduce recarga audio.
+    // Reproduce el audio de recarga del jugador.
     private void PlayReloadAudio()
     {
         if (!playerOwnedWeapon || reloadSound == null)
@@ -515,7 +533,8 @@ public class WeaponScript : MonoBehaviour
         playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
     }
 
-    // Gestiona da�o feedback.
+    // Convierte el resultado del daño en feedback de jugador:
+    // hit marker, confirmación de baja y estadísticas.
     private void HandleDamageFeedback(DamageResult damageResult)
     {
         if (!playerOwnedWeapon || !damageResult.WasDamaged)
@@ -535,7 +554,8 @@ public class WeaponScript : MonoBehaviour
         CrosshairFeedbackController.Instance?.PlayHitMarker();
     }
 
-    // Notifica enemigo aggro.
+    // Si el disparo dañó a un enemigo, se le avisa de quién le atacó.
+    // Esto conecta el arma con la lógica de agresividad enemiga.
     private void NotifyEnemyAggro(Transform hitTransform, Vector3 hitPoint, DamageResult damageResult)
     {
         if (!playerOwnedWeapon || !damageResult.WasDamaged || hitTransform == null)
@@ -554,7 +574,7 @@ public class WeaponScript : MonoBehaviour
         enemyController.NotifyDamagedByPlayer(aggressor, hitPoint);
     }
 
-    // Aplica actual pose.
+    // Compone la pose final del arma sumando base, equipamiento y recoil.
     private void ApplyCurrentPose()
     {
         transform.localPosition = baseLocalPosition + equipPositionOffset + recoilPositionOffset;
