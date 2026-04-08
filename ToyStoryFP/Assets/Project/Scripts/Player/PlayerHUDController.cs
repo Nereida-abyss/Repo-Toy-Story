@@ -89,7 +89,7 @@ public class PlayerHUDController : MonoBehaviour
 
         if (playerController != null)
         {
-            weaponLoadout = playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
+            weaponLoadout = playerController.WeaponLoadout ?? playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
             playerCurrency = playerController.Currency ?? playerController.GetComponent<PlayerCurrencyController>();
             playerAudio = playerController.Audio ?? playerController.GetComponent<PlayerAudioController>();
         }

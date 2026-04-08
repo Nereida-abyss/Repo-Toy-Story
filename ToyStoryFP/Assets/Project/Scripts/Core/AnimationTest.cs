@@ -2,32 +2,29 @@ using UnityEngine;
 
 public class AnimationTest : MonoBehaviour
 {
-    
-    [Range(-2,2)]
-    public float horizontal;
-    [Range(-2,2)]
-    public float vertical;
+    [Range(-2, 2)]
+    [SerializeField] private float horizontal;
 
-    private Animator animator; 
+    [Range(-2, 2)]
+    [SerializeField] private float vertical;
 
-    public bool Jump;
+    private Animator animator;
 
+    [SerializeField] private bool jump;
 
-
-    void Start()
+    private void Start()
     {
         animator = GetComponent<Animator>();
     }
 
-    
-    void Update()
+    private void Update()
     {
         animator.SetFloat("Horizontal", horizontal);
         animator.SetFloat("Vertical", vertical);
 
-        if (Jump)
+        if (jump)
         {
-            Jump = false;
+            jump = false;
             animator.SetTrigger("Jump");
         }
     }

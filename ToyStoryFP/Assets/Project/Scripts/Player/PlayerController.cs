@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public PlayerHealthScript Health => healthScript;
     public PlayerCurrencyController Currency => currencyController;
     public PlayerAudioController Audio => audioController;
+    public WeaponLoadoutScript WeaponLoadout => weaponLoadout;
 
     void Awake()
     {

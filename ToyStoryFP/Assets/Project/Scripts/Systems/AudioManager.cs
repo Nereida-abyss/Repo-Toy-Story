@@ -3,11 +3,11 @@ using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance;
+    public static AudioManager Instance { get; private set; }
 
     [Header("Audio Clip Arrays")]
-    public AudioClip[] musicList;
-    public AudioClip[] sfxList;
+    [SerializeField] private AudioClip[] musicList;
+    [SerializeField] private AudioClip[] sfxList;
 
     [Header("Audio Source References")]
     [SerializeField] private AudioSource musicSource;
@@ -17,6 +17,9 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private bool keepMainMenuMusicInAllScenes = true;
     [SerializeField] private int mainMenuMusicIndex = 0;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.05f;
+
+    public AudioClip[] MusicList => musicList;
+    public AudioClip[] SfxList => sfxList;
 
     // Inicializa referencias antes de usar el componente.
     private void Awake()

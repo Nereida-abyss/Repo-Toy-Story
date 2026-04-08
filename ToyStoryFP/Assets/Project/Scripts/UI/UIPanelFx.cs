@@ -403,12 +403,12 @@ public class UIPanelFx : MonoBehaviour
     // Busca audio clip en gestor.
     private AudioClip FindAudioClipInManager(string token)
     {
-        if (AudioManager.Instance == null || AudioManager.Instance.sfxList == null)
+        if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
         {
             return null;
         }
 
-        AudioClip[] sfx = AudioManager.Instance.sfxList;
+        AudioClip[] sfx = AudioManager.Instance.SfxList;
         string search = token != null ? token.ToLowerInvariant() : string.Empty;
 
         for (int i = 0; i < sfx.Length; i++)

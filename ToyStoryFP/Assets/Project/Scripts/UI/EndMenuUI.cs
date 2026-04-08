@@ -5,13 +5,13 @@ using UnityEngine.UI;
 public class EndMenuUI : MonoBehaviour
 {
     [Header("Paneles (no elementos sueltos)")]
-    public GameObject gameOverPanel;   
-    public GameObject creditsPanel;    
-    public GameObject buttonsPanel;    
-    
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private GameObject creditsPanel;
+    [SerializeField] private GameObject buttonsPanel;
+
     [Header("Configuración")]
-    public float creditsDisplayTime = 4f;
-    public float fadeDuration = 0.5f;
+    [SerializeField] private float creditsDisplayTime = 4f;
+    [SerializeField] private float fadeDuration = 0.5f;
     
     void Start()
     {

@@ -7,11 +7,11 @@ using UnityEngine.UI;
 public class PanelController : MonoBehaviour
 {
     [Header("Paneles")]
-    public GameObject panelGameOver;
-    public GameObject panelCredits;
-    public GameObject panelButtons;
-    public GameObject panelSetting;
-    public GameObject panelScore;
+    [SerializeField] private GameObject panelGameOver;
+    [SerializeField] private GameObject panelCredits;
+    [SerializeField] private GameObject panelButtons;
+    [SerializeField] private GameObject panelSetting;
+    [SerializeField] private GameObject panelScore;
 
     [Header("Créditos (Opcional)")]
     [SerializeField] private Button creditsButton;
@@ -1347,7 +1347,7 @@ public class PanelController : MonoBehaviour
             }
         }
 
-        if (!useAudioManagerFallback || AudioManager.Instance == null || AudioManager.Instance.sfxList == null)
+        if (!useAudioManagerFallback || AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
         {
             return;
         }
@@ -1370,12 +1370,12 @@ public class PanelController : MonoBehaviour
     // Busca audio gestor SFX indice por token.
     private int FindAudioManagerSfxIndexByToken(string token)
     {
-        if (AudioManager.Instance == null || AudioManager.Instance.sfxList == null)
+        if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
         {
             return -1;
         }
 
-        AudioClip[] sfxList = AudioManager.Instance.sfxList;
+        AudioClip[] sfxList = AudioManager.Instance.SfxList;
         string normalizedToken = token != null ? token.ToLowerInvariant() : string.Empty;
 
         for (int i = 0; i < sfxList.Length; i++)

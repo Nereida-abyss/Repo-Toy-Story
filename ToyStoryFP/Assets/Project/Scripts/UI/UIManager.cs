@@ -10,9 +10,9 @@ public class UIManager : MonoBehaviour
     public static bool IsGamePaused => Instance != null && Instance.IsPaused;
 
     [Header("Paneles")]
-    public GameObject panelPause;
-    public GameObject panelUI;
-    public GameObject settingsPanel;
+    [SerializeField] private GameObject panelPause;
+    [SerializeField] private GameObject panelUI;
+    [SerializeField] private GameObject settingsPanel;
 
     public bool IsPaused =>
         (panelPause != null && panelPause.activeSelf) ||
