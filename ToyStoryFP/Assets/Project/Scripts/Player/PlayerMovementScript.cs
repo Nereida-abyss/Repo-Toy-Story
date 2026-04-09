@@ -44,18 +44,24 @@ public class MovementScript : MonoBehaviour
     private bool hasVerticalSpeedParameter;
     private bool hasExternalAnimationInput;
     private bool externalTranslationDriven;
+    private bool baseMovementStatsCached;
     private float jumpDelayTimer;
     private float jumpBufferTimer;
     private float groundedLockTimer;
+    private float baseWalkSpeed;
+    private float baseJumpForce;
 
     public bool IsGrounded => isGrounded;
     public float VerticalSpeed => rb != null ? rb.linearVelocity.y : 0f;
+    public float BaseWalkSpeed => baseMovementStatsCached ? baseWalkSpeed : Mathf.Max(0.01f, WalkSpeed);
+    public float BaseJumpForce => baseMovementStatsCached ? baseJumpForce : Mathf.Max(0.01f, JumpForce);
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         mouseLook = GetComponentInChildren<MouseLookScript>(true);
         playerAudio = GetComponent<PlayerAudioController>();
+        CacheBaseMovementStats();
         ResolveVisualReferences();
     }
 
@@ -104,6 +110,7 @@ public class MovementScript : MonoBehaviour
 
     void OnValidate()
     {
+        CacheBaseMovementStats();
         ResolveVisualReferences();
     }
 
@@ -173,6 +180,19 @@ public class MovementScript : MonoBehaviour
         externalTranslationDriven = false;
         externalPlanarVelocity = Vector3.zero;
         ClearAnimationInputOverride();
+    }
+
+    // Aplica niveles de tienda a velocidad y salto usando una base estable.
+    public void ApplyShopUpgradeLevels(int speedLevel, int jumpLevel, float upgradeStepMultiplier)
+    {
+        CacheBaseMovementStats();
+
+        float sanitizedStep = Mathf.Max(0f, upgradeStepMultiplier);
+        float speedMultiplier = 1f + (Mathf.Max(1, speedLevel) - 1) * sanitizedStep;
+        float jumpMultiplier = 1f + (Mathf.Max(1, jumpLevel) - 1) * sanitizedStep;
+
+        WalkSpeed = BaseWalkSpeed * speedMultiplier;
+        JumpForce = BaseJumpForce * jumpMultiplier;
     }
 
     // Gestiona solicitud salto.
@@ -258,6 +278,27 @@ public class MovementScript : MonoBehaviour
         }
 
         CacheAnimatorParameters();
+    }
+
+    // Guarda una base de movimiento fija para las mejoras de tienda.
+    private void CacheBaseMovementStats()
+    {
+        if (!Application.isPlaying)
+        {
+            baseWalkSpeed = Mathf.Max(0.01f, WalkSpeed);
+            baseJumpForce = Mathf.Max(0.01f, JumpForce);
+            baseMovementStatsCached = true;
+            return;
+        }
+
+        if (baseMovementStatsCached)
+        {
+            return;
+        }
+
+        baseWalkSpeed = Mathf.Max(0.01f, WalkSpeed);
+        baseJumpForce = Mathf.Max(0.01f, JumpForce);
+        baseMovementStatsCached = true;
     }
 
     // Resuelve visual model raíz.

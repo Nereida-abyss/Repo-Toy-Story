@@ -21,7 +21,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5770565335141704779
 Transform:
   m_ObjectHideFlags: 0
@@ -385,7 +385,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -869,7 +869,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -3240,7 +3240,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -4652,7 +4652,7 @@ MonoBehaviour:
   coinPickupPitchRandomness: 0.04
   killConfirmClip: {fileID: 8300000, guid: 2a8e1d4f6b7c49a3b5d0e2f18496c3ab, type: 3}
   killConfirmVolume: 0.3
-  hurtClip: {fileID: 0}
+  hurtClip: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
   hurtVolume: 0.2
   hurtPitchRandomness: 0.035
   hurtMinInterval: 0.08
@@ -6692,7 +6692,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3237991800731528449
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8548,7 +8548,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -8879,7 +8879,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
+  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
   clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
@@ -9460,23 +9460,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1152, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1152, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1172, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 610347972088071321, guid: ae91d63a62fd06d4aa34ea1304c8c546, type: 3}
       propertyPath: previousPanelToHide
@@ -9708,6 +9708,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7428757647949270732}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: fireRate
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: fireSound
       value: 
       objectReference: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
@@ -9726,6 +9730,10 @@ PrefabInstance:
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: reloadVolume
       value: 0.26
+      objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: damagePerShot
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: dryFireVolume
@@ -9922,9 +9930,9 @@ MonoBehaviour:
   fireOrigin: {fileID: 0}
   maxRange: 100
   playerOwnedWeapon: 0
-  fireRate: 10
-  damagePerShot: 20
-  magazineSize: 30
+  fireRate: 3
+  damagePerShot: 45
+  magazineSize: 16
   reserveAmmo: 90
   infiniteReserve: 1
   reloadDuration: 1.2

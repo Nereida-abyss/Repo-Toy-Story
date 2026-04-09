@@ -124,7 +124,7 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             StartNextWave();
             return;

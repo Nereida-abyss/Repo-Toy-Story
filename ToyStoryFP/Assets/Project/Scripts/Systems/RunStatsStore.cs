@@ -10,6 +10,7 @@ public static class RunStatsStore
     private const string LastBotsKilledKey = "score.lastBotsKilled";
 
     private static int currentRunCoins;
+    private static int currentRunPeakCoins;
     private static int currentRunWave;
     private static int currentRunBotsKilled;
 
@@ -17,6 +18,7 @@ public static class RunStatsStore
     public static void BeginRun()
     {
         currentRunCoins = 0;
+        currentRunPeakCoins = 0;
         currentRunWave = 0;
         currentRunBotsKilled = 0;
     }
@@ -25,13 +27,14 @@ public static class RunStatsStore
     public static void UpdateCoins(int currentCoins)
     {
         currentRunCoins = Mathf.Max(0, currentCoins);
+        currentRunPeakCoins = Mathf.Max(currentRunPeakCoins, currentRunCoins);
 
-        if (currentCoins <= GetMaxCoins())
+        if (currentRunPeakCoins <= GetMaxCoins())
         {
             return;
         }
 
-        PlayerPrefs.SetInt(MaxCoinsKey, currentRunCoins);
+        PlayerPrefs.SetInt(MaxCoinsKey, currentRunPeakCoins);
         PlayerPrefs.Save();
     }
 
@@ -66,7 +69,7 @@ public static class RunStatsStore
     // Gestiona commit ultimo ejecución.
     public static void CommitLastRun()
     {
-        PlayerPrefs.SetInt(LastCoinsKey, Mathf.Max(0, currentRunCoins));
+        PlayerPrefs.SetInt(LastCoinsKey, Mathf.Max(0, currentRunPeakCoins));
         PlayerPrefs.SetInt(LastWaveKey, Mathf.Max(0, currentRunWave));
         PlayerPrefs.SetInt(LastBotsKilledKey, Mathf.Max(0, currentRunBotsKilled));
         PlayerPrefs.Save();

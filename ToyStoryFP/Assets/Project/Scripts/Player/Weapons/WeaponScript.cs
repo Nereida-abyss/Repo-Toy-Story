@@ -15,6 +15,7 @@ public class WeaponScript : MonoBehaviour
     [SerializeField] private int magazineSize = 30;
     [SerializeField] private int reserveAmmo = 90;
     [SerializeField] private bool infiniteReserve = true;
+    [SerializeField] private int reserveMagazineCapacity = 2;
     [SerializeField] private float reloadDuration = 1.2f;
     [SerializeField] private float dryFireCooldown = 0.2f;
 
@@ -47,9 +48,11 @@ public class WeaponScript : MonoBehaviour
     private float reloadTimer;
     private float nextAllowedDryFireTime;
     private int currentAmmoInMagazine;
+    private int configuredReserveAmmo;
     private bool isReloading;
     private bool ammoInitialized;
     private bool basePoseCached;
+    private bool configuredAmmoCached;
     private Vector3 baseLocalPosition;
     private Vector3 baseLocalEulerAngles;
     private Vector3 recoilPositionOffset;
@@ -67,13 +70,21 @@ public class WeaponScript : MonoBehaviour
     public int ReserveAmmo => reserveAmmo;
     public int DamagePerShot => damagePerShot;
     public bool HasInfiniteReserve => infiniteReserve;
+    public bool UsesFiniteReserve => !infiniteReserve;
     public bool IsReloading => playerOwnedWeapon && isReloading;
     public bool IsPlayerOwnedWeapon => playerOwnedWeapon;
+    public int ReserveAmmoCapacity => infiniteReserve ? 0 : GetFiniteReserveCapacity();
+    public int TotalAmmoCapacity => infiniteReserve ? 0 : Mathf.Max(1, magazineSize) + GetFiniteReserveCapacity();
+    public int MissingTotalAmmo => infiniteReserve ? 0 : Mathf.Max(0, TotalAmmoCapacity - (currentAmmoInMagazine + reserveAmmo));
+    public bool NeedsConfiguredAmmoRefill =>
+        playerOwnedWeapon &&
+        (currentAmmoInMagazine < magazineSize || reserveAmmo < configuredReserveAmmo || isReloading);
 
     void Awake()
     {
         CacheBasePose();
         ResolvePlayerAudio();
+        CacheConfiguredAmmo();
         TryInitializeAmmo();
     }
 
@@ -81,6 +92,7 @@ public class WeaponScript : MonoBehaviour
     {
         CacheBasePose();
         ResolvePlayerAudio();
+        CacheConfiguredAmmo();
         TryInitializeAmmo();
     }
 
@@ -219,6 +231,64 @@ public class WeaponScript : MonoBehaviour
         NotifyStateChanged();
     }
 
+    // Rellena cargador y reserva usando la configuracion base del arma.
+    public bool RefillAmmoToConfiguredReserve()
+    {
+        if (!playerOwnedWeapon)
+        {
+            return false;
+        }
+
+        CacheConfiguredAmmo();
+
+        int targetMagazine = Mathf.Max(1, magazineSize);
+        int targetReserve = Mathf.Max(configuredReserveAmmo, targetMagazine);
+        bool changed = currentAmmoInMagazine != targetMagazine || reserveAmmo != targetReserve || isReloading;
+
+        currentAmmoInMagazine = targetMagazine;
+        reserveAmmo = targetReserve;
+        SetReloadState(false, false);
+
+        if (changed)
+        {
+            NotifyStateChanged();
+        }
+
+        return changed;
+    }
+
+    public bool TryAddAmmoByMagazines(int magazineCount)
+    {
+        if (!playerOwnedWeapon || infiniteReserve || magazineCount <= 0)
+        {
+            return false;
+        }
+
+        CacheConfiguredAmmo();
+
+        int ammoPerMagazine = Mathf.Max(1, magazineSize);
+        int maxReserve = GetFiniteReserveCapacity();
+        int maxTotalAmmo = ammoPerMagazine + maxReserve;
+        int currentTotalAmmo = currentAmmoInMagazine + reserveAmmo;
+        int missingAmmo = Mathf.Max(0, maxTotalAmmo - currentTotalAmmo);
+
+        if (missingAmmo <= 0)
+        {
+            return false;
+        }
+
+        int ammoToAdd = Mathf.Min(ammoPerMagazine * magazineCount, missingAmmo);
+        int magazineRoom = Mathf.Max(0, ammoPerMagazine - currentAmmoInMagazine);
+        int addedToMagazine = Mathf.Min(magazineRoom, ammoToAdd);
+        int addedToReserve = ammoToAdd - addedToMagazine;
+
+        currentAmmoInMagazine += addedToMagazine;
+        reserveAmmo = Mathf.Min(maxReserve, reserveAmmo + addedToReserve);
+        SetReloadState(false, false);
+        NotifyStateChanged();
+        return true;
+    }
+
     // Esta compuerta decide si el disparo puede salir o no.
     // Revisa cadencia, recarga y munición, y además gestiona el clic seco
     // para que el arma reaccione aunque no quede bala.
@@ -323,9 +393,10 @@ public class WeaponScript : MonoBehaviour
             return;
         }
 
+        CacheConfiguredAmmo();
         magazineSize = Mathf.Max(1, magazineSize);
         currentAmmoInMagazine = magazineSize;
-        reserveAmmo = Mathf.Max(reserveAmmo, magazineSize);
+        reserveAmmo = infiniteReserve ? Mathf.Max(configuredReserveAmmo, magazineSize) : configuredReserveAmmo;
         ammoInitialized = true;
     }
 
@@ -362,6 +433,27 @@ public class WeaponScript : MonoBehaviour
         }
 
         NotifyStateChanged();
+    }
+
+    // Congela la reserva configurada original para poder restaurarla desde tienda.
+    private void CacheConfiguredAmmo()
+    {
+        if (configuredAmmoCached)
+        {
+            return;
+        }
+
+        magazineSize = Mathf.Max(1, magazineSize);
+        reserveMagazineCapacity = Mathf.Max(0, reserveMagazineCapacity);
+        configuredReserveAmmo = infiniteReserve
+            ? Mathf.Max(reserveAmmo, magazineSize)
+            : GetFiniteReserveCapacity();
+        configuredAmmoCached = true;
+    }
+
+    private int GetFiniteReserveCapacity()
+    {
+        return Mathf.Max(0, reserveMagazineCapacity) * Mathf.Max(1, magazineSize);
     }
 
     // Centraliza el cambio de estado de recarga para no repartir esa lógica por todo el script.

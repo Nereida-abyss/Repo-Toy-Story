@@ -140,8 +140,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponScript
   _camera: {fileID: 0}
+  fireOrigin: {fileID: 0}
+  maxRange: 100
+  playerOwnedWeapon: 0
   fireRate: 10
   damagePerShot: 20
+  magazineSize: 30
+  reserveAmmo: 60
+  infiniteReserve: 0
+  reserveMagazineCapacity: 2
+  reloadDuration: 1.2
+  dryFireCooldown: 0.2
   muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
   fireSound: {fileID: 0}
 --- !u!1 &600000000000000000

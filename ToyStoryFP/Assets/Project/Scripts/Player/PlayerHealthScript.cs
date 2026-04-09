@@ -30,7 +30,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         NotifyHealthChanged();
     }
 
-    // Gestiona take daño.
+    // Gestiona take daï¿½o.
     public DamageResult TakeDamage(int damage)
     {
         if (!IsAlive || damage <= 0)
@@ -64,6 +64,26 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         }
 
         return new DamageResult(damageApplied > 0, wasKilled, damageApplied);
+    }
+
+    // Cura vida actual sin superar el maximo.
+    public bool Heal(int amount)
+    {
+        if (!IsAlive || amount <= 0 || currentHealth >= maxHealth)
+        {
+            return false;
+        }
+
+        int previousHealth = currentHealth;
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+
+        if (currentHealth == previousHealth)
+        {
+            return false;
+        }
+
+        NotifyHealthChanged();
+        return true;
     }
 
     // Actualiza maximo vida.

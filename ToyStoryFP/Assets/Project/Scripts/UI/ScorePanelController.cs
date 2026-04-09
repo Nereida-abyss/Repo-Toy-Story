@@ -125,7 +125,7 @@ public class ScorePanelController : MonoBehaviour
 
         if (bestCoinsText != null)
         {
-            bestCoinsText.text = $"LAST COINS: {coins}";
+            bestCoinsText.text = $"MAX COINS: {coins}";
         }
 
         if (bestWaveText != null)

@@ -152,7 +152,7 @@ public class MouseLookScript : MonoBehaviour
 
     void Update()
     {
-        bool pausedNow = UIManager.IsGamePaused;
+        bool pausedNow = UIManager.IsGamePaused || PlayerShopController.IsInputBlocked;
 
         if (!pauseStateInitialized || pausedNow != lastKnownPauseState)
         {

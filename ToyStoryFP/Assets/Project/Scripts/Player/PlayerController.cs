@@ -14,11 +14,13 @@ public class PlayerController : MonoBehaviour
     private PlayerCurrencyController currencyController;
     private PlayerAudioController audioController;
     private WeaponLoadoutScript weaponLoadout;
+    private PlayerShopController shopController;
 
     public PlayerHealthScript Health => healthScript;
     public PlayerCurrencyController Currency => currencyController;
     public PlayerAudioController Audio => audioController;
     public WeaponLoadoutScript WeaponLoadout => weaponLoadout;
+    public PlayerShopController Shop => shopController;
 
     void Awake()
     {
@@ -35,6 +37,12 @@ public class PlayerController : MonoBehaviour
         currencyController = GetComponent<PlayerCurrencyController>();
         audioController = GetComponent<PlayerAudioController>();
         weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
+        shopController = GetComponent<PlayerShopController>();
+
+        if (shopController == null)
+        {
+            shopController = gameObject.AddComponent<PlayerShopController>();
+        }
 
         RunStatsStore.BeginRun();
         weaponLoadout?.BeginRunLoadout();
@@ -50,7 +58,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (UIManager.IsGamePaused)
+        if (UIManager.IsGamePaused || PlayerShopController.IsInputBlocked)
         {
             movementScript.SetMoveInput(Vector2.zero);
             return;

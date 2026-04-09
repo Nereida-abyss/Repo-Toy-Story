@@ -2316,74 +2316,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 991857915}
     m_Modifications:
-    - target: {fileID: 12284217865056662, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 293397983470283026, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hoverClip
-      value: 
-      objectReference: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-    - target: {fileID: 919900000000002001, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1751616391576222996, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hoverClip
-      value: 
-      objectReference: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-    - target: {fileID: 2117941058062852428, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2117941058062852428, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2117941058062852428, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2117941058062852440, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2117941058062852440, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2852006045536350014, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3797186642790115807, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hoverClip
-      value: 
-      objectReference: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-    - target: {fileID: 4655425901243566510, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: fireRate
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4655425901243566510, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: damagePerShot
-      value: 45
-      objectReference: {fileID: 0}
     - target: {fileID: 4978345595291347896, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_Name
       value: PlayerController
       objectReference: {fileID: 0}
-    - target: {fileID: 5766890511806992490, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hoverClip
-      value: 
-      objectReference: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-    - target: {fileID: 6667787602384711056, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8351890078211611525, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hoverClip
-      value: 
-      objectReference: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
     - target: {fileID: 8742786380324879594, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.07
@@ -2423,18 +2359,6 @@ PrefabInstance:
     - target: {fileID: 8742786380324879594, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: hurtClip
-      value: 
-      objectReference: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
-    - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: fireRate
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
-      propertyPath: damagePerShot
-      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

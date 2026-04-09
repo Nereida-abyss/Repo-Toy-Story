@@ -4,8 +4,11 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class WaveIntermissionUI : MonoBehaviour
 {
+    private const string LegacyStartPrompt = "If you want to start the next round, press T";
+    private const string UpdatedStartPrompt = "If you want to start the next round, press Q";
+
     [SerializeField] private GameObject panelRoot;
-    [SerializeField] private string promptText = "If you want to start the next round, press T";
+    [SerializeField] private string promptText = UpdatedStartPrompt;
     [SerializeField] private TMP_Text promptLabel;
 
     private bool hasLoggedMissingReferences;
@@ -31,6 +34,7 @@ public class WaveIntermissionUI : MonoBehaviour
             return;
         }
 
+        UpgradeLegacyPromptIfNeeded();
         promptLabel.text = promptText;
         SetVisible(true);
     }
@@ -45,6 +49,7 @@ public class WaveIntermissionUI : MonoBehaviour
     private void ResolveReferences()
     {
         panelRoot ??= gameObject;
+        UpgradeLegacyPromptIfNeeded();
 
         if (promptLabel == null)
         {
@@ -79,6 +84,15 @@ public class WaveIntermissionUI : MonoBehaviour
         }
 
         return null;
+    }
+
+    // Reemplaza el texto heredado de la T por el nuevo atajo con Q.
+    private void UpgradeLegacyPromptIfNeeded()
+    {
+        if (string.IsNullOrWhiteSpace(promptText) || promptText == LegacyStartPrompt)
+        {
+            promptText = UpdatedStartPrompt;
+        }
     }
 
     // Gestiona registro faltante referencias.

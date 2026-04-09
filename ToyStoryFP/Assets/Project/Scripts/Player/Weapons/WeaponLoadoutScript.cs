@@ -319,6 +319,80 @@ public class WeaponLoadoutScript : MonoBehaviour
         return shopEntries;
     }
 
+    // Busca una entrada concreta de tienda por id estable.
+    public bool TryGetShopEntry(string weaponId, out WeaponShopEntry entry)
+    {
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+
+        if (string.IsNullOrEmpty(normalizedWeaponId))
+        {
+            entry = default(WeaponShopEntry);
+            return false;
+        }
+
+        if (!definitionsById.ContainsKey(normalizedWeaponId))
+        {
+            if (allWeapons.Length == 0)
+            {
+                RefreshWeapons();
+            }
+            else
+            {
+                BuildDefinitionMaps();
+            }
+        }
+
+        if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
+        {
+            entry = default(WeaponShopEntry);
+            return false;
+        }
+
+        entry = new WeaponShopEntry(normalizedWeaponId, Mathf.Max(0, definition.price), IsWeaponUnlocked(normalizedWeaponId));
+        return true;
+    }
+
+    // Ajusta un precio de tienda en runtime sin depender del prefab.
+    public void SetWeaponShopPrice(string weaponId, int price)
+    {
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+
+        if (string.IsNullOrEmpty(normalizedWeaponId))
+        {
+            return;
+        }
+
+        if (!definitionsById.ContainsKey(normalizedWeaponId))
+        {
+            if (allWeapons.Length == 0)
+            {
+                RefreshWeapons();
+            }
+            else
+            {
+                BuildDefinitionMaps();
+            }
+        }
+
+        if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
+        {
+            return;
+        }
+
+        definition.price = Mathf.Max(0, price);
+    }
+
+    // Rellena la municion del arma equipada con su reserva configurada.
+    public bool RefillCurrentWeaponAmmoToConfiguredReserve()
+    {
+        return CurrentWeapon != null && CurrentWeapon.RefillAmmoToConfiguredReserve();
+    }
+
+    public bool AddAmmoToCurrentWeaponByMagazines(int magazineCount)
+    {
+        return CurrentWeapon != null && CurrentWeapon.TryAddAmmoByMagazines(magazineCount);
+    }
+
     // Cambia al arma siguiente o anterior dentro de las desbloqueadas.
     // Si solo hay una o estamos en mitad de otra transición, no hace nada.
     public bool TryCycleWeapon(int direction)
