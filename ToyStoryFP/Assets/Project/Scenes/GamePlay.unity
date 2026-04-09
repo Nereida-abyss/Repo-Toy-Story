@@ -2205,6 +2205,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2545896600369808183, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 2545896600369808183, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
+    - target: {fileID: 2545896600369808183, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
+    - target: {fileID: 3726297795991414036, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 3726297795991414036, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
+    - target: {fileID: 3726297795991414036, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2340,6 +2364,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerController
       objectReference: {fileID: 0}
+    - target: {fileID: 7864455122527516035, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 7864455122527516035, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
+    - target: {fileID: 7864455122527516035, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
     - target: {fileID: 8742786380324879594, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.07
@@ -2396,6 +2432,18 @@ PrefabInstance:
       propertyPath: weaponSwitchClip
       value: 
       objectReference: {fileID: 8300000, guid: 53d1af525c81dd64b888d66b4c892419, type: 3}
+    - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
+    - target: {fileID: 9093384505567265199, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
