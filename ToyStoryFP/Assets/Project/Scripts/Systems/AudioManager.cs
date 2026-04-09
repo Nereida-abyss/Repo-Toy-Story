@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 public class AudioManager : MonoBehaviour
 {
     private const string DefaultCatalogResourcePath = "Audio/ProjectAudioCatalog";
+    private const string MainMenuSceneName = "MainMenu";
+    private const string GamePlaySceneName = "GamePlay";
 
     private static AudioManager instance;
 
@@ -71,6 +73,9 @@ public class AudioManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         EnsureAudioSources();
         ResolveCatalog();
+
+        // Campo legacy conservado por compatibilidad de inspector; ya no gobierna el cambio de musica.
+        _ = keepMainMenuMusicInAllScenes;
     }
 
     // Activa listeners y estado al habilitar el objeto.
@@ -96,18 +101,13 @@ public class AudioManager : MonoBehaviour
     // Arranca la configuración inicial del componente.
     private void Start()
     {
-        EnsureMainMenuMusic();
+        SyncMusicForScene(SceneManager.GetActiveScene().name);
     }
 
     // Gestiona el evento de escena loaded.
-    private void OnSceneLoaded(Scene _, LoadSceneMode __)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode __)
     {
-        if (!keepMainMenuMusicInAllScenes)
-        {
-            return;
-        }
-
-        EnsureMainMenuMusic();
+        SyncMusicForScene(scene.name);
     }
 
     // Reproduce music.
@@ -300,24 +300,24 @@ public class AudioManager : MonoBehaviour
         return ResolveCatalog() != null ? ResolveCatalog().Credits.outroSwish : null;
     }
 
-    // Asegura main menu music.
-    private void EnsureMainMenuMusic()
+    // Sincroniza la musica segun la escena activa sin pisar escenas no configuradas.
+    private void SyncMusicForScene(string sceneName)
     {
         EnsureAudioSources();
 
-        if (!keepMainMenuMusicInAllScenes || musicSource == null)
+        if (musicSource == null)
         {
             return;
         }
 
-        AudioClip targetClip = GetMainMenuMusicClip();
-        musicSource.volume = musicVolume;
-        musicSource.loop = true;
-
+        AudioClip targetClip = GetMusicClipForScene(sceneName);
         if (targetClip == null)
         {
             return;
         }
+
+        musicSource.volume = musicVolume;
+        musicSource.loop = true;
 
         bool wrongClip = musicSource.clip != targetClip;
         bool stopped = !musicSource.isPlaying;
@@ -359,6 +359,20 @@ public class AudioManager : MonoBehaviour
         {
             sfxSource = gameObject.AddComponent<AudioSource>();
             sfxSource.playOnAwake = false;
+        }
+    }
+
+    // Devuelve la pista asociada a una escena conocida.
+    private AudioClip GetMusicClipForScene(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case MainMenuSceneName:
+                return GetMainMenuMusicClip();
+            case GamePlaySceneName:
+                return GetGameplayMusicClip();
+            default:
+                return null;
         }
     }
 
