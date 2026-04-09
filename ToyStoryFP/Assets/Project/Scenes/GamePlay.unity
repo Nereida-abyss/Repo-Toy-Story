@@ -2324,6 +2324,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 991857915}
     m_Modifications:
+    - target: {fileID: 4655425901243566510, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 4655425901243566510, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: reloadSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
+    - target: {fileID: 4655425901243566510, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: dryFireSound
+      value: 
+      objectReference: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
     - target: {fileID: 4978345595291347896, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_Name
       value: PlayerController
