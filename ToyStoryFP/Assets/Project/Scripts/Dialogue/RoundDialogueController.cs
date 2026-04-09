@@ -28,7 +28,7 @@ public class RoundDialogueController : MonoBehaviour
             return;
         }
 
-        if dialoguePanel != null)
+        if (dialoguePanel != null)
         {
             dialoguePanel.SetActive(false);
         }
