@@ -19,24 +19,24 @@ MonoBehaviour:
     defeat: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
     victory: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
   player:
-    jump: {fileID: 8300000, guid: f2031425364758697a8b9cadbe0f1021, type: 3}
+    jump: {fileID: 8300000, guid: 3b671fcfca24e3d4c90cbae5d305bf8e, type: 3}
     footsteps:
-    - {fileID: 8300000, guid: b1c2d3e4f5061728394a5b6c7d8e9f01, type: 3}
+    - {fileID: 8300000, guid: ab4f8660451a2fe4ba1f55914d924887, type: 3}
     - {fileID: 8300000, guid: c1d2e3f40516273849a5b6c7d8e9f012, type: 3}
-    weaponSwitch: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
-    coinPickup: {fileID: 8300000, guid: 5f4a2b7c9d014936b3f0c2e7a18d4b6f, type: 3}
-    killConfirm: {fileID: 8300000, guid: 2a8e1d4f6b7c49a3b5d0e2f18496c3ab, type: 3}
+    weaponSwitch: {fileID: 8300000, guid: 53d1af525c81dd64b888d66b4c892419, type: 3}
+    coinPickup: {fileID: 8300000, guid: b29b1159a0cad1f4ea9e7bc44bc013be, type: 3}
+    killConfirm: {fileID: 8300000, guid: 40fc46528fc5a344fa900d91087f192c, type: 3}
     hurt: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
   enemy:
     alert: {fileID: 8300000, guid: 59afec697d2bb7d4c82d150b5f760a68, type: 3}
   weapons:
-    defaultFire: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
+    defaultFire: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
     defaultDryFire: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
-    defaultReload: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
+    defaultReload: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
   ui:
-    click: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
-    hover: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
-    panelOpen: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+    click: {fileID: 8300000, guid: c4ade59720ca758408ccdcbeb9cb5098, type: 3}
+    hover: {fileID: 8300000, guid: 1c68a3829e5c02041b0c5257e6226707, type: 3}
+    panelOpen: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
     panelClose: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
   credits:
     introWhoosh: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
