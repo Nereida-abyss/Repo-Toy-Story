@@ -46,11 +46,53 @@ public class RoundDialogueController : MonoBehaviour
             }
         }
 
+        Dialogue dialogue = dialogueManager.GetDialogueForCurrentRound();
+        if (dialogue == null)
+        {
+            Debug.LogWarning("No dialogue found for the current round.");
+            yield break;
+        }
+
+        if (pauseGameDuringDialogue)
+        {
+            Time.timeScale = 0f;
+        }
+
+        dialoguePanel.SetActive(true);
+        npcNameText.text = dialogue.npcName;
+
+        for (int i = 0; i < dialogue.sentences.Length; i++)
+        {
+            yield return StartCoroutine(TypeSentence(dialogue.sentences[i]));
+
+            if (i < dialogue.sentences.Length - 1)
+            {
+                yield return new WaitForSecondsRealtime(timeBetweenSentences);
+            }
+        }
+
+        dialoguePanel.SetActive(false);
+        if (pauseGameDuringDialogue)
+        {
+            Time.timeScale = 1f;
+        }
     }
+
+    private IEnumerator TypeSentence(string sentence)
+    {
+        sentenceText.text = "";
+        foreach (char letter in sentence.ToCharArray())
+        {
+            sentenceText.text += letter;
+            yield return new WaitForSecondsRealtime(typingSpeed);
+        }
+    }
+
+
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

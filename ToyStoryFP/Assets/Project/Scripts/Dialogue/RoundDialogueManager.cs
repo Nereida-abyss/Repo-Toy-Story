@@ -5,8 +5,13 @@ public class RoundDialogueManager : MonoBehaviour
 {
     public static RoundDialogueManager Instance;
 
-    [Header("Dialogue for each round")]
-    public List<Dialogue> dialoguesPerRound;
+    [Header("Custom Dialogues (lo programo pero igual ni se usa me la pela la verdad")]
+    public List<Dialogue> customDialogues;
+
+    [Header("Auto Dialogues")]
+    public string npcName = "Buzz Lightyear";
+    public bool useRandomSentences = true;
+    public bool repeatSentences = false; //si se cambia a true salen los custom dialogues, asi que se deja en false de momento
 
     private int currentRound = 0;
 
@@ -25,14 +30,68 @@ public class RoundDialogueManager : MonoBehaviour
 
     public Dialogue GetDialogueForCurrentRound()
     {
-        if (currentRound < dialoguesPerRound.Count)
+        //esto por si quereis los custom
+        if (customDialogues != null && customDialogues.Count > 0)
         {
-            return dialoguesPerRound[currentRound];
+            if (repeatSentences)
+            {
+                int index = currentRound % customDialogues.Count;
+                return customDialogues[index];
+            }
+            else if (currentRound < customDialogues.Count)
+            {
+                return customDialogues[currentRound];
+            }
+
+        }
+
+        //esto para los auto generados que son los que en un principio se van a usar
+        return GenerateAutoDialogue();
+    }
+
+    private Dialogue GenerateAutoDialogue()
+    {
+        Dialogue dialogue = ScriptableObject.CreateInstance<Dialogue>();
+        dialogue.npcName = npcName;
+
+        int roundNumber = currentRound + 1;
+
+        if (useRandomSentences)
+        {
+            dialogue.sentences = new string[]
+            {
+                $"ROUND {roundNumber}: {npcName} says: 'To infinity and beyond!'",
+                GetRandomSentence(),
+            };
         }
         else
         {
-            return dialoguesPerRound[dialoguesPerRound.Count - 1];
+            dialogue.sentences = new string[]
+            {
+                $"ROUND {roundNumber}: {npcName} says: 'To infinity and beyond!'",
+                "Get ready for the next wave, Cowboy!",
+                "More tropes are coming! HAHA!",
+                "This battle will last TO INFINITY AND BEYOND!"
+
+            };
         }
+        return dialogue;
+    }
+
+    private string GetRandomSentence()
+    {
+        string[] randomSentences = new string[]
+        {
+            "The battle is heating up!",
+            "Can you handle the pressure?",
+            "Don't let your guard down!",
+            "This is just the beginning!",
+            "Get ready for the next wave, Cowboy!",
+            "More tropes are coming! HAHA!",
+            "This battle will last TO INFINITY AND BEYOND!"
+        };
+        int index = Random.Range(0, randomSentences.Length);
+        return randomSentences[index];
     }
 
     public void AdvanceToNextRound()
@@ -45,15 +104,15 @@ public class RoundDialogueManager : MonoBehaviour
     {
         return currentRound;
     }
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
