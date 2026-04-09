@@ -1372,7 +1372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveIntermissionUI
   panelRoot: {fileID: 919900000000002001}
-  promptText: If you want to start the next round, press T
+  promptText: If you want to start the next round, press Q
   promptLabel: {fileID: 919900000000002009}
 --- !u!114 &1093348462997832507
 MonoBehaviour:
@@ -9309,12 +9309,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: reserveAmmo
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: dryFireSound
       value: 
       objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: reloadVolume
       value: 0.26
+      objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: damagePerShot
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: dryFireVolume
@@ -9724,6 +9732,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: reserveAmmo
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: dryFireSound
       value: 
       objectReference: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
@@ -9733,7 +9745,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: damagePerShot
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: dryFireVolume
@@ -9935,6 +9947,7 @@ MonoBehaviour:
   magazineSize: 16
   reserveAmmo: 90
   infiniteReserve: 1
+  reserveMagazineCapacity: 2
   reloadDuration: 1.2
   dryFireCooldown: 0.2
   muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
