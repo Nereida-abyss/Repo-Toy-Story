@@ -2360,6 +2360,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: jumpClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3b671fcfca24e3d4c90cbae5d305bf8e, type: 3}
+    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: coinPickupClip
+      value: 
+      objectReference: {fileID: 8300000, guid: b29b1159a0cad1f4ea9e7bc44bc013be, type: 3}
+    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: killConfirmClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 40fc46528fc5a344fa900d91087f192c, type: 3}
+    - target: {fileID: 8763889996309575755, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: weaponSwitchClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 53d1af525c81dd64b888d66b4c892419, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
