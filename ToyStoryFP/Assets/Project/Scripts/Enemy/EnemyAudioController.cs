@@ -25,7 +25,8 @@ public class EnemyAudioController : MonoBehaviour
     // Reproduce alerta.
     public void PlayAlert()
     {
-        PlayOneShot(alertClip, alertVolume, 0.01f);
+        AudioClip clipToPlay = alertClip != null ? alertClip : AudioManager.Instance?.GetEnemyAlertClip();
+        PlayOneShot(clipToPlay, alertVolume, 0.01f);
     }
 
     // Reproduce arma disparo.

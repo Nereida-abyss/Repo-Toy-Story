@@ -585,7 +585,9 @@ public class WeaponScript : MonoBehaviour
     // Reproduce el sonido de disparo usando el canal correcto para jugador o enemigo.
     private void PlayFireAudio()
     {
-        if (fireSound == null)
+        AudioClip clipToPlay = fireSound != null ? fireSound : AudioManager.Instance?.GetDefaultWeaponFireClip();
+
+        if (clipToPlay == null)
         {
             return;
         }
@@ -594,35 +596,39 @@ public class WeaponScript : MonoBehaviour
 
         if (playerOwnedWeapon)
         {
-            playerAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
+            playerAudio?.PlayWeaponFire(clipToPlay, fireVolume, firePitchRandomness);
             return;
         }
 
-        enemyAudio?.PlayWeaponFire(fireSound, fireVolume, firePitchRandomness);
+        enemyAudio?.PlayWeaponFire(clipToPlay, fireVolume, firePitchRandomness);
     }
 
     // Reproduce el sonido de cargador vacío del jugador.
     private void PlayDryFireAudio()
     {
-        if (!playerOwnedWeapon || dryFireSound == null)
+        AudioClip clipToPlay = dryFireSound != null ? dryFireSound : AudioManager.Instance?.GetDefaultWeaponDryFireClip();
+
+        if (!playerOwnedWeapon || clipToPlay == null)
         {
             return;
         }
 
         ResolvePlayerAudio();
-        playerAudio?.PlayDryFire(dryFireSound, dryFireVolume, dryFirePitchRandomness);
+        playerAudio?.PlayDryFire(clipToPlay, dryFireVolume, dryFirePitchRandomness);
     }
 
     // Reproduce el audio de recarga del jugador.
     private void PlayReloadAudio()
     {
-        if (!playerOwnedWeapon || reloadSound == null)
+        AudioClip clipToPlay = reloadSound != null ? reloadSound : AudioManager.Instance?.GetDefaultWeaponReloadClip();
+
+        if (!playerOwnedWeapon || clipToPlay == null)
         {
             return;
         }
 
         ResolvePlayerAudio();
-        playerAudio?.PlayReload(reloadSound, reloadVolume, reloadPitchRandomness);
+        playerAudio?.PlayReload(clipToPlay, reloadVolume, reloadPitchRandomness);
     }
 
     // Convierte el resultado del daño en feedback de jugador:

@@ -3,6 +3,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PlayerAudioController : MonoBehaviour
 {
+    private static readonly AudioClip[] EmptyAudioClips = System.Array.Empty<AudioClip>();
+
     private const string GeneralSourceName = "PlayerAudioGeneral";
     private const string WeaponSourceName = "PlayerAudioWeapon";
     private const string FootstepSourceName = "PlayerAudioFootsteps";
@@ -61,26 +63,33 @@ public class PlayerAudioController : MonoBehaviour
     // Reproduce salto.
     public void PlayJump()
     {
-        PlayOneShot(generalSource, jumpClip, jumpVolume);
+        PlayOneShot(generalSource, ResolveJumpClip(), jumpVolume);
     }
 
     // Reproduce arma cambio.
     public void PlayWeaponSwitch()
     {
-        PlayOneShot(generalSource, weaponSwitchClip, weaponSwitchVolume);
+        PlayOneShot(generalSource, ResolveWeaponSwitchClip(), weaponSwitchVolume);
     }
 
     // Reproduce moneda pickup.
     public void PlayCoinPickup()
     {
-        PlayOneShot(generalSource, coinPickupClip, coinPickupVolume, coinPickupPitchRandomness);
+        PlayOneShot(generalSource, ResolveCoinPickupClip(), coinPickupVolume, coinPickupPitchRandomness);
     }
 
     // Reproduce kill confirm.
     public void PlayKillConfirm()
     {
-        AudioClip clipToPlay = killConfirmClip != null ? killConfirmClip : weaponSwitchClip;
-        float volumeToPlay = killConfirmClip != null ? killConfirmVolume : Mathf.Max(weaponSwitchVolume, killConfirmVolume);
+        AudioClip clipToPlay = ResolveKillConfirmClip();
+        bool hasDedicatedKillConfirm = clipToPlay != null;
+
+        if (!hasDedicatedKillConfirm)
+        {
+            clipToPlay = ResolveWeaponSwitchClip();
+        }
+
+        float volumeToPlay = hasDedicatedKillConfirm ? killConfirmVolume : Mathf.Max(weaponSwitchVolume, killConfirmVolume);
         PlayOneShot(generalSource, clipToPlay, volumeToPlay);
     }
 
@@ -92,7 +101,9 @@ public class PlayerAudioController : MonoBehaviour
             return;
         }
 
-        if (hurtClip == null)
+        AudioClip resolvedHurtClip = ResolveHurtClip();
+
+        if (resolvedHurtClip == null)
         {
             if (!hasLoggedMissingHurtClip)
             {
@@ -104,7 +115,7 @@ public class PlayerAudioController : MonoBehaviour
         }
 
         lastHurtPlayTime = Time.time;
-        PlayOneShot(generalSource, hurtClip, hurtVolume, hurtPitchRandomness);
+        PlayOneShot(generalSource, resolvedHurtClip, hurtVolume, hurtPitchRandomness);
     }
 
     // Reproduce arma disparo.
@@ -136,7 +147,9 @@ public class PlayerAudioController : MonoBehaviour
             return;
         }
 
-        if (footstepClips == null || footstepClips.Length == 0 || footstepSource == null)
+        AudioClip[] resolvedFootstepClips = ResolveFootstepClips();
+
+        if (resolvedFootstepClips.Length == 0 || footstepSource == null)
         {
             return;
         }
@@ -150,7 +163,7 @@ public class PlayerAudioController : MonoBehaviour
 
         PlayOneShot(
             footstepSource,
-            GetRandomFootstepClip(),
+            GetRandomFootstepClip(resolvedFootstepClips),
             footstepVolume,
             footstepPitchRandomness);
 
@@ -201,15 +214,15 @@ public class PlayerAudioController : MonoBehaviour
     }
 
     // Obtiene aleatorio footstep clip.
-    private AudioClip GetRandomFootstepClip()
+    private AudioClip GetRandomFootstepClip(AudioClip[] clips)
     {
-        if (footstepClips == null || footstepClips.Length == 0)
+        if (clips == null || clips.Length == 0)
         {
             return null;
         }
 
-        int clipIndex = Random.Range(0, footstepClips.Length);
-        return footstepClips[clipIndex];
+        int clipIndex = Random.Range(0, clips.Length);
+        return clips[clipIndex];
     }
 
     // Reproduce one disparo.
@@ -234,5 +247,41 @@ public class PlayerAudioController : MonoBehaviour
 
         hasLoggedMissingSources = true;
         GameDebug.Advertencia("AudioJugador", "Faltan una o mas referencias de AudioSource hijas en PlayerAudioController.", this);
+    }
+
+    private AudioClip ResolveJumpClip()
+    {
+        return jumpClip != null ? jumpClip : AudioManager.Instance?.GetPlayerJumpClip();
+    }
+
+    private AudioClip[] ResolveFootstepClips()
+    {
+        if (footstepClips != null && footstepClips.Length > 0)
+        {
+            return footstepClips;
+        }
+
+        AudioClip[] catalogClips = AudioManager.Instance != null ? AudioManager.Instance.GetPlayerFootstepClips() : null;
+        return catalogClips != null && catalogClips.Length > 0 ? catalogClips : EmptyAudioClips;
+    }
+
+    private AudioClip ResolveWeaponSwitchClip()
+    {
+        return weaponSwitchClip != null ? weaponSwitchClip : AudioManager.Instance?.GetPlayerWeaponSwitchClip();
+    }
+
+    private AudioClip ResolveCoinPickupClip()
+    {
+        return coinPickupClip != null ? coinPickupClip : AudioManager.Instance?.GetPlayerCoinPickupClip();
+    }
+
+    private AudioClip ResolveKillConfirmClip()
+    {
+        return killConfirmClip != null ? killConfirmClip : AudioManager.Instance?.GetPlayerKillConfirmClip();
+    }
+
+    private AudioClip ResolveHurtClip()
+    {
+        return hurtClip != null ? hurtClip : AudioManager.Instance?.GetPlayerHurtClip();
     }
 }

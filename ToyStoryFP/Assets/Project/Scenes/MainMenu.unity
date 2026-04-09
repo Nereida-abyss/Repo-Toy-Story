@@ -12909,6 +12909,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f74a65e49bb64844ebc5d1b52b6e3dcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  catalog: {fileID: 11400000, guid: 5f7b2d6a3c9e49a8b3d2e1f0a4c6b8d1, type: 2}
   musicList:
   - {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
   sfxList: []

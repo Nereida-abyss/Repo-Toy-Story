@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9c7d8a5f0a4468cb92ec1dce1b49f4d, type: 3}
+  m_Name: ProjectAudioCatalog
+  m_EditorClassIdentifier: 
+  music:
+    mainMenu: {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
+    gameplay: {fileID: 8300000, guid: cd3a806230632c043a19e317c52b2e53, type: 3}
+    shop: {fileID: 8300000, guid: 887f145f9d6cd2543a062cda4e7f64f6, type: 3}
+    defeat: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
+    victory: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
+  player:
+    jump: {fileID: 8300000, guid: f2031425364758697a8b9cadbe0f1021, type: 3}
+    footsteps:
+    - {fileID: 8300000, guid: b1c2d3e4f5061728394a5b6c7d8e9f01, type: 3}
+    - {fileID: 8300000, guid: c1d2e3f40516273849a5b6c7d8e9f012, type: 3}
+    weaponSwitch: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+    coinPickup: {fileID: 8300000, guid: 5f4a2b7c9d014936b3f0c2e7a18d4b6f, type: 3}
+    killConfirm: {fileID: 8300000, guid: 2a8e1d4f6b7c49a3b5d0e2f18496c3ab, type: 3}
+    hurt: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
+  enemy:
+    alert: {fileID: 8300000, guid: 59afec697d2bb7d4c82d150b5f760a68, type: 3}
+  weapons:
+    defaultFire: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
+    defaultDryFire: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
+    defaultReload: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
+  ui:
+    click: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+    hover: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+    panelOpen: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+    panelClose: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+  credits:
+    introWhoosh: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
+    nameHit: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
+    nameTick: {fileID: 8300000, guid: 557b4ced3b7f5de49a3d4e810fa15236, type: 3}
+    finalSting: {fileID: 8300000, guid: 8a701eab4658c674a87557384398ccd8, type: 3}
+    outroSwish: {fileID: 8300000, guid: 28abffd6836ef6745ade07903864dfe8, type: 3}

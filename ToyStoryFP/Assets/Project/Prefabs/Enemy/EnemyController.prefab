@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioController
   audioSource: {fileID: 8918308276734767724}
-  alertClip: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+  alertClip: {fileID: 0}
   alertVolume: 0.07
   minDistance: 1.2
   maxDistance: 16

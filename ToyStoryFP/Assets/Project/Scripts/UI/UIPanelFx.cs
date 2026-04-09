@@ -28,9 +28,6 @@ public class UIPanelFx : MonoBehaviour
     [SerializeField] private float closeVolume = 0.38f;
 
     private static AudioSource sharedAudioSource;
-    private static AudioClip cachedFallbackOpenClip;
-    private static AudioClip cachedFallbackCloseClip;
-
     private RectTransform rectTransform;
     private Coroutine activeRoutine;
     private Vector2 baseAnchoredPosition;
@@ -368,19 +365,19 @@ public class UIPanelFx : MonoBehaviour
             return null;
         }
 
-        if (cachedFallbackOpenClip != null)
+        if (AudioManager.Instance == null)
         {
-            return cachedFallbackOpenClip;
+            return null;
         }
 
-        cachedFallbackOpenClip = FindAudioClipInManager("switch");
+        AudioClip openFallback = AudioManager.Instance.GetUiPanelOpenClip();
 
-        if (cachedFallbackOpenClip == null)
+        if (openFallback == null)
         {
-            cachedFallbackOpenClip = FindAudioClipInManager("click");
+            openFallback = AudioManager.Instance.GetUiHoverClip();
         }
 
-        return cachedFallbackOpenClip;
+        return openFallback != null ? openFallback : AudioManager.Instance.GetUiClickClip();
     }
 
     // Intenta sacar un clip de cierre de respaldo desde el AudioManager.
@@ -391,43 +388,12 @@ public class UIPanelFx : MonoBehaviour
             return null;
         }
 
-        if (cachedFallbackCloseClip != null)
-        {
-            return cachedFallbackCloseClip;
-        }
-
-        cachedFallbackCloseClip = FindAudioClipInManager("click");
-        return cachedFallbackCloseClip;
-    }
-
-    // Busca un clip en el AudioManager comparando por palabra clave en el nombre.
-    private AudioClip FindAudioClipInManager(string token)
-    {
-        if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
+        if (AudioManager.Instance == null)
         {
             return null;
         }
 
-        AudioClip[] sfx = AudioManager.Instance.SfxList;
-        string search = token != null ? token.ToLowerInvariant() : string.Empty;
-
-        for (int i = 0; i < sfx.Length; i++)
-        {
-            AudioClip clip = sfx[i];
-
-            if (clip == null)
-            {
-                continue;
-            }
-
-            string clipName = clip.name != null ? clip.name.ToLowerInvariant() : string.Empty;
-
-            if (!string.IsNullOrEmpty(search) && clipName.Contains(search))
-            {
-                return clip;
-            }
-        }
-
-        return sfx.Length > 0 ? sfx[0] : null;
+        AudioClip closeFallback = AudioManager.Instance.GetUiPanelCloseClip();
+        return closeFallback != null ? closeFallback : AudioManager.Instance.GetUiClickClip();
     }
 }

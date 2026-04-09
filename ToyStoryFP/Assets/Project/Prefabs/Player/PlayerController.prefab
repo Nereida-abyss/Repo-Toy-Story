@@ -4635,24 +4635,22 @@ MonoBehaviour:
   generalSource: {fileID: 3145642461339569945}
   weaponSource: {fileID: 7004235822566892732}
   footstepSource: {fileID: 2917685653942069891}
-  jumpClip: {fileID: 8300000, guid: f2031425364758697a8b9cadbe0f1021, type: 3}
+  jumpClip: {fileID: 0}
   jumpVolume: 0.12
-  footstepClips:
-  - {fileID: 8300000, guid: b1c2d3e4f5061728394a5b6c7d8e9f01, type: 3}
-  - {fileID: 8300000, guid: c1d2e3f40516273849a5b6c7d8e9f012, type: 3}
+  footstepClips: []
   footstepVolume: 0.06
   footstepMinInterval: 0.3
   footstepMaxInterval: 0.5
   footstepMinMoveAmount: 0.2
   footstepPitchRandomness: 0.03
-  weaponSwitchClip: {fileID: 8300000, guid: a4b5c6d7e8f90123456789abcdef0123, type: 3}
+  weaponSwitchClip: {fileID: 0}
   weaponSwitchVolume: 0.12
-  coinPickupClip: {fileID: 8300000, guid: 5f4a2b7c9d014936b3f0c2e7a18d4b6f, type: 3}
+  coinPickupClip: {fileID: 0}
   coinPickupVolume: 0.24
   coinPickupPitchRandomness: 0.04
-  killConfirmClip: {fileID: 8300000, guid: 2a8e1d4f6b7c49a3b5d0e2f18496c3ab, type: 3}
+  killConfirmClip: {fileID: 0}
   killConfirmVolume: 0.3
-  hurtClip: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
+  hurtClip: {fileID: 0}
   hurtVolume: 0.2
   hurtPitchRandomness: 0.035
   hurtMinInterval: 0.08
@@ -9951,9 +9949,9 @@ MonoBehaviour:
   reloadDuration: 1.2
   dryFireCooldown: 0.2
   muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
-  fireSound: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
-  dryFireSound: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
-  reloadSound: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
+  fireSound: {fileID: 0}
+  dryFireSound: {fileID: 0}
+  reloadSound: {fileID: 0}
   fireVolume: 0.42
   dryFireVolume: 0.2
   reloadVolume: 0.26

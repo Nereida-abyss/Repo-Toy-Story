@@ -266,7 +266,7 @@ public class PanelController : MonoBehaviour
 
         if (!skipRequested)
         {
-            PlayCreditsAudio(outroSwishClip, "click");
+            PlayCreditsAudio(outroSwishClip, "swish");
         }
 
         yield return FadeCanvasGroupAlpha(creditsCanvasGroup, fadeDuration);
@@ -425,7 +425,7 @@ public class PanelController : MonoBehaviour
 
             if (scaledNameGap > 0f && i < names.Count - 1)
             {
-                PlayCreditsAudio(nameTickClip, "click");
+                PlayCreditsAudio(nameTickClip, "tick");
                 yield return HoldDuration(scaledNameGap, allowSkip, skipAllowedAtTime, skipAction);
             }
 
@@ -1352,10 +1352,15 @@ public class PanelController : MonoBehaviour
     // Reproduce el audio espec?fico de cr?ditos y, si falta, intenta un sonido de respaldo del AudioManager.
     private void PlayCreditsAudio(AudioClip clip, string fallbackToken)
     {
+        AudioSource source = creditsAudioSource;
+
+        if (source == null)
+        {
+            source = GetComponent<AudioSource>();
+        }
+
         if (clip != null)
         {
-            AudioSource source = creditsAudioSource;
-
             if (source != null)
             {
                 source.PlayOneShot(clip);
@@ -1363,55 +1368,58 @@ public class PanelController : MonoBehaviour
             }
         }
 
-        if (!useAudioManagerFallback || AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
+        if (!useAudioManagerFallback || AudioManager.Instance == null)
         {
             return;
         }
 
-        int fallbackIndex = FindAudioManagerSfxIndexByToken(fallbackToken);
+        AudioClip fallbackClip = GetCreditsFallbackClip(fallbackToken);
 
-        if (fallbackIndex < 0)
+        if (fallbackClip == null && !string.Equals(fallbackToken, "click"))
         {
-            fallbackIndex = FindAudioManagerSfxIndexByToken("click");
+            fallbackClip = GetCreditsFallbackClip("click");
         }
 
-        if (fallbackIndex < 0)
+        if (fallbackClip == null)
         {
             return;
         }
 
-        AudioManager.Instance.PlaySFX(fallbackIndex);
+        if (source == null)
+        {
+            return;
+        }
+
+        source.PlayOneShot(fallbackClip);
     }
 
-    // Busca en la lista de SFX un clip cuyo nombre encaje con una palabra clave.
-    private int FindAudioManagerSfxIndexByToken(string token)
+    // Resuelve el clip de respaldo usando slots nominales del catalogo.
+    private AudioClip GetCreditsFallbackClip(string token)
     {
-        if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
+        if (AudioManager.Instance == null)
         {
-            return -1;
+            return null;
         }
 
-        AudioClip[] sfxList = AudioManager.Instance.SfxList;
         string normalizedToken = token != null ? token.ToLowerInvariant() : string.Empty;
 
-        for (int i = 0; i < sfxList.Length; i++)
+        switch (normalizedToken)
         {
-            AudioClip clip = sfxList[i];
-
-            if (clip == null)
-            {
-                continue;
-            }
-
-            string clipName = clip.name != null ? clip.name.ToLowerInvariant() : string.Empty;
-
-            if (!string.IsNullOrEmpty(normalizedToken) && clipName.Contains(normalizedToken))
-            {
-                return i;
-            }
+            case "whoosh":
+                return AudioManager.Instance.GetCreditsIntroWhooshClip();
+            case "hit":
+                return AudioManager.Instance.GetCreditsNameHitClip();
+            case "tick":
+                return AudioManager.Instance.GetCreditsNameTickClip();
+            case "sting":
+                return AudioManager.Instance.GetCreditsFinalStingClip();
+            case "swish":
+                return AudioManager.Instance.GetCreditsOutroSwishClip();
+            case "click":
+                return AudioManager.Instance.GetCreditsNameTickClip() ?? AudioManager.Instance.GetUiClickClip();
+            default:
+                return AudioManager.Instance.GetUiClickClip();
         }
-
-        return sfxList.Length > 0 ? 0 : -1;
     }
 
     // Decide si ya se puede saltar cr?ditos y si el jugador realmente lo ha pedido.

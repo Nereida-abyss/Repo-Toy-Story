@@ -31,9 +31,6 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [SerializeField] private float hoverMinInterval = DefaultHoverInterval;
 
     private static AudioSource sharedAudioSource;
-    private static AudioClip cachedFallbackClickClip;
-    private static AudioClip cachedFallbackHoverClip;
-
     private Button button;
     private RectTransform rectTransform;
     private Vector3 baseScale = Vector3.one;
@@ -341,13 +338,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return null;
         }
 
-        if (cachedFallbackClickClip != null)
-        {
-            return cachedFallbackClickClip;
-        }
-
-        cachedFallbackClickClip = FindAudioClipInManager("click");
-        return cachedFallbackClickClip;
+        return AudioManager.Instance != null ? AudioManager.Instance.GetUiClickClip() : null;
     }
 
     // Intenta encontrar un clip de hover de respaldo en el AudioManager.
@@ -358,49 +349,12 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return null;
         }
 
-        if (cachedFallbackHoverClip != null)
-        {
-            return cachedFallbackHoverClip;
-        }
-
-        cachedFallbackHoverClip = FindAudioClipInManager("switch");
-
-        if (cachedFallbackHoverClip == null)
-        {
-            cachedFallbackHoverClip = FindAudioClipInManager("click");
-        }
-
-        return cachedFallbackHoverClip;
-    }
-
-    // Busca un clip por nombre usando una palabra clave simple.
-    private AudioClip FindAudioClipInManager(string token)
-    {
-        if (AudioManager.Instance == null || AudioManager.Instance.SfxList == null)
+        if (AudioManager.Instance == null)
         {
             return null;
         }
 
-        AudioClip[] sfx = AudioManager.Instance.SfxList;
-        string search = token != null ? token.ToLowerInvariant() : string.Empty;
-
-        for (int i = 0; i < sfx.Length; i++)
-        {
-            AudioClip clip = sfx[i];
-
-            if (clip == null)
-            {
-                continue;
-            }
-
-            string clipName = clip.name != null ? clip.name.ToLowerInvariant() : string.Empty;
-
-            if (!string.IsNullOrEmpty(search) && clipName.Contains(search))
-            {
-                return clip;
-            }
-        }
-
-        return sfx.Length > 0 ? sfx[0] : null;
+        AudioClip hoverFallback = AudioManager.Instance.GetUiHoverClip();
+        return hoverFallback != null ? hoverFallback : AudioManager.Instance.GetUiClickClip();
     }
 }
