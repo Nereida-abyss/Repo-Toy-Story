@@ -146,6 +146,7 @@ MonoBehaviour:
   jumpPreparationCameraDip: 0
   visualModelRoot: {fileID: 4765474583668706138}
   modelAnimator: {fileID: 1380607283353183073}
+  visualModelNameHint: PlayerModelo
   jumpStateTransitionDuration: 0.03
   locomotionTransitionDuration: 0.06
 --- !u!114 &5603611093461556055
