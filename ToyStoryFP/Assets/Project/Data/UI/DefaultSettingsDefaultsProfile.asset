@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6a34d5f302d43efaa8f1e8f4c290c51, type: 3}
   m_Name: DefaultSettingsDefaultsProfile
   m_EditorClassIdentifier: 
-  defaultVolume: 1
+  defaultVolume: 0.5
   defaultLookSensitivity: 2
   minLookSensitivity: 0.5
   maxLookSensitivity: 5
-  defaultWindowedWidth: 1024
-  defaultWindowedHeight: 768
+  defaultWindowedWidth: 1920
+  defaultWindowedHeight: 1080
   minimumWindowedDimension: 320

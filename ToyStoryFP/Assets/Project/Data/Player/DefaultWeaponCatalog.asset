@@ -20,7 +20,7 @@ MonoBehaviour:
     unlockedByDefault: 1
   - weaponId: TacticalRifle
     weapon: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-    price: 300
+    price: 100
     unlockedByDefault: 0
   - weaponId: AssaultRifle
     weapon: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
