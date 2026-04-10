@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,6 +6,8 @@ public class AudioManager : MonoBehaviour
 {
     private const string MainMenuSceneName = "MainMenu";
     private const string GamePlaySceneName = "GamePlay";
+    private const string EndMenuSceneName = "EndMenu";
+    private const int EndMenuMusicLegacyIndex = 3;
 
     private static AudioManager instance;
 
@@ -27,6 +30,7 @@ public class AudioManager : MonoBehaviour
     private bool hasLoggedMissingCatalog;
     private bool hasLoggedMissingMusicSource;
     private bool hasLoggedMissingSfxSource;
+    private readonly HashSet<string> warnedKnownScenesWithoutMusic = new HashSet<string>();
 
     public static AudioManager Instance
     {
@@ -183,7 +187,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip GetEndMenuMusicClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.endMenu : null;
+        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.endMenu : null;
+        return clip != null ? clip : GetLegacyMusicClip(EndMenuMusicLegacyIndex);
     }
 
     public AudioClip GetWaveAnnouncementClip()
@@ -316,9 +321,15 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
+        if (!IsKnownMusicScene(sceneName))
+        {
+            return;
+        }
+
         AudioClip targetClip = GetMusicClipForScene(sceneName);
         if (targetClip == null)
         {
+            StopMusicForKnownSceneWithoutClip(sceneName, resolvedMusicSource);
             return;
         }
 
@@ -376,9 +387,45 @@ public class AudioManager : MonoBehaviour
                 return GetMainMenuMusicClip();
             case GamePlaySceneName:
                 return GetGameplayMusicClip();
+            case EndMenuSceneName:
+                return GetEndMenuMusicClip();
             default:
                 return null;
         }
+    }
+
+    private bool IsKnownMusicScene(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case MainMenuSceneName:
+            case GamePlaySceneName:
+            case EndMenuSceneName:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void StopMusicForKnownSceneWithoutClip(string sceneName, AudioSource resolvedMusicSource)
+    {
+        if (resolvedMusicSource.isPlaying)
+        {
+            resolvedMusicSource.Stop();
+        }
+
+        resolvedMusicSource.clip = null;
+
+        if (warnedKnownScenesWithoutMusic.Contains(sceneName))
+        {
+            return;
+        }
+
+        warnedKnownScenesWithoutMusic.Add(sceneName);
+        GameDebug.Advertencia(
+            "Audio",
+            $"La escena musical conocida '{sceneName}' no tiene clip configurado. Se detiene la musica actual para evitar arrastrar la pista anterior.",
+            this);
     }
 
     private ProjectAudioCatalog ResolveCatalog()
