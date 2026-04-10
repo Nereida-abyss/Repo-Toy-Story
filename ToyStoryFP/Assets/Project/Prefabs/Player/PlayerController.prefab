@@ -194,23 +194,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponLoadoutScript
   weaponCamera: {fileID: 7428757647949270732}
   playerAudio: {fileID: 8763889996309575755}
+  weaponCatalog: {fileID: 11400000, guid: e0c8a5be57c144798ad3eca0273f1d0d, type: 2}
   weaponSwitchDuration: 0.33
   weaponSwitchLowerRatio: 0.45
   weaponSwitchRaiseRatio: 0.45
-  defaultStartingWeaponId: Low_Poly_1323
-  weaponUnlockDefinitions:
-  - weaponId: Low_Poly_1323
-    weapon: {fileID: 4655425901243566510}
-    price: 0
-    unlockedByDefault: 1
-  - weaponId: TacticalRifle
-    weapon: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
-    price: 0
-    unlockedByDefault: 0
-  - weaponId: AssaultRifle
-    weapon: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
-    price: 0
-    unlockedByDefault: 0
 --- !u!114 &919900000000004001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,6 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3a40cf52454703b0201f7e40b9ff94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionFade
+  sceneTransitionProfile: {fileID: 11400000, guid: e5a2c75b07084b249beefb28ca79e887, type: 2}
   fadeDuration: 1.1
   startVignetteIntensity: 0
   endVignetteIntensity: 1
@@ -412,6 +400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -928,6 +917,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -1187,6 +1177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16
@@ -1457,6 +1448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16
@@ -1690,6 +1682,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16
@@ -3299,6 +3292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -3411,6 +3405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16
@@ -4711,6 +4706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e6b8e4566d14a94b6c4f2ea80e6a214, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShopController
+  shopBalanceProfile: {fileID: 11400000, guid: 4058c69a7cac43ebbb2f0583427a5d34, type: 2}
   waveManager: {fileID: 0}
   panelShop: {fileID: 6938587728798845622}
   moneyText: {fileID: 7939850641683457737}
@@ -4734,6 +4730,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d09a3c7c7244a3a0b8dd7c6e86f1aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
+  audioProfile: {fileID: 11400000, guid: a1f390697ddf4956b52dc73a792f8efb, type: 2}
   generalSource: {fileID: 3145642461339569945}
   weaponSource: {fileID: 7004235822566892732}
   footstepSource: {fileID: 2917685653942069891}
@@ -7986,6 +7983,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -8651,6 +8649,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -8982,6 +8981,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -9420,6 +9420,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: statsProfile
+      value: 
+      objectReference: {fileID: 11400000, guid: 367a980f74df4d9990c9e8127f89b387, type: 2}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: fireSound
       value: 
       objectReference: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
@@ -9847,6 +9851,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: statsProfile
+      value: 
+      objectReference: {fileID: 11400000, guid: 299db6bcb3ab46d88411f52d04f38e2d, type: 2}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: fireRate
       value: 8
       objectReference: {fileID: 0}
@@ -10071,6 +10079,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponScript
   _camera: {fileID: 7428757647949270732}
   fireOrigin: {fileID: 0}
+  statsProfile: {fileID: 11400000, guid: c77ef411754d48b494e9b98c302ab579, type: 2}
   maxRange: 100
   playerOwnedWeapon: 0
   playerAudio: {fileID: 8763889996309575755}

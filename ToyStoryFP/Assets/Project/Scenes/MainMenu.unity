@@ -673,6 +673,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16
@@ -2344,6 +2345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -3322,6 +3324,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -5968,6 +5971,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -10941,6 +10945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3a40cf52454703b0201f7e40b9ff94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionFade
+  sceneTransitionProfile: {fileID: 11400000, guid: e5a2c75b07084b249beefb28ca79e887, type: 2}
   fadeDuration: 1.1
   startVignetteIntensity: 0
   endVignetteIntensity: 1

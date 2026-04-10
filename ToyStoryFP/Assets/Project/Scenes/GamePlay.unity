@@ -4495,17 +4495,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   waveSpawner: {fileID: 920100000000000007}
+  balanceProfile: {fileID: 11400000, guid: 8ab875e8db03440aa1afc9f855dadc40, type: 2}
   initialWaveDelay: 2
   intermissionDuration: 180
   spawnInterval: 0.5
   waveAnnouncementDuration: 2.5
   baseEnemyCount: 10
   additionalEnemiesPerWave: 2
-  enemyRoundScaling:
-    healthMultiplierPerRound: 1.03
-    damageMultiplierPerRound: 1.02
-    maxHealthMultiplier: 1.75
-    maxDamageMultiplier: 1.35
+  healthMultiplierPerRound: 1.03
+  damageMultiplierPerRound: 1.02
+  maxHealthMultiplier: 1.75
+  maxDamageMultiplier: 1.35
 --- !u!1 &920100000000000004
 GameObject:
   m_ObjectHideFlags: 0

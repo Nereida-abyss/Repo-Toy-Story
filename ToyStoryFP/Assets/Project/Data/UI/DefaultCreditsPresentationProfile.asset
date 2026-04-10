@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65df05482f404c5e8a842e7aa2acf8cd, type: 3}
+  m_Name: DefaultCreditsPresentationProfile
+  m_EditorClassIdentifier: 
+  gameOverDuration: 3
+  introSkipGracePeriod: 1.5
+  skipInputGracePeriod: 0.15
+  creditsFadeOutDuration: 0.6
+  skippedFadeOutDuration: 0.2
+  titleInDuration: 2.2
+  sectionInDuration: 1.2
+  sectionHoldDuration: 5.5
+  sectionOutDuration: 0.9
+  finalHoldDuration: 6
+  globalFadeOutDuration: 1.2
+  sectionGap: 0.6
+  titleStartScale: 0.88
+  titleStartYOffset: 45
+  sectionStartYOffset: 95
+  sequentialNameReveal: 1
+  nameRevealDuration: 0.26
+  nameRevealGap: 0.08
+  nameStartYOffset: 28
+  sectionDimAlpha: 0.3
+  sectionFocusAlpha: 1
+  lineStagger: 0.2
+  easeType: 0
+  targetCreditsDurationMin: 7
+  targetCreditsDurationMax: 9
+  introBeatDuration: 0.75
+  perNameRevealDuration: 0.55
+  perNameGap: 0.14
+  comboHoldDuration: 0.65
+  finalStingerDuration: 1.45
+  outroFadeDuration: 0.65
+  introStartScale: 0.92
+  namePunchScale: 0.1
+  panelPulseAmount: 0.03
+  previousNameAlpha: 0.78
+  microShakeAmount: 4
+  microShakeDuration: 0.08
+  nameHitClip: {fileID: 0}
+  nameTickClip: {fileID: 0}
+  introWhooshClip: {fileID: 0}
+  finalStingClip: {fileID: 0}
+  outroSwishClip: {fileID: 0}
+  useAudioManagerFallback: 1
+  fallbackCreditsDuration: 3
+  textStagger: 0.18
+  textFadeInDuration: 0.45
+  textMoveDuration: 0.7
+  textStartYOffset: 70

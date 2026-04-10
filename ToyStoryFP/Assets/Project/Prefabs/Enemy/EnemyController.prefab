@@ -179,6 +179,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   target: {fileID: 0}
+  behaviorProfile: {fileID: 11400000, guid: 861687652c6c47a581e1acf5315c2efa, type: 2}
   targetAimHeight: 0.15
   detectionRange: 1
   loseSightGraceTime: 0.6
@@ -580,6 +581,10 @@ PrefabInstance:
       propertyPath: _camera
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: statsProfile
+      value: 
+      objectReference: {fileID: 11400000, guid: d6cda8a4e277475f9816c784257c7f1e, type: 2}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: fireRate
       value: 3
@@ -1119,6 +1124,10 @@ PrefabInstance:
       propertyPath: _camera
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: statsProfile
+      value: 
+      objectReference: {fileID: 11400000, guid: 9054ba77c8e54377be25a8fdb2bf9e92, type: 2}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: fireRate
       value: 3

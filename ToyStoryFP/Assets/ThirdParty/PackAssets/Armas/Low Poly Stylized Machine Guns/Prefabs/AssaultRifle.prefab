@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponScript
   _camera: {fileID: 0}
   fireOrigin: {fileID: 0}
+  statsProfile: {fileID: 11400000, guid: 45f2ac7dfc524c47935a51c39162cfb7, type: 2}
   maxRange: 100
   playerOwnedWeapon: 0
   fireRate: 10

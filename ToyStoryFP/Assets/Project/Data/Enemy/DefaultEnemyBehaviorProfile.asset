@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a64e82b1b3054a9692c495181271ff88, type: 3}
+  m_Name: DefaultEnemyBehaviorProfile
+  m_EditorClassIdentifier: 
+  targetAimHeight: 0.15
+  detectionRange: 1
+  loseSightGraceTime: 0.6
+  eyeHeight: 1.4
+  alertHeightOffset: 0.45
+  stoppingDistance: 0.75
+  attackRange: 0.8
+  turnSpeed: 360
+  alertSpeedMultiplier: 2
+  damageSpeedMultiplier: 1.7
+  damageSpeedBoostDuration: 3
+  patrolPointReachThreshold: 0.25
+  patrolRetargetDelay: 0.2
+  patrolSearchRadius: 5
+  patrolMinTravelDistance: 2.5
+  attackWarmup: 0.65
+  attackAimDotThreshold: 0.877
+  allyAlertRadius: 0.6
+  investigationDuration: 4
+  slotRefreshInterval: 0.35
+  slotInnerRadius: 0.95
+  slotOuterRadius: 1.35
+  slotInnerCount: 4
+  slotOuterCount: 6
+  stuckCheckInterval: 0.25
+  stuckProgressThreshold: 0.03
+  stuckTimeout: 0.75
+  wallProbeDistance: 0.18
+  avoidancePriorityMin: 35
+  avoidancePriorityMax: 65
+  animationSpeedReference: 0.2
+  minimumMoveBlend: 0
+  animationMoveThreshold: 0.01
+  combatDecisionInterval: 0.6
+  combatMovePointRefreshInterval: 0.2
+  combatStrafeDistance: 0.55
+  combatAdvanceDistance: 0.35
+  combatRetreatDistance: 0.45
+  preferredCombatDistance: 0.72
+  preferredDistanceTolerance: 0.12
+  combatMovementJitter: 0.08
+  combatLateralWeight: 0.6
+  combatAdvanceWeight: 0.2
+  combatRetreatWeight: 0.2
+  movementFacingDeadzone: 0.02

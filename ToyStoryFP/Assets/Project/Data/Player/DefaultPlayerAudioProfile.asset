@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b8647118a5b4134bfec4ff4a5fefe65, type: 3}
+  m_Name: DefaultPlayerAudioProfile
+  m_EditorClassIdentifier: 
+  jumpClip: {fileID: 0}
+  jumpVolume: 0.12
+  footstepClips: []
+  footstepVolume: 0.06
+  footstepMinInterval: 0.3
+  footstepMaxInterval: 0.5
+  footstepMinMoveAmount: 0.2
+  footstepPitchRandomness: 0.03
+  weaponSwitchClip: {fileID: 0}
+  weaponSwitchVolume: 0.12
+  coinPickupClip: {fileID: 0}
+  coinPickupVolume: 0.24
+  coinPickupPitchRandomness: 0.04
+  killConfirmClip: {fileID: 0}
+  killConfirmVolume: 0.3
+  hurtClip: {fileID: 0}
+  hurtVolume: 0.2
+  hurtPitchRandomness: 0.035
+  hurtMinInterval: 0.08

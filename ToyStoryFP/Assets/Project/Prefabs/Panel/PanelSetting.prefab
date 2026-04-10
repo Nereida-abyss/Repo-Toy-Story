@@ -913,6 +913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -1213,6 +1214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -1513,6 +1515,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba2ebe592034504a8747c106116856c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonFx
+  buttonFxProfile: {fileID: 11400000, guid: 08963776c79f4e6b97f6da9dd9a873af, type: 2}
   targetGraphic: {fileID: 0}
   affectGraphicColor: 1
   normalColor: {r: 1, g: 0.95, b: 0.78, a: 0.96}
@@ -2828,6 +2831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3e9d6e87e9f4b4fa43fd59bf42ad2a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultsProfile: {fileID: 11400000, guid: 8efb086037eb4ff5ba1f122ab3f1b39a, type: 2}
   closeButton: {fileID: 1065}
   fullscreenButton: {fileID: 1085}
   fullscreenStateText: {fileID: 1034}
@@ -2850,6 +2854,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69098781ddcf7024ca2992b2ddc3c17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelFx
+  panelFxProfile: {fileID: 11400000, guid: 1bcdfe1ce3b7427eb444965b13ddd30e, type: 2}
   playOpenOnEnable: 1
   openDuration: 0.25
   closeDuration: 0.16

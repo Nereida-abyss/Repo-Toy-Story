@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f60ca6120404470bf6d2954ea07d4f7, type: 3}
+  m_Name: AssaultRiflePlayerWeaponStatsProfile
+  m_EditorClassIdentifier: 
+  maxRange: 100
+  fireRate: 8
+  damagePerShot: 30
+  magazineSize: 30
+  reserveAmmo: 120
+  infiniteReserve: 0
+  reserveMagazineCapacity: 2
+  reloadDuration: 1.2
+  dryFireCooldown: 0.2
+  muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
+  fireSound: {fileID: 8300000, guid: d0e1f2031425364758697a8b9cadbe0f, type: 3}
+  dryFireSound: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+  reloadSound: {fileID: 8300000, guid: e1f2031425364758697a8b9cadbe0f10, type: 3}
+  fireVolume: 0.42
+  dryFireVolume: 0.2
+  reloadVolume: 0.26
+  firePitchRandomness: 0.008
+  dryFirePitchRandomness: 0.005
+  reloadPitchRandomness: 0.01
+  cameraRecoilPitch: 1.1
+  cameraRecoilYaw: 0.2
+  weaponRecoilPosition: {x: 0, y: 0.01, z: -0.05}
+  weaponRecoilRotation: {x: -6, y: 1.25, z: 0.5}
+  weaponRecoilReturnTime: 0.08
+  weaponEquipLowerPosition: {x: 0.08, y: -0.22, z: 0.06}
+  weaponEquipLowerRotation: {x: 18, y: -8, z: 12}

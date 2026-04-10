@@ -1,7 +1,7 @@
 # Audio Setup
 
 El punto principal para cambiar sonidos ahora es:
-`Assets/Project/Resources/Audio/ProjectAudioCatalog.asset`
+`Assets/Project/Data/Audio/ProjectAudioCatalog.asset`
 
 Guia rapida:
 - Musica global: grupo `Music` del catalogo.
@@ -16,6 +16,6 @@ Reglas de prioridad:
 - Los botones y paneles ya no buscan sonidos por nombre dentro de una lista generica.
 
 Puntos importantes del proyecto:
-- `AudioManager` carga el catalogo automaticamente desde `Resources/Audio/ProjectAudioCatalog`.
+- `AudioManager` consume una referencia serializada al catalogo desde Inspector.
 - `PlayerAudioController`, `EnemyAudioController` y `WeaponScript` usan el catalogo como fallback explicito.
 - Los cambios de audio compartido deben hacerse en el catalogo, no dentro de prefabs anidados, salvo que se quiera un override concreto para un objeto concreto.
