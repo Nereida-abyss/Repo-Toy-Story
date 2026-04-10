@@ -10,6 +10,7 @@ public class CoinPickup : MonoBehaviour
     private static Material sharedCoinMaterial;
 
     [SerializeField] private int coinValue = 1;
+    [SerializeField] private CoinPickupProfile pickupProfile;
     [SerializeField] private float pickupRadius = 0.2f;
     [SerializeField] private float rotationSpeed = 165f;
     [SerializeField] private float bobAmplitude = 0.03f;
@@ -22,9 +23,10 @@ public class CoinPickup : MonoBehaviour
     private Vector3 basePosition;
     private Transform visualRoot;
     private bool collected;
+    private bool missingProfileWarningShown;
 
     // Gestiona spawn.
-    public static CoinPickup Spawn(Vector3 worldPosition, int value)
+    public static CoinPickup Spawn(Vector3 worldPosition, int value, CoinPickupProfile profile = null)
     {
         GameObject coinObject = new GameObject("CoinPickup");
         coinObject.name = "CoinPickup";
@@ -32,6 +34,7 @@ public class CoinPickup : MonoBehaviour
 
         CoinPickup pickup = coinObject.AddComponent<CoinPickup>();
         pickup.coinValue = Mathf.Max(1, value);
+        pickup.pickupProfile = profile;
         pickup.ConfigureRuntimeCoin();
         return pickup;
     }
@@ -39,6 +42,11 @@ public class CoinPickup : MonoBehaviour
     void Awake()
     {
         ConfigureRuntimeCoin();
+    }
+
+    void Start()
+    {
+        ApplyProfile(warnIfMissing: true);
     }
 
     void OnEnable()
@@ -71,6 +79,7 @@ public class CoinPickup : MonoBehaviour
     // Configura runtime moneda.
     private void ConfigureRuntimeCoin()
     {
+        ApplyProfile(warnIfMissing: false);
         basePosition = transform.position;
         ApplyIgnoreRaycastLayer(gameObject);
 
@@ -97,6 +106,31 @@ public class CoinPickup : MonoBehaviour
         body.useGravity = false;
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         EnsureVisual();
+    }
+
+    private void ApplyProfile(bool warnIfMissing)
+    {
+        if (pickupProfile == null)
+        {
+            if (warnIfMissing && !missingProfileWarningShown)
+            {
+                GameDebug.Advertencia(
+                    "Jugador",
+                    "CoinPickup no tiene CoinPickupProfile asignado. Se usaran los valores locales del componente.",
+                    this);
+                missingProfileWarningShown = true;
+            }
+
+            return;
+        }
+
+        pickupRadius = pickupProfile.PickupRadius;
+        rotationSpeed = pickupProfile.RotationSpeed;
+        bobAmplitude = pickupProfile.BobAmplitude;
+        bobFrequency = pickupProfile.BobFrequency;
+        pickupDelay = pickupProfile.PickupDelay;
+        visualScale = pickupProfile.VisualScale;
+        visualLocalOffset = pickupProfile.VisualLocalOffset;
     }
 
     // Intenta collect.

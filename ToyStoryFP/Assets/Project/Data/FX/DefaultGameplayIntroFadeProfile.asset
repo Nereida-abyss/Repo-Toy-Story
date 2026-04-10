@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12581ea403f34e7e8af8686ae7b52eb9, type: 3}
+  m_Name: DefaultGameplayIntroFadeProfile
+  m_EditorClassIdentifier: 
+  fadeDuration: 1.35
+  startVignetteIntensity: 1
+  endVignetteIntensity: 0
+  startPostExposure: -10
+  endPostExposure: 0
+  startVignetteSmoothness: 1
+  endVignetteSmoothness: 0.2

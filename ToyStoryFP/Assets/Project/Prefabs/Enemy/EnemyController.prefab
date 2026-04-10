@@ -166,6 +166,7 @@ MonoBehaviour:
   dropCoinOnDeath: 1
   coinValue: 1
   coinDropOffset: {x: 0, y: 0.08, z: 0}
+  coinPickupProfile: {fileID: 11400000, guid: 5dd5d2c731be432482e20767a85caf1b, type: 2}
 --- !u!114 &134238219663904444
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -18,6 +18,7 @@ public class MouseLookScript : MonoBehaviour
 
     public static MouseLookScript instance;
 
+    [SerializeField] private MouseLookTuningProfile tuningProfile;
     [Header("Mouse Look Settings")]
     public Vector2 clampInDegrees = new Vector2(360, 180);
     public bool lockCursor = true;
@@ -81,6 +82,7 @@ public class MouseLookScript : MonoBehaviour
     private bool pauseStateInitialized;
     private bool lastKnownPauseState;
     private bool pauseEventSubscribed;
+    private bool missingProfileWarningShown;
 
     [HideInInspector]
     public bool scoped;
@@ -101,6 +103,11 @@ public class MouseLookScript : MonoBehaviour
     private PausePoseSnapshot pausePoseSnapshot;
     private bool pausePoseCapturedThisCycle;
     private Rigidbody pausePoseRootRigidbody;
+
+    void Awake()
+    {
+        ApplyTuningProfile();
+    }
 
     void OnEnable()
     {
@@ -133,6 +140,44 @@ public class MouseLookScript : MonoBehaviour
         {
             LockCursor();
         }
+    }
+
+    private void ApplyTuningProfile()
+    {
+        if (tuningProfile == null)
+        {
+            if (!missingProfileWarningShown)
+            {
+                GameDebug.Advertencia(
+                    "Jugador",
+                    "MouseLookScript no tiene MouseLookTuningProfile asignado. Se usaran los valores locales del componente.",
+                    this);
+                missingProfileWarningShown = true;
+            }
+
+            return;
+        }
+
+        clampInDegrees = tuningProfile.ClampInDegrees;
+        lockCursor = tuningProfile.LockCursor;
+        postUnpauseLookBlockDuration = tuningProfile.PostUnpauseLookBlockDuration;
+        pauseInputResetOnOpen = tuningProfile.PauseInputResetOnOpen;
+        pauseInputResetOnClose = tuningProfile.PauseInputResetOnClose;
+        postUnpauseSpikeFilterDuration = tuningProfile.PostUnpauseSpikeFilterDuration;
+        postUnpauseSpikeThreshold = tuningProfile.PostUnpauseSpikeThreshold;
+        restorePoseOnUnpause = tuningProfile.RestorePoseOnUnpause;
+        restoreCameraLocalPositionOnUnpause = tuningProfile.RestoreCameraLocalPositionOnUnpause;
+        clearAngularVelocityOnResume = tuningProfile.ClearAngularVelocityOnResume;
+        smoothing = tuningProfile.Smoothing;
+        recoilReturnTime = tuningProfile.RecoilReturnTime;
+        jumpLiftHeight = tuningProfile.JumpLiftHeight;
+        jumpLiftUpDuration = tuningProfile.JumpLiftUpDuration;
+        jumpLiftDownDuration = tuningProfile.JumpLiftDownDuration;
+        jumpBounceDropHeight = tuningProfile.JumpBounceDropHeight;
+        jumpBounceDropDuration = tuningProfile.JumpBounceDropDuration;
+        jumpBounceRecoverDuration = tuningProfile.JumpBounceRecoverDuration;
+        anticipationDropHeight = tuningProfile.AnticipationDropHeight;
+        anticipationDropReturnDuration = tuningProfile.AnticipationDropReturnDuration;
     }
 
     // Guarda una sensibilidad segura dentro de los límites permitidos.

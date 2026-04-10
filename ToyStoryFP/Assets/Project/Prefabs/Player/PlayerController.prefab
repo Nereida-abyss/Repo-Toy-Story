@@ -157,6 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66b15431f8646f44faf7a09a7769de55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MouseLookScript
+  tuningProfile: {fileID: 11400000, guid: f7d8d9c563c0483da42682dc8dc37f62, type: 2}
   clampInDegrees: {x: 360, y: 38}
   lockCursor: 1
   postUnpauseLookBlockDuration: 0.08
@@ -210,6 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c526a5e37c044306b61eae6f93a9e1e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayIntroFade
+  introFadeProfile: {fileID: 11400000, guid: c0d77b837c0e4e4485db87dcf483ac0a, type: 2}
   fadeDuration: 1.35
   startVignetteIntensity: 1
   endVignetteIntensity: 0
@@ -3992,6 +3994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23be97d06af44f8cb4d29fe97a8dc650, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrosshairFeedbackController
+  feedbackProfile: {fileID: 11400000, guid: bcafd8a7b83a41669e0c43848a34caf7, type: 2}
   hitMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hitMarkerDuration: 0.12
   hitMarkerSize: 24
@@ -4676,6 +4679,7 @@ MonoBehaviour:
   dropCoinOnDeath: 0
   coinValue: 1
   coinDropOffset: {x: 0, y: 0.5, z: 0}
+  coinPickupProfile: {fileID: 11400000, guid: 5dd5d2c731be432482e20767a85caf1b, type: 2}
 --- !u!114 &879036673528475793
 MonoBehaviour:
   m_ObjectHideFlags: 0

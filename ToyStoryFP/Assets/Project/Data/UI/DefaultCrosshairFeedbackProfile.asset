@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba72004ac2684fb9984e7fc7db2ffc1e, type: 3}
+  m_Name: DefaultCrosshairFeedbackProfile
+  m_EditorClassIdentifier: 
+  hitMarkerColor: {r: 1, g: 1, b: 1, a: 1}
+  hitMarkerDuration: 0.12
+  hitMarkerSize: 24
+  hitMarkerThickness: 3
+  hitMarkerScalePunch: 1.16
+  deathMarkerColor: {r: 1, g: 0.3, b: 0.12, a: 1}
+  deathMarkerDuration: 0.22
+  deathMarkerSize: 34
+  deathMarkerThickness: 4
+  deathMarkerScalePunch: 1.25

@@ -11,8 +11,10 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
     [SerializeField] private bool dropCoinOnDeath = true;
     [SerializeField] private int coinValue = 1;
     [SerializeField] private Vector3 coinDropOffset = new Vector3(0f, 0.5f, 0f);
+    [SerializeField] private CoinPickupProfile coinPickupProfile;
 
     private int currentHealth;
+    private bool missingCoinProfileWarningShown;
 
     public event Action<PlayerHealthScript> HealthChanged;
     public event Action<PlayerHealthScript> Died;
@@ -103,7 +105,16 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
             return;
         }
 
-        CoinPickup.Spawn(transform.position + coinDropOffset, coinValue);
+        if (coinPickupProfile == null && !missingCoinProfileWarningShown)
+        {
+            GameDebug.Advertencia(
+                "Jugador",
+                "PlayerHealthScript no tiene CoinPickupProfile asignado para el drop de moneda. Se usaran los valores locales de CoinPickup.",
+                this);
+            missingCoinProfileWarningShown = true;
+        }
+
+        CoinPickup.Spawn(transform.position + coinDropOffset, coinValue, coinPickupProfile);
     }
 
     // Comprueba si soltar moneda.

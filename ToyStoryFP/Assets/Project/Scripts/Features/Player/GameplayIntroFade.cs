@@ -8,6 +8,7 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Camera))]
 public class GameplayIntroFade : MonoBehaviour
 {
+    [SerializeField] private GameplayIntroFadeProfile introFadeProfile;
     [SerializeField] [Min(0.01f)] private float fadeDuration = 1.35f;
     [SerializeField] [Range(0f, 1f)] private float startVignetteIntensity = 1f;
     [SerializeField] [Range(0f, 1f)] private float endVignetteIntensity = 0f;
@@ -22,10 +23,13 @@ public class GameplayIntroFade : MonoBehaviour
     private ColorAdjustments colorAdjustments;
     private UniversalAdditionalCameraData cameraData;
     private bool originalPostProcessingState;
+    private bool missingProfileWarningShown;
     private List<UIFadeUtility.FadeTarget> uiFadeTargets = new List<UIFadeUtility.FadeTarget>();
 
     void Awake()
     {
+        ApplyProfile();
+
         if (!EnsurePostProcessingVolume())
         {
             enabled = false;
@@ -127,6 +131,31 @@ public class GameplayIntroFade : MonoBehaviour
         introVolume.sharedProfile = null;
         introVolume.profile = runtimeProfile;
         return true;
+    }
+
+    private void ApplyProfile()
+    {
+        if (introFadeProfile == null)
+        {
+            if (!missingProfileWarningShown)
+            {
+                GameDebug.Advertencia(
+                    "Gameplay",
+                    "GameplayIntroFade no tiene GameplayIntroFadeProfile asignado. Se usaran los valores locales del componente.",
+                    this);
+                missingProfileWarningShown = true;
+            }
+
+            return;
+        }
+
+        fadeDuration = introFadeProfile.FadeDuration;
+        startVignetteIntensity = introFadeProfile.StartVignetteIntensity;
+        endVignetteIntensity = introFadeProfile.EndVignetteIntensity;
+        startPostExposure = introFadeProfile.StartPostExposure;
+        endPostExposure = introFadeProfile.EndPostExposure;
+        startVignetteSmoothness = introFadeProfile.StartVignetteSmoothness;
+        endVignetteSmoothness = introFadeProfile.EndVignetteSmoothness;
     }
 
     // Aplica fade estado.

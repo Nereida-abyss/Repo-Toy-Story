@@ -4,6 +4,8 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class CrosshairFeedbackController : MonoBehaviour
 {
+    [SerializeField] private CrosshairFeedbackProfile feedbackProfile;
+
     [Header("Hit Marker")]
     [SerializeField] private Color hitMarkerColor = Color.white;
     [SerializeField] private float hitMarkerDuration = 0.12f;
@@ -28,6 +30,7 @@ public class CrosshairFeedbackController : MonoBehaviour
     private float deathMarkerTimer;
     private Vector3 hitBaseScale = Vector3.one;
     private Vector3 deathBaseScale = Vector3.one;
+    private bool missingProfileWarningShown;
 
     public static CrosshairFeedbackController Instance { get; private set; }
 
@@ -44,6 +47,7 @@ public class CrosshairFeedbackController : MonoBehaviour
 
     void Awake()
     {
+        ApplyProfile();
         Instance = this;
         EnsureMarkers();
         SetMarkerAlpha(hitMarkerCanvasGroup, 0f);
@@ -80,6 +84,34 @@ public class CrosshairFeedbackController : MonoBehaviour
         deathMarkerTimer = deathMarkerDuration;
         SetMarkerAlpha(deathMarkerCanvasGroup, 1f);
         deathMarkerRoot.localScale = deathBaseScale * deathMarkerScalePunch;
+    }
+
+    private void ApplyProfile()
+    {
+        if (feedbackProfile == null)
+        {
+            if (!missingProfileWarningShown)
+            {
+                GameDebug.Advertencia(
+                    "UI",
+                    "CrosshairFeedbackController no tiene CrosshairFeedbackProfile asignado. Se usaran los valores locales del componente.",
+                    this);
+                missingProfileWarningShown = true;
+            }
+
+            return;
+        }
+
+        hitMarkerColor = feedbackProfile.HitMarkerColor;
+        hitMarkerDuration = feedbackProfile.HitMarkerDuration;
+        hitMarkerSize = feedbackProfile.HitMarkerSize;
+        hitMarkerThickness = feedbackProfile.HitMarkerThickness;
+        hitMarkerScalePunch = feedbackProfile.HitMarkerScalePunch;
+        deathMarkerColor = feedbackProfile.DeathMarkerColor;
+        deathMarkerDuration = feedbackProfile.DeathMarkerDuration;
+        deathMarkerSize = feedbackProfile.DeathMarkerSize;
+        deathMarkerThickness = feedbackProfile.DeathMarkerThickness;
+        deathMarkerScalePunch = feedbackProfile.DeathMarkerScalePunch;
     }
 
     // Asegura markers.

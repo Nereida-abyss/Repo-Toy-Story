@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83713ddb2df74df8bf43fa50f2a16c9e, type: 3}
+  m_Name: DefaultMouseLookTuningProfile
+  m_EditorClassIdentifier: 
+  clampInDegrees: {x: 360, y: 38}
+  lockCursor: 1
+  postUnpauseLookBlockDuration: 0.08
+  pauseInputResetOnOpen: 1
+  pauseInputResetOnClose: 1
+  postUnpauseSpikeFilterDuration: 0.12
+  postUnpauseSpikeThreshold: 3.5
+  restorePoseOnUnpause: 1
+  restoreCameraLocalPositionOnUnpause: 1
+  clearAngularVelocityOnResume: 1
+  smoothing: {x: 3, y: 3}
+  recoilReturnTime: 0.08
+  jumpLiftHeight: 0.051
+  jumpLiftUpDuration: 0.3
+  jumpLiftDownDuration: 0.6
+  jumpBounceDropHeight: 0.02
+  jumpBounceDropDuration: 0.1
+  jumpBounceRecoverDuration: 0.1
+  anticipationDropHeight: 0.06
+  anticipationDropReturnDuration: 0.1
