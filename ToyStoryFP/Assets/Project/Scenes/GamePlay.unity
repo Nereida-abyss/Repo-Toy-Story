@@ -2404,7 +2404,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 59afec697d2bb7d4c82d150b5f760a68, type: 3}
     - target: {fileID: 490423872273553250, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: alertVolume
-      value: 0.3
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: m_Name
@@ -2413,6 +2413,10 @@ PrefabInstance:
     - target: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 901900000000000004, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2258943681596602701, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2470,6 +2474,10 @@ PrefabInstance:
       propertyPath: fireSound
       value: 
       objectReference: {fileID: 8300000, guid: 8bcb6dcb406370a4e81ff6098040b131, type: 3}
+    - target: {fileID: 3726297795991414036, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+      propertyPath: fireVolume
+      value: 0.258
+      objectReference: {fileID: 0}
     - target: {fileID: 3726297795991414036, guid: 0c477606bdeb629418516db0806869dd, type: 3}
       propertyPath: reloadSound
       value: 
@@ -2597,11 +2605,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 991857915}
     m_Modifications:
-    - target: {fileID: 1142213344556677889, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+    - target: {fileID: 919900000000005111, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: waveManager
       value: 
       objectReference: {fileID: 920100000000000003}
-    - target: {fileID: 919900000000005111, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+    - target: {fileID: 1142213344556677889, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: waveManager
       value: 
       objectReference: {fileID: 920100000000000003}
@@ -4498,29 +4506,6 @@ MonoBehaviour:
     damageMultiplierPerRound: 1.02
     maxHealthMultiplier: 1.75
     maxDamageMultiplier: 1.35
---- !u!114 &920100000000000007
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 920100000000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6abfe0d7b2c44b9d8f1e65a0c1234a56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
-  enemyPrefab: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
-  spawnPoints:
-  - {fileID: 920100000000000013}
-  - {fileID: 920100000000000023}
-  - {fileID: 920100000000000033}
-  - {fileID: 920100000000000043}
-  - {fileID: 920100000000000053}
-  - {fileID: 920100000000000063}
-  target: {fileID: 1905847329}
-  tacticsCoordinator: {fileID: 920100000000000006}
-  navMeshSampleDistance: 2
 --- !u!1 &920100000000000004
 GameObject:
   m_ObjectHideFlags: 0
@@ -4570,6 +4555,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a8d4f0fd9604d65a4c3e18b72bb0f31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTacticsCoordinator
+--- !u!114 &920100000000000007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920100000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6abfe0d7b2c44b9d8f1e65a0c1234a56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
+  enemyPrefab: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+  spawnPoints:
+  - {fileID: 920100000000000013}
+  - {fileID: 920100000000000023}
+  - {fileID: 920100000000000033}
+  - {fileID: 920100000000000043}
+  - {fileID: 920100000000000053}
+  - {fileID: 920100000000000063}
+  target: {fileID: 1905847329}
+  tacticsCoordinator: {fileID: 920100000000000006}
+  navMeshSampleDistance: 2
 --- !u!1 &920100000000000011
 GameObject:
   m_ObjectHideFlags: 0
