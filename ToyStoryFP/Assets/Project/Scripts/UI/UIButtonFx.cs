@@ -30,7 +30,6 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [SerializeField] private float pitchRandomness = 0.04f;
     [SerializeField] private float hoverMinInterval = DefaultHoverInterval;
 
-    private static AudioSource sharedAudioSource;
     private Button button;
     private RectTransform rectTransform;
     private Vector3 baseScale = Vector3.one;
@@ -39,6 +38,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private bool isPressed;
     private float lastHoverSfxTime = -100f;
     private bool listenerBound;
+    private bool missingSharedAudioWarningShown;
 
     // Inicializa referencias antes de usar el componente.
     private void Awake()
@@ -316,18 +316,23 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return null;
         }
 
-        if (sharedAudioSource != null)
+        AudioManager audioManager = AudioManager.Instance;
+
+        if (audioManager != null && audioManager.SharedSfxSource != null)
         {
-            return sharedAudioSource;
+            return audioManager.SharedSfxSource;
         }
 
-        GameObject audioRoot = new GameObject("UIFX_Audio");
-        DontDestroyOnLoad(audioRoot);
-        sharedAudioSource = audioRoot.AddComponent<AudioSource>();
-        sharedAudioSource.playOnAwake = false;
-        sharedAudioSource.spatialBlend = 0f;
-        sharedAudioSource.loop = false;
-        return sharedAudioSource;
+        if (!missingSharedAudioWarningShown)
+        {
+            missingSharedAudioWarningShown = true;
+            GameDebug.Advertencia(
+                "UI",
+                $"UIButtonFx en '{name}' necesita un AudioSource local o un AudioManager con SFX asignado.",
+                this);
+        }
+
+        return null;
     }
 
     // Intenta encontrar un clip de click de respaldo en el AudioManager.

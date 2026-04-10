@@ -27,6 +27,7 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField] private float healthPulseScale = 1.12f;
     [SerializeField] private float healthPulseDuration = 0.2f;
 
+    private PlayerController playerController;
     private PlayerHealthScript playerHealth;
     private PlayerCurrencyController playerCurrency;
     private PlayerAudioController playerAudio;
@@ -44,7 +45,6 @@ public class PlayerHUDController : MonoBehaviour
     void Awake()
     {
         ResolveReferences();
-        ResolveUiReferences();
         WarnIfUiReferencesAreMissing();
         BindEvents();
         RefreshAllImmediate();
@@ -53,7 +53,6 @@ public class PlayerHUDController : MonoBehaviour
     void OnEnable()
     {
         ResolveReferences();
-        ResolveUiReferences();
         BindEvents();
         RefreshAllImmediate();
         InitializeDamageFeedbackVisuals();
@@ -66,7 +65,10 @@ public class PlayerHUDController : MonoBehaviour
 
     void OnValidate()
     {
-        ResolveUiReferences();
+        if (healthFillImage != null)
+        {
+            healthFillBaseScale = healthFillImage.rectTransform.localScale;
+        }
     }
 
     void Update()
@@ -79,54 +81,14 @@ public class PlayerHUDController : MonoBehaviour
     // Busca y cachea las piezas de gameplay de las que depende el HUD.
     private void ResolveReferences()
     {
+        playerController ??= GetComponentInParent<PlayerController>();
         playerHealth = GetComponentInParent<PlayerHealthScript>();
-        PlayerController playerController = GetComponentInParent<PlayerController>();
-
-        if (playerController == null)
-        {
-            playerController = FindFirstObjectByType<PlayerController>();
-        }
 
         if (playerController != null)
         {
             weaponLoadout = playerController.WeaponLoadout ?? playerController.GetComponentInChildren<WeaponLoadoutScript>(true);
             playerCurrency = playerController.Currency ?? playerController.GetComponent<PlayerCurrencyController>();
             playerAudio = playerController.Audio ?? playerController.GetComponent<PlayerAudioController>();
-        }
-    }
-
-    // Intenta completar las referencias visuales del HUD por nombre.
-    // Esto hace el prefab m?s resistente si alguna referencia no vino cableada en Inspector.
-    private void ResolveUiReferences()
-    {
-        if (healthFillImage == null)
-        {
-            healthFillImage = FindComponentInChildrenByName<Image>("HealthBarFill");
-        }
-
-        if (healthText == null)
-        {
-            healthText = FindComponentInChildrenByName<TMP_Text>("HealthText");
-        }
-
-        if (ammoText == null)
-        {
-            ammoText = FindComponentInChildrenByName<TMP_Text>("AmmoText");
-        }
-
-        if (reloadText == null)
-        {
-            reloadText = FindComponentInChildrenByName<TMP_Text>("ReloadText");
-        }
-
-        if (coinsText == null)
-        {
-            coinsText = FindComponentInChildrenByName<TMP_Text>("CoinsText");
-        }
-
-        if (damageFlashImage == null)
-        {
-            damageFlashImage = FindComponentInChildrenByName<Image>("PanelUIPlayer");
         }
     }
 
@@ -503,25 +465,5 @@ public class PlayerHUDController : MonoBehaviour
         Color color = damageFlashColor;
         color.a *= Mathf.Clamp01(alpha01);
         damageFlashImage.color = color;
-    }
-
-    private T FindComponentInChildrenByName<T>(string targetName) where T : Component
-    {
-        if (string.IsNullOrWhiteSpace(targetName))
-        {
-            return null;
-        }
-
-        T[] components = GetComponentsInChildren<T>(true);
-
-        for (int i = 0; i < components.Length; i++)
-        {
-            if (components[i] != null && components[i].gameObject.name == targetName)
-            {
-                return components[i];
-            }
-        }
-
-        return null;
     }
 }

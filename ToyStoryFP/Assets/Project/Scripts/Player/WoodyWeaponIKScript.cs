@@ -4,7 +4,6 @@ using UnityEngine;
 public class WoodyWeaponIKScript : MonoBehaviour
 {
     [Header("Weapon Lookup")]
-    [SerializeField] private string weaponPath = "FPCamara/AssaultRifle";
     [SerializeField] private string leftGripName = "LeftHandGrip";
     [SerializeField] private string rightGripName = "RightHandGrip";
     [SerializeField] private string leftHintName = "LeftElbowHint";
@@ -119,16 +118,6 @@ public class WoodyWeaponIKScript : MonoBehaviour
             leftHint = null;
             rightHint = null;
             return;
-        }
-
-        if (!string.IsNullOrWhiteSpace(weaponPath))
-        {
-            Transform pathMatch = transform.root.Find(weaponPath);
-
-            if (pathMatch != null && pathMatch.gameObject.activeInHierarchy)
-            {
-                weaponRoot = pathMatch;
-            }
         }
 
         leftGrip = FindNamedChild(weaponRoot, leftGripName);

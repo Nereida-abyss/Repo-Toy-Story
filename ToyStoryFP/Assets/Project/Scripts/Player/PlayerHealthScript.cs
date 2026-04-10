@@ -4,7 +4,6 @@ using UnityEngine.Serialization;
 
 public class PlayerHealthScript : MonoBehaviour, IDamageable
 {
-    private const string EndMenuSceneName = "EndMenu";
 
     [FormerlySerializedAs("health")]
     [SerializeField] private int maxHealth = 100;
@@ -49,15 +48,7 @@ public class PlayerHealthScript : MonoBehaviour, IDamageable
         {
             HandleDeath();
 
-            if (BelongsToPlayer())
-            {
-                RunStatsStore.CommitLastRun();
-                CambioEscena.LoadSceneSafely(EndMenuSceneName);
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-                Destroy(gameObject, 2f);
-            }
-            else
+            if (!BelongsToPlayer())
             {
                 Destroy(gameObject);
             }

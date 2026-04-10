@@ -9,6 +9,7 @@ public class EnemyAudioController : MonoBehaviour
     [SerializeField] private float minDistance = 1.2f;
     [SerializeField] private float maxDistance = 16f;
     [SerializeField] private float firePitchRandomness = 0.02f;
+    private bool hasLoggedMissingAudioSource;
 
     void Awake()
     {
@@ -43,9 +44,10 @@ public class EnemyAudioController : MonoBehaviour
             audioSource = GetComponent<AudioSource>();
         }
 
-        if (audioSource == null)
+        if (audioSource == null && !hasLoggedMissingAudioSource)
         {
-            audioSource = gameObject.AddComponent<AudioSource>();
+            hasLoggedMissingAudioSource = true;
+            GameDebug.Advertencia("Audio", "EnemyAudioController necesita un AudioSource asignado en el prefab enemigo.", this);
         }
     }
 

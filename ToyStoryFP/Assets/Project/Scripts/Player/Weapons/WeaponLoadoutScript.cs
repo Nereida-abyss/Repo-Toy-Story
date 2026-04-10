@@ -36,6 +36,7 @@ public class WeaponLoadoutScript : MonoBehaviour
     }
 
     [SerializeField] private Camera weaponCamera;
+    [SerializeField] private PlayerAudioController playerAudio;
     [SerializeField] private float weaponSwitchDuration = 0.35f;
     [SerializeField] private float weaponSwitchLowerRatio = 0.45f;
     [SerializeField] private float weaponSwitchRaiseRatio = 0.45f;
@@ -49,9 +50,10 @@ public class WeaponLoadoutScript : MonoBehaviour
     private float switchPhaseTimer;
     private WeaponSwitchState switchState = WeaponSwitchState.Idle;
     private WeaponScript visibleWeapon;
-    private PlayerAudioController playerAudio;
     private bool initialLoadoutResolved;
     private bool runLoadoutInitialized;
+    private bool configurationCached;
+    private WeaponScript[] unexpectedWeapons = Array.Empty<WeaponScript>();
 
     private readonly Dictionary<string, WeaponUnlockDefinition> definitionsById =
         new Dictionary<string, WeaponUnlockDefinition>(StringComparer.Ordinal);
@@ -59,6 +61,7 @@ public class WeaponLoadoutScript : MonoBehaviour
     private readonly HashSet<string> unlockedWeaponIds = new HashSet<string>(StringComparer.Ordinal);
     private readonly List<WeaponShopEntry> shopEntries = new List<WeaponShopEntry>();
     private readonly HashSet<string> knownShopIds = new HashSet<string>(StringComparer.Ordinal);
+    private readonly HashSet<WeaponScript> warnedUnexpectedWeapons = new HashSet<WeaponScript>();
 
     public event Action<WeaponScript> CurrentWeaponChanged;
 
@@ -71,14 +74,8 @@ public class WeaponLoadoutScript : MonoBehaviour
 
     void Awake()
     {
-        if (weaponCamera == null)
-        {
-            weaponCamera = GetComponent<Camera>();
-        }
-
-        playerAudio = GetComponentInParent<PlayerAudioController>();
         RefreshWeapons();
-        BeginRunLoadout();
+        WarnIfCoreReferencesAreMissing();
     }
 
     void Update()
@@ -102,42 +99,15 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Relee todas las armas hijas y reconstruye el estado interno del loadout.
-    // Esto sirve para dejar coherentes las listas, la visibilidad y el arma activa
-    // aunque la jerarquía haya cambiado o la partida aún no haya empezado.
     public void RefreshWeapons()
     {
-        allWeapons = CollectDirectChildWeapons();
-        BuildDefinitionMaps();
-
-        if (allWeapons.Length == 0)
-        {
-            unlockedWeapons = Array.Empty<WeaponScript>();
-            equippedWeaponIndex = -1;
-            targetWeaponIndex = -1;
-            visibleWeapon = null;
-            switchState = WeaponSwitchState.Idle;
-            CurrentWeaponChanged?.Invoke(null);
-            return;
-        }
-
-        for (int i = 0; i < allWeapons.Length; i++)
-        {
-            if (weaponCamera != null)
-            {
-                allWeapons[i]._camera = weaponCamera;
-            }
-
-            allWeapons[i].SetPlayerOwned(true);
-        }
+        CacheConfiguration();
 
         if (!runLoadoutInitialized)
         {
-            unlockedWeapons = allWeapons;
-            int activeIndex = ResolveActiveIndex(unlockedWeapons);
-            bool initializeSilently = !initialLoadoutResolved;
-            SetWeaponIndexImmediate(activeIndex, initializeSilently);
-            initialLoadoutResolved = true;
+            ResetCurrentSelection();
+            DeactivateAllWeapons();
+            CurrentWeaponChanged?.Invoke(null);
             return;
         }
 
@@ -145,33 +115,25 @@ public class WeaponLoadoutScript : MonoBehaviour
 
         if (unlockedWeapons.Length == 0)
         {
+            ResetCurrentSelection();
             DeactivateAllWeapons();
-            equippedWeaponIndex = -1;
-            targetWeaponIndex = -1;
-            visibleWeapon = null;
-            switchState = WeaponSwitchState.Idle;
             CurrentWeaponChanged?.Invoke(null);
             return;
         }
 
         if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
         {
-            equippedWeaponIndex = 0;
+            equippedWeaponIndex = ResolveStartingWeaponIndex();
         }
 
         SetWeaponIndexImmediate(equippedWeaponIndex);
     }
 
-    // Arranca el loadout de una partida nueva.
-    // Primero desbloquea las armas marcadas por defecto y luego garantiza
-    // que siempre exista al menos un arma equipada si el jugador tiene alguna disponible.
     public void BeginRunLoadout()
     {
-        if (allWeapons.Length == 0)
-        {
-            RefreshWeapons();
-        }
-
+        CacheConfiguration();
+        ResetCurrentSelection();
+        DeactivateAllWeapons();
         unlockedWeaponIds.Clear();
 
         for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
@@ -189,26 +151,22 @@ public class WeaponLoadoutScript : MonoBehaviour
             }
         }
 
-        runLoadoutInitialized = true;
-        RebuildUnlockedWeapons();
-
-        if (unlockedWeaponIds.Count == 0 && allWeapons.Length > 0)
+        if (unlockedWeaponIds.Count == 0)
         {
-            string fallbackWeaponId = ResolveFallbackWeaponId();
+            string fallbackWeaponId = GetFirstConfiguredWeaponId();
             if (!string.IsNullOrEmpty(fallbackWeaponId))
             {
                 unlockedWeaponIds.Add(fallbackWeaponId);
-                RebuildUnlockedWeapons();
             }
         }
 
+        runLoadoutInitialized = true;
+        RebuildUnlockedWeapons();
+
         if (unlockedWeapons.Length == 0)
         {
+            ResetCurrentSelection();
             DeactivateAllWeapons();
-            equippedWeaponIndex = -1;
-            targetWeaponIndex = -1;
-            visibleWeapon = null;
-            switchState = WeaponSwitchState.Idle;
             CurrentWeaponChanged?.Invoke(null);
             return;
         }
@@ -219,12 +177,10 @@ public class WeaponLoadoutScript : MonoBehaviour
         initialLoadoutResolved = true;
     }
 
-    // Intenta comprar y desbloquear un arma.
-    // Valida el id, cobra la moneda, actualiza la lista de desbloqueadas
-    // y opcionalmente la equipa al instante para que el cambio se note enseguida.
     public bool TryPurchaseWeapon(string weaponId, PlayerCurrencyController currency, bool autoEquip, out string failReason)
     {
         failReason = string.Empty;
+        EnsureConfigurationIsReady();
 
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
         if (string.IsNullOrEmpty(normalizedWeaponId))
@@ -236,6 +192,12 @@ public class WeaponLoadoutScript : MonoBehaviour
         if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
         {
             failReason = $"Weapon '{normalizedWeaponId}' is not registered.";
+            return false;
+        }
+
+        if (definition.weapon == null)
+        {
+            failReason = $"Weapon '{normalizedWeaponId}' has no weapon reference assigned.";
             return false;
         }
 
@@ -286,16 +248,16 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
-    // Comprueba si este id ya está en la mochila de armas desbloqueadas.
     public bool IsWeaponUnlocked(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
         return !string.IsNullOrEmpty(normalizedWeaponId) && unlockedWeaponIds.Contains(normalizedWeaponId);
     }
 
-    // Construye la lista de tienda sin duplicados y con el estado de desbloqueo actual.
     public IReadOnlyList<WeaponShopEntry> GetWeaponShopEntries()
     {
+        EnsureConfigurationIsReady();
+
         shopEntries.Clear();
         knownShopIds.Clear();
 
@@ -319,27 +281,15 @@ public class WeaponLoadoutScript : MonoBehaviour
         return shopEntries;
     }
 
-    // Busca una entrada concreta de tienda por id estable.
     public bool TryGetShopEntry(string weaponId, out WeaponShopEntry entry)
     {
-        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+        EnsureConfigurationIsReady();
 
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
         if (string.IsNullOrEmpty(normalizedWeaponId))
         {
             entry = default(WeaponShopEntry);
             return false;
-        }
-
-        if (!definitionsById.ContainsKey(normalizedWeaponId))
-        {
-            if (allWeapons.Length == 0)
-            {
-                RefreshWeapons();
-            }
-            else
-            {
-                BuildDefinitionMaps();
-            }
         }
 
         if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
@@ -352,37 +302,25 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
-    // Ajusta un precio de tienda en runtime sin depender del prefab.
     public void SetWeaponShopPrice(string weaponId, int price)
     {
-        string normalizedWeaponId = NormalizeWeaponId(weaponId);
+        EnsureConfigurationIsReady();
 
+        string normalizedWeaponId = NormalizeWeaponId(weaponId);
         if (string.IsNullOrEmpty(normalizedWeaponId))
         {
             return;
         }
 
-        if (!definitionsById.ContainsKey(normalizedWeaponId))
-        {
-            if (allWeapons.Length == 0)
-            {
-                RefreshWeapons();
-            }
-            else
-            {
-                BuildDefinitionMaps();
-            }
-        }
-
         if (!definitionsById.TryGetValue(normalizedWeaponId, out WeaponUnlockDefinition definition) || definition == null)
         {
+            GameDebug.Advertencia("Armas", $"No se puede fijar precio para '{normalizedWeaponId}' porque no esta configurada en WeaponLoadoutScript.", this);
             return;
         }
 
         definition.price = Mathf.Max(0, price);
     }
 
-    // Rellena la municion del arma equipada con su reserva configurada.
     public bool RefillCurrentWeaponAmmoToConfiguredReserve()
     {
         return CurrentWeapon != null && CurrentWeapon.RefillAmmoToConfiguredReserve();
@@ -393,8 +331,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         return CurrentWeapon != null && CurrentWeapon.TryAddAmmoByMagazines(magazineCount);
     }
 
-    // Cambia al arma siguiente o anterior dentro de las desbloqueadas.
-    // Si solo hay una o estamos en mitad de otra transición, no hace nada.
     public bool TryCycleWeapon(int direction)
     {
         if (unlockedWeapons.Length <= 1 || IsSwitchingWeapon)
@@ -419,9 +355,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         return true;
     }
 
-    // Empieza la animación de cambio.
-    // Primero asegura que el arma actual esté visible, la baja,
-    // cancela su recarga y deja preparado el índice objetivo.
     private void StartWeaponSwitch(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= unlockedWeapons.Length || nextIndex == equippedWeaponIndex)
@@ -436,11 +369,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         switchState = WeaponSwitchState.Lowering;
         switchPhaseTimer = GetLowerDuration();
 
-        if (playerAudio == null)
-        {
-            playerAudio = GetComponentInParent<PlayerAudioController>();
-        }
-
         visibleWeapon?.CancelReload();
         playerAudio?.PlayWeaponSwitch();
         CurrentWeaponChanged?.Invoke(null);
@@ -451,7 +379,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Fase 1 del cambio: bajar el arma actual hasta esconderla.
     private void UpdateLowering(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -474,7 +401,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Cuando el arma ya ha bajado, activamos la nueva y arrancamos la subida.
     private void CompleteLowering()
     {
         if (targetWeaponIndex < 0 || targetWeaponIndex >= unlockedWeapons.Length)
@@ -500,7 +426,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Fase 2 del cambio: subir el arma nueva hasta su pose normal.
     private void UpdateRaising(float deltaTime)
     {
         if (visibleWeapon == null)
@@ -523,7 +448,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         }
     }
 
-    // Cierra la transición y deja el arma nueva lista para disparar con su pose limpia.
     private void FinishWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -541,7 +465,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Cancela el cambio y vuelve a un estado seguro sin dejar índices a medias.
     private void CancelWeaponSwitch()
     {
         switchState = WeaponSwitchState.Idle;
@@ -552,17 +475,11 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Equipa un arma sin animación de transición.
-    // Se usa para el arranque, para reparaciones del estado interno
-    // y para cualquier caso donde cambiar "de golpe" sea más seguro.
     private void SetWeaponIndexImmediate(int index, bool initializeSilently = false)
     {
         if (unlockedWeapons.Length == 0)
         {
-            equippedWeaponIndex = -1;
-            targetWeaponIndex = -1;
-            visibleWeapon = null;
-            switchState = WeaponSwitchState.Idle;
+            ResetCurrentSelection();
             CurrentWeaponChanged?.Invoke(null);
             return;
         }
@@ -588,9 +505,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         CurrentWeaponChanged?.Invoke(visibleWeapon);
     }
 
-    // Comprueba que solo el arma equipada esté activa y visible.
-    // Si algo externo dejó varias armas encendidas o apagó la correcta,
-    // este método recompone la situación.
     private void EnsureEquippedWeaponVisible()
     {
         if (equippedWeaponIndex < 0 || equippedWeaponIndex >= unlockedWeapons.Length)
@@ -643,7 +557,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         visibleWeapon = equippedWeapon;
     }
 
-    // Enciende solo el arma indicada y apaga las demás.
     private void ActivateOnly(int index)
     {
         WeaponScript activeWeapon =
@@ -665,60 +578,31 @@ public class WeaponLoadoutScript : MonoBehaviour
                 weapon.gameObject.SetActive(shouldBeActive);
             }
         }
+
+        DeactivateUnexpectedWeapons();
     }
 
-    // Reparte la duración total del cambio en la parte de bajada.
     private float GetLowerDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchLowerRatio) / totalRatio);
     }
 
-    // Reparte la duración total del cambio en la parte de subida.
     private float GetRaiseDuration()
     {
         float totalRatio = Mathf.Max(0.01f, Mathf.Clamp01(weaponSwitchLowerRatio) + Mathf.Clamp01(weaponSwitchRaiseRatio));
         return Mathf.Max(0f, weaponSwitchDuration) * (Mathf.Clamp01(weaponSwitchRaiseRatio) / totalRatio);
     }
 
-    // Suaviza la fase de animación para que el cambio no se vea mecánico.
     private float SmoothPhase(float value)
     {
         value = Mathf.Clamp01(value);
         return value * value * (3f - 2f * value);
     }
 
-    // Recoge solo las armas que son hijas directas de la cámara de armas.
-    // Así evitamos capturar objetos más profundos que no representan un arma equipada.
-    private WeaponScript[] CollectDirectChildWeapons()
+    private void CacheConfiguration()
     {
-        if (weaponCamera == null)
-        {
-            return Array.Empty<WeaponScript>();
-        }
-
-        Transform cameraTransform = weaponCamera.transform;
-        List<WeaponScript> directChildWeapons = new List<WeaponScript>(cameraTransform.childCount);
-
-        for (int i = 0; i < cameraTransform.childCount; i++)
-        {
-            Transform child = cameraTransform.GetChild(i);
-            WeaponScript weapon = child.GetComponent<WeaponScript>();
-
-            if (weapon != null)
-            {
-                directChildWeapons.Add(weapon);
-            }
-        }
-
-        return directChildWeapons.ToArray();
-    }
-
-    // Construye los mapas que relacionan ids, definiciones y componentes reales.
-    // Si falta una definición en Inspector, intenta crear una de respaldo
-    // para que el sistema siga funcionando y además lo deja avisado en consola.
-    private void BuildDefinitionMaps()
-    {
+        configurationCached = true;
         definitionsById.Clear();
         weaponIdByWeapon.Clear();
 
@@ -726,6 +610,13 @@ public class WeaponLoadoutScript : MonoBehaviour
         {
             weaponUnlockDefinitions = new List<WeaponUnlockDefinition>();
         }
+
+        WeaponScript[] detectedWeapons = weaponCamera != null
+            ? weaponCamera.GetComponentsInChildren<WeaponScript>(true)
+            : Array.Empty<WeaponScript>();
+
+        List<WeaponScript> configuredWeapons = new List<WeaponScript>(weaponUnlockDefinitions.Count);
+        HashSet<WeaponScript> registeredWeapons = new HashSet<WeaponScript>();
 
         for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
         {
@@ -742,57 +633,43 @@ public class WeaponLoadoutScript : MonoBehaviour
                 continue;
             }
 
-            if (definition.weapon == null)
-            {
-                definition.weapon = FindWeaponByName(definition.weaponId);
-            }
-
             if (definitionsById.ContainsKey(definition.weaponId))
             {
                 GameDebug.Advertencia("Armas", $"Id de arma duplicado '{definition.weaponId}' en WeaponLoadoutScript. Se mantiene la primera ocurrencia.", this);
                 continue;
             }
 
+            definition.weapon = ResolveConfiguredWeaponInstance(definition, detectedWeapons);
             definitionsById.Add(definition.weaponId, definition);
 
-            if (definition.weapon != null && !weaponIdByWeapon.ContainsKey(definition.weapon))
+            if (definition.weapon == null)
             {
-                weaponIdByWeapon.Add(definition.weapon, definition.weaponId);
-            }
-        }
-
-        for (int i = 0; i < allWeapons.Length; i++)
-        {
-            WeaponScript weapon = allWeapons[i];
-            if (weapon == null || weaponIdByWeapon.ContainsKey(weapon))
-            {
+                GameDebug.Advertencia("Armas", $"El arma '{definition.weaponId}' no tiene WeaponScript asignado en Inspector.", this);
                 continue;
             }
 
-            string fallbackId = NormalizeWeaponId(weapon.name);
-            if (definitionsById.ContainsKey(fallbackId))
+            if (!registeredWeapons.Add(definition.weapon))
             {
-                weaponIdByWeapon[weapon] = fallbackId;
+                GameDebug.Advertencia("Armas", $"El arma '{definition.weaponId}' comparte WeaponScript con otra definicion. Revisa el Inspector.", this);
                 continue;
             }
 
-            WeaponUnlockDefinition runtimeDefinition = new WeaponUnlockDefinition
-            {
-                weaponId = fallbackId,
-                weapon = weapon,
-                price = 0,
-                unlockedByDefault = false
-            };
+            configuredWeapons.Add(definition.weapon);
+            weaponIdByWeapon.Add(definition.weapon, definition.weaponId);
 
-            weaponUnlockDefinitions.Add(runtimeDefinition);
-            definitionsById.Add(fallbackId, runtimeDefinition);
-            weaponIdByWeapon.Add(weapon, fallbackId);
-            GameDebug.Advertencia("Armas", $"Se autoregistro el arma '{fallbackId}'. Configurala en Inspector para controlar desbloqueo.", this);
+            if (weaponCamera != null)
+            {
+                definition.weapon._camera = weaponCamera;
+            }
+
+            definition.weapon.ConfigureAudioControllers(playerAudio, null);
+            definition.weapon.SetPlayerOwned(true);
         }
+
+        allWeapons = configuredWeapons.ToArray();
+        CacheUnexpectedWeapons(registeredWeapons, detectedWeapons);
     }
 
-    // Reconstruye la lista de armas desbloqueadas usando los ids comprados o permitidos.
-    // Las armas bloqueadas se apagan para que no puedan quedarse visibles por accidente.
     private void RebuildUnlockedWeapons()
     {
         List<WeaponScript> unlocked = new List<WeaponScript>(allWeapons.Length);
@@ -821,38 +698,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         unlockedWeapons = unlocked.ToArray();
     }
 
-    // Intenta descubrir qué arma estaba realmente activa.
-    // Si la escena no está perfectamente ordenada, usa el índice equipado o el primero como rescate.
-    private int ResolveActiveIndex(WeaponScript[] pool)
-    {
-        if (pool == null || pool.Length == 0)
-        {
-            return -1;
-        }
-
-        int activeIndex = -1;
-        int activeWeaponCount = 0;
-
-        for (int i = 0; i < pool.Length; i++)
-        {
-            if (!pool[i].gameObject.activeSelf)
-            {
-                continue;
-            }
-
-            activeWeaponCount++;
-            activeIndex = i;
-        }
-
-        if (activeWeaponCount == 1)
-        {
-            return activeIndex;
-        }
-
-        return equippedWeaponIndex >= 0 && equippedWeaponIndex < pool.Length ? equippedWeaponIndex : 0;
-    }
-
-    // Traduce un componente de arma a su id estable dentro del sistema de desbloqueo.
     private string ResolveWeaponId(WeaponScript weapon)
     {
         if (weapon == null)
@@ -860,21 +705,9 @@ public class WeaponLoadoutScript : MonoBehaviour
             return string.Empty;
         }
 
-        if (weaponIdByWeapon.TryGetValue(weapon, out string mappedId) && !string.IsNullOrEmpty(mappedId))
-        {
-            return mappedId;
-        }
-
-        string fallbackId = NormalizeWeaponId(weapon.name);
-        if (!string.IsNullOrEmpty(fallbackId))
-        {
-            weaponIdByWeapon[weapon] = fallbackId;
-        }
-
-        return fallbackId;
+        return weaponIdByWeapon.TryGetValue(weapon, out string mappedId) ? mappedId : string.Empty;
     }
 
-    // Decide con qué arma empieza el jugador al arrancar la partida.
     private int ResolveStartingWeaponIndex()
     {
         string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
@@ -890,7 +723,6 @@ public class WeaponLoadoutScript : MonoBehaviour
         return 0;
     }
 
-    // Busca la posición de un arma concreta dentro de la lista desbloqueada.
     private int FindUnlockedWeaponIndex(string weaponId)
     {
         string normalizedWeaponId = NormalizeWeaponId(weaponId);
@@ -910,54 +742,48 @@ public class WeaponLoadoutScript : MonoBehaviour
         return -1;
     }
 
-    // Si no hay arma inicial clara, intenta encontrar una opción segura de respaldo.
-    private string ResolveFallbackWeaponId()
+    private string GetFirstConfiguredWeaponId()
     {
-        string preferredId = NormalizeWeaponId(defaultStartingWeaponId);
-        if (!string.IsNullOrEmpty(preferredId))
+        for (int i = 0; i < weaponUnlockDefinitions.Count; i++)
         {
-            if (definitionsById.ContainsKey(preferredId) || FindWeaponByName(preferredId) != null)
+            WeaponUnlockDefinition definition = weaponUnlockDefinitions[i];
+            if (definition == null || definition.weapon == null)
             {
-                return preferredId;
+                continue;
             }
-        }
 
-        if (allWeapons.Length > 0)
-        {
-            return ResolveWeaponId(allWeapons[0]);
+            string weaponId = NormalizeWeaponId(definition.weaponId);
+            if (!string.IsNullOrEmpty(weaponId))
+            {
+                return weaponId;
+            }
         }
 
         return string.Empty;
     }
 
-    // Busca un componente de arma comparando por nombre normalizado.
-    private WeaponScript FindWeaponByName(string weaponName)
+    private void EnsureConfigurationIsReady()
     {
-        string normalizedName = NormalizeWeaponId(weaponName);
-        if (string.IsNullOrEmpty(normalizedName))
+        if (!configurationCached)
         {
-            return null;
+            CacheConfiguration();
         }
-
-        for (int i = 0; i < allWeapons.Length; i++)
-        {
-            WeaponScript weapon = allWeapons[i];
-            if (weapon != null && NormalizeWeaponId(weapon.name) == normalizedName)
-            {
-                return weapon;
-            }
-        }
-
-        return null;
     }
 
-    // Limpia ids vacíos o con espacios para comparar siempre de forma consistente.
     private string NormalizeWeaponId(string rawWeaponId)
     {
         return string.IsNullOrWhiteSpace(rawWeaponId) ? string.Empty : rawWeaponId.Trim();
     }
 
-    // Apaga todas las armas, útil cuando el jugador todavía no tiene ninguna disponible.
+    private void ResetCurrentSelection()
+    {
+        equippedWeaponIndex = -1;
+        targetWeaponIndex = -1;
+        visibleWeapon = null;
+        switchState = WeaponSwitchState.Idle;
+        switchPhaseTimer = 0f;
+    }
+
     private void DeactivateAllWeapons()
     {
         for (int i = 0; i < allWeapons.Length; i++)
@@ -965,6 +791,148 @@ public class WeaponLoadoutScript : MonoBehaviour
             if (allWeapons[i] != null && allWeapons[i].gameObject.activeSelf)
             {
                 allWeapons[i].gameObject.SetActive(false);
+            }
+        }
+
+        DeactivateUnexpectedWeapons();
+    }
+
+    private void WarnIfCoreReferencesAreMissing()
+    {
+        if (weaponCamera == null)
+        {
+            GameDebug.Advertencia("Armas", "WeaponLoadoutScript necesita una weaponCamera asignada en Inspector.", this);
+        }
+
+        if (playerAudio == null)
+        {
+            GameDebug.Advertencia("Armas", "WeaponLoadoutScript necesita PlayerAudioController asignado en Inspector para el sonido de cambio.", this);
+        }
+    }
+
+    private void CacheUnexpectedWeapons(HashSet<WeaponScript> configuredWeapons, WeaponScript[] detectedWeapons)
+    {
+        unexpectedWeapons = Array.Empty<WeaponScript>();
+
+        if (weaponCamera == null || detectedWeapons == null || detectedWeapons.Length == 0)
+        {
+            return;
+        }
+
+        List<WeaponScript> extras = new List<WeaponScript>();
+        HashSet<GameObject> configuredWeaponObjects = new HashSet<GameObject>();
+        HashSet<string> configuredWeaponIds = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (WeaponScript configuredWeapon in configuredWeapons)
+        {
+            if (configuredWeapon != null)
+            {
+                configuredWeaponObjects.Add(configuredWeapon.gameObject);
+            }
+        }
+
+        foreach (KeyValuePair<string, WeaponUnlockDefinition> definitionPair in definitionsById)
+        {
+            if (!string.IsNullOrEmpty(definitionPair.Key))
+            {
+                configuredWeaponIds.Add(definitionPair.Key);
+            }
+        }
+
+        for (int i = 0; i < detectedWeapons.Length; i++)
+        {
+            WeaponScript detectedWeapon = detectedWeapons[i];
+            if (detectedWeapon == null || configuredWeapons.Contains(detectedWeapon))
+            {
+                continue;
+            }
+
+            if (configuredWeaponObjects.Contains(detectedWeapon.gameObject))
+            {
+                continue;
+            }
+
+            string detectedWeaponId = NormalizeWeaponId(detectedWeapon.name);
+            if (!string.IsNullOrEmpty(detectedWeaponId) && configuredWeaponIds.Contains(detectedWeaponId))
+            {
+                continue;
+            }
+
+            extras.Add(detectedWeapon);
+
+            if (warnedUnexpectedWeapons.Add(detectedWeapon))
+            {
+                GameDebug.Advertencia(
+                    "Armas",
+                    $"Se detecto un WeaponScript fuera de weaponUnlockDefinitions en '{detectedWeapon.name}'. Quedara inactivo hasta que se configure en Inspector.",
+                    detectedWeapon);
+            }
+        }
+
+        unexpectedWeapons = extras.ToArray();
+    }
+
+    private WeaponScript ResolveConfiguredWeaponInstance(WeaponUnlockDefinition definition, WeaponScript[] detectedWeapons)
+    {
+        if (definition == null)
+        {
+            return null;
+        }
+
+        WeaponScript configuredWeapon = definition.weapon;
+        if (configuredWeapon != null
+            && weaponCamera != null
+            && configuredWeapon.transform != null
+            && configuredWeapon.transform.IsChildOf(weaponCamera.transform))
+        {
+            return configuredWeapon;
+        }
+
+        string weaponId = NormalizeWeaponId(definition.weaponId);
+        if (string.IsNullOrEmpty(weaponId) || detectedWeapons == null)
+        {
+            return configuredWeapon;
+        }
+
+        WeaponScript matchedWeapon = null;
+
+        for (int i = 0; i < detectedWeapons.Length; i++)
+        {
+            WeaponScript detectedWeapon = detectedWeapons[i];
+            if (detectedWeapon == null)
+            {
+                continue;
+            }
+
+            if (NormalizeWeaponId(detectedWeapon.name) != weaponId)
+            {
+                continue;
+            }
+
+            if (matchedWeapon != null && matchedWeapon != detectedWeapon)
+            {
+                GameDebug.Advertencia("Armas", $"Hay varias armas llamadas '{weaponId}' bajo la weaponCamera. Revisa la jerarquia.", this);
+                return configuredWeapon;
+            }
+
+            matchedWeapon = detectedWeapon;
+        }
+
+        if (matchedWeapon != null)
+        {
+            return matchedWeapon;
+        }
+
+        return configuredWeapon;
+    }
+
+    private void DeactivateUnexpectedWeapons()
+    {
+        for (int i = 0; i < unexpectedWeapons.Length; i++)
+        {
+            if (unexpectedWeapons[i] != null && unexpectedWeapons[i].gameObject.activeSelf)
+            {
+                unexpectedWeapons[i].gameObject.SetActive(false);
             }
         }
     }

@@ -16,8 +16,7 @@ MonoBehaviour:
     mainMenu: {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
     gameplay: {fileID: 8300000, guid: cd3a806230632c043a19e317c52b2e53, type: 3}
     shop: {fileID: 8300000, guid: 887f145f9d6cd2543a062cda4e7f64f6, type: 3}
-    defeat: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
-    victory: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
+    endMenu: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
   player:
     jump: {fileID: 8300000, guid: 3b671fcfca24e3d4c90cbae5d305bf8e, type: 3}
     footsteps:
@@ -38,6 +37,8 @@ MonoBehaviour:
     hover: {fileID: 8300000, guid: 1c68a3829e5c02041b0c5257e6226707, type: 3}
     panelOpen: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
     panelClose: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+  waves:
+    announcement: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
   credits:
     introWhoosh: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
     nameHit: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}

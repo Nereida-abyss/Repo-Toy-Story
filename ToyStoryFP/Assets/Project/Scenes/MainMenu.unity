@@ -5237,6 +5237,7 @@ GameObject:
   - component: {fileID: 629299489}
   - component: {fileID: 629299488}
   - component: {fileID: 629299487}
+  - component: {fileID: 629299490}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -5305,6 +5306,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1004149733}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &629299490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 629299486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4f0e10e5a44a0bbf9d7b8d7c4f0a21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FullscreenHotkeyHandler
+  settingsPanelController: {fileID: 2129231401}
+  applySavedSettingsOnAwake: 1
 --- !u!1 &641003360
 GameObject:
   m_ObjectHideFlags: 0
@@ -10770,6 +10785,8 @@ GameObject:
   - component: {fileID: 1470118341}
   - component: {fileID: 1470118340}
   - component: {fileID: 1470118343}
+  - component: {fileID: 1470118344}
+  - component: {fileID: 1470118345}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -10895,6 +10912,42 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &1470118344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470118339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 200
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 0}
+--- !u!114 &1470118345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470118339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3a40cf52454703b0201f7e40b9ff94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionFade
+  fadeDuration: 1.1
+  startVignetteIntensity: 0
+  endVignetteIntensity: 1
+  startPostExposure: 0
+  endPostExposure: -10
+  startVignetteSmoothness: 0.2
+  endVignetteSmoothness: 1
 --- !u!1 &1475468139
 GameObject:
   m_ObjectHideFlags: 0

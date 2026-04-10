@@ -5,44 +5,9 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 public class EnemyTacticsCoordinator : MonoBehaviour
 {
-    private static EnemyTacticsCoordinator cachedInstance;
-
     private readonly HashSet<EnemyController> registeredEnemies = new HashSet<EnemyController>();
     private readonly Dictionary<EnemyController, int> reservedSlotIndices = new Dictionary<EnemyController, int>();
     private readonly Dictionary<EnemyController, int> reservedCombatSideSigns = new Dictionary<EnemyController, int>();
-
-    // Busca el coordinador activo y lo deja cacheado.
-    // Piensa en él como el "árbitro" que reparte posiciones para que los enemigos no se estorben.
-    public static EnemyTacticsCoordinator Resolve()
-    {
-        if (cachedInstance != null)
-        {
-            return cachedInstance;
-        }
-
-        cachedInstance = FindFirstObjectByType<EnemyTacticsCoordinator>();
-        return cachedInstance;
-    }
-
-    void Awake()
-    {
-        if (cachedInstance != null && cachedInstance != this)
-        {
-            GameDebug.Advertencia("IA", "EnemyTacticsCoordinator detecto multiples instancias activas. Se desactiva el duplicado.", this);
-            enabled = false;
-            return;
-        }
-
-        cachedInstance = this;
-    }
-
-    void OnDestroy()
-    {
-        if (cachedInstance == this)
-        {
-            cachedInstance = null;
-        }
-    }
 
     // Registra al enemigo en el sistema táctico y le asigna una prioridad de evasión.
     // Esa prioridad ayuda a que la navegación no trate a todos igual y se apelotonen menos.

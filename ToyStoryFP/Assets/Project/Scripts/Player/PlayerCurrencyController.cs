@@ -5,9 +5,9 @@ using UnityEngine;
 public class PlayerCurrencyController : MonoBehaviour
 {
     [SerializeField] private int startingCoins;
+    [SerializeField] private PlayerAudioController playerAudio;
 
     private int currentCoins;
-    private PlayerAudioController playerAudio;
 
     public event Action<PlayerCurrencyController> CoinsChanged;
 
@@ -15,7 +15,6 @@ public class PlayerCurrencyController : MonoBehaviour
 
     void Awake()
     {
-        playerAudio = GetComponent<PlayerAudioController>();
         currentCoins = Mathf.Max(0, startingCoins);
         RunStatsStore.UpdateCoins(currentCoins);
         NotifyCoinsChanged();

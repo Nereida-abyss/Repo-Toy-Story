@@ -5,10 +5,6 @@ public class PlayerAudioController : MonoBehaviour
 {
     private static readonly AudioClip[] EmptyAudioClips = System.Array.Empty<AudioClip>();
 
-    private const string GeneralSourceName = "PlayerAudioGeneral";
-    private const string WeaponSourceName = "PlayerAudioWeapon";
-    private const string FootstepSourceName = "PlayerAudioFootsteps";
-
     [Header("Audio Sources")]
     [SerializeField] private AudioSource generalSource;
     [SerializeField] private AudioSource weaponSource;
@@ -52,12 +48,10 @@ public class PlayerAudioController : MonoBehaviour
 
     void Awake()
     {
-        ResolveSources();
-    }
-
-    void OnValidate()
-    {
-        ResolveSources();
+        if (generalSource == null || weaponSource == null || footstepSource == null)
+        {
+            LogMissingSources();
+        }
     }
 
     // Reproduce salto.
@@ -171,46 +165,6 @@ public class PlayerAudioController : MonoBehaviour
             Mathf.Max(0.01f, footstepMaxInterval),
             Mathf.Max(0.01f, footstepMinInterval),
             Mathf.Clamp01(movementIntensity));
-    }
-
-    // Resuelve sources.
-    private void ResolveSources()
-    {
-        if (generalSource == null)
-        {
-            generalSource = ResolveChildSource(GeneralSourceName);
-        }
-
-        if (weaponSource == null)
-        {
-            weaponSource = ResolveChildSource(WeaponSourceName);
-        }
-
-        if (footstepSource == null)
-        {
-            footstepSource = ResolveChildSource(FootstepSourceName);
-        }
-
-        if (generalSource == null || weaponSource == null || footstepSource == null)
-        {
-            LogMissingSources();
-        }
-    }
-
-    // Resuelve hijo origen.
-    private AudioSource ResolveChildSource(string childName)
-    {
-        AudioSource[] sources = GetComponentsInChildren<AudioSource>(true);
-
-        for (int i = 0; i < sources.Length; i++)
-        {
-            if (sources[i] != null && sources[i].gameObject.name == childName)
-            {
-                return sources[i];
-            }
-        }
-
-        return null;
     }
 
     // Obtiene aleatorio footstep clip.

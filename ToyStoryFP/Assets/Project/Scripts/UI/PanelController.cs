@@ -110,16 +110,16 @@ public class PanelController : MonoBehaviour
     // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
-        AutoDiscoverReferences();
-        EnsureScorePanelController();
+        ValidateReferences();
+        ConfigureScorePanelController();
         BindListeners();
     }
 
     // Activa listeners y estado al habilitar el objeto.
     private void OnEnable()
     {
-        AutoDiscoverReferences();
-        EnsureScorePanelController();
+        ValidateReferences();
+        ConfigureScorePanelController();
         BindListeners();
     }
 
@@ -235,10 +235,14 @@ public class PanelController : MonoBehaviour
 
         SetPanelActive(panelCredits, true);
 
-        CanvasGroup creditsCanvasGroup = EnsureCanvasGroup(panelCredits);
-        creditsCanvasGroup.alpha = 1f;
-        creditsCanvasGroup.interactable = false;
-        creditsCanvasGroup.blocksRaycasts = false;
+        CanvasGroup creditsCanvasGroup = RequireCanvasGroup(panelCredits, nameof(panelCredits));
+
+        if (creditsCanvasGroup != null)
+        {
+            creditsCanvasGroup.alpha = 1f;
+            creditsCanvasGroup.interactable = false;
+            creditsCanvasGroup.blocksRaycasts = false;
+        }
 
         float skipGracePeriod = introMode ? introSkipGracePeriod : skipInputGracePeriod;
         float skipAllowedAtTime = Time.unscaledTime + Mathf.Max(0f, skipGracePeriod);
@@ -271,7 +275,11 @@ public class PanelController : MonoBehaviour
 
         yield return FadeCanvasGroupAlpha(creditsCanvasGroup, fadeDuration);
 
-        creditsCanvasGroup.alpha = 1f;
+        if (creditsCanvasGroup != null)
+        {
+            creditsCanvasGroup.alpha = 1f;
+        }
+
         SetPanelActive(panelCredits, false);
 
         if (creditsPanelFx != null)
@@ -1040,13 +1048,13 @@ public class PanelController : MonoBehaviour
     private List<CreditTextEntry> CollectCreditTextEntries()
     {
         List<CreditTextEntry> entries = new List<CreditTextEntry>();
+        Transform root = ResolveCreditsTextRoot();
 
-        if (creditsTextRoot == null)
+        if (root == null)
         {
-            AutoDiscoverCreditsTextRoot();
+            return entries;
         }
 
-        Transform root = creditsTextRoot != null ? creditsTextRoot : panelCredits.transform;
         TMP_Text[] texts = root.GetComponentsInChildren<TMP_Text>(true);
 
         for (int i = 0; i < texts.Length; i++)
@@ -1073,13 +1081,7 @@ public class PanelController : MonoBehaviour
     private List<CreditSection> CollectCreditSections()
     {
         List<CreditSection> sections = new List<CreditSection>();
-
-        if (creditsTextRoot == null)
-        {
-            AutoDiscoverCreditsTextRoot();
-        }
-
-        Transform root = creditsTextRoot != null ? creditsTextRoot : panelCredits.transform;
+        Transform root = ResolveCreditsTextRoot();
 
         if (root == null || root.childCount <= 1)
         {
@@ -1354,11 +1356,6 @@ public class PanelController : MonoBehaviour
     {
         AudioSource source = creditsAudioSource;
 
-        if (source == null)
-        {
-            source = GetComponent<AudioSource>();
-        }
-
         if (clip != null)
         {
             if (source != null)
@@ -1481,17 +1478,26 @@ public class PanelController : MonoBehaviour
         }
     }
 
-    // Garantiza un CanvasGroup para poder hacer fades y bloquear interacci?n.
-    private CanvasGroup EnsureCanvasGroup(GameObject target)
+    // Resuelve el CanvasGroup requerido sin crear componentes ocultos en runtime.
+    private CanvasGroup RequireCanvasGroup(GameObject target, string panelLabel)
     {
-        CanvasGroup canvasGroup = target.GetComponent<CanvasGroup>();
-
-        if (canvasGroup == null)
+        if (target == null)
         {
-            canvasGroup = target.AddComponent<CanvasGroup>();
+            return null;
         }
 
-        return canvasGroup;
+        CanvasGroup canvasGroup = target.GetComponent<CanvasGroup>();
+
+        if (canvasGroup != null)
+        {
+            return canvasGroup;
+        }
+
+        GameDebug.Advertencia(
+            "EndMenu",
+            $"El panel '{panelLabel}' necesita un CanvasGroup asignado en la escena para animarse correctamente.",
+            this);
+        return null;
     }
 
     // Conecta botones sin duplicar listeners aunque el objeto se active varias veces.
@@ -1501,8 +1507,6 @@ public class PanelController : MonoBehaviour
         {
             return;
         }
-
-        AutoDiscoverReferences();
 
         if (creditsButton != null)
         {
@@ -1529,20 +1533,13 @@ public class PanelController : MonoBehaviour
         listenersBound = false;
     }
 
-    // Intenta completar referencias opcionales por nombre para que el panel sea m?s resistente.
-    private void AutoDiscoverReferences()
-    {
-        AutoDiscoverCreditsButton();
-        AutoDiscoverCreditsTextRoot();
-        AutoDiscoverScorePanel();
-    }
-
     // Asegura el controlador de puntuaci?n y lo deja enlazado con los paneles correctos.
     private void EnsureScorePanelController()
     {
         if (scorePanelController == null)
         {
-            scorePanelController = GetComponent<ScorePanelController>();
+            ConfigureScorePanelController();
+            return;
         }
 
         if (scorePanelController == null)
@@ -1555,77 +1552,94 @@ public class PanelController : MonoBehaviour
         }
 
         scorePanelController.ConfigureIfNeeded(panelButtons, panelScore);
-        AutoDiscoverScorePanel();
     }
 
-    // Busca el bot?n de cr?ditos dentro del panel de botones si no vino asignado en Inspector.
-    private void AutoDiscoverCreditsButton()
+    // Configura el panel de score solo si su referencia esta serializada de forma explicita.
+    private void ConfigureScorePanelController()
     {
-        if (creditsButton != null || panelButtons == null)
+        if (scorePanelController == null)
         {
+            GameDebug.Advertencia(
+                "EndMenu",
+                "PanelController necesita una referencia explicita a ScorePanelController en el inspector.",
+                this);
             return;
         }
 
-        Button[] buttons = panelButtons.GetComponentsInChildren<Button>(true);
-
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            Button candidate = buttons[i];
-
-            if (candidate != null && candidate.name == "CreditsButton")
-            {
-                creditsButton = candidate;
-                return;
-            }
-        }
+        scorePanelController.ConfigureIfNeeded(panelButtons, panelScore);
     }
 
-    // Busca la ra?z de textos de cr?ditos para no depender de una referencia manual.
-    private void AutoDiscoverCreditsTextRoot()
+    // Devuelve la raiz real de textos de creditos sin busquedas por nombre.
+    private Transform ResolveCreditsTextRoot()
     {
-        if (creditsTextRoot != null || panelCredits == null)
+        if (creditsTextRoot != null)
         {
-            return;
+            return creditsTextRoot;
         }
 
-        creditsTextRoot = FindChildByName(panelCredits.transform, "Textos") ?? panelCredits.transform;
-    }
-
-    // Busca el panel de puntuaci?n cercano al men? actual para poder mostrarlo cuando toque.
-    private void AutoDiscoverScorePanel()
-    {
-        if (panelScore != null)
+        if (panelCredits != null)
         {
-            return;
-        }
-
-        Transform searchRoot = panelButtons != null && panelButtons.transform.parent != null
-            ? panelButtons.transform.parent
-            : transform.root;
-        Transform scoreTransform = FindChildByName(searchRoot, "PanelScore");
-        panelScore = scoreTransform != null ? scoreTransform.gameObject : null;
-    }
-
-    // Busca un hijo por nombre recorriendo la jerarqu?a a mano.
-    private Transform FindChildByName(Transform root, string childName)
-    {
-        if (root == null || string.IsNullOrWhiteSpace(childName))
-        {
-            return null;
-        }
-
-        Transform[] children = root.GetComponentsInChildren<Transform>(true);
-
-        for (int i = 0; i < children.Length; i++)
-        {
-            Transform candidate = children[i];
-
-            if (candidate != null && candidate.name == childName)
-            {
-                return candidate;
-            }
+            GameDebug.Advertencia(
+                "EndMenu",
+                "PanelController necesita una referencia explicita a creditsTextRoot en el inspector.",
+                this);
+            return panelCredits.transform;
         }
 
         return null;
+    }
+
+    // Comprueba las dependencias clave del flujo para que EndMenu no dependa de autodeteccion.
+    private void ValidateReferences()
+    {
+        ValidatePanelReference(panelGameOver, "panelGameOver");
+        ValidatePanelReference(panelCredits, "panelCredits");
+        ValidatePanelReference(panelButtons, "panelButtons");
+        ValidatePanelReference(panelSetting, "panelSetting");
+        ValidatePanelReference(panelScore, "panelScore");
+
+        if (panelGameOver != null)
+        {
+            RequireCanvasGroup(panelGameOver, panelGameOver.name);
+        }
+
+        if (panelCredits != null)
+        {
+            RequireCanvasGroup(panelCredits, panelCredits.name);
+        }
+
+        if (panelButtons != null)
+        {
+            RequireCanvasGroup(panelButtons, panelButtons.name);
+        }
+
+        if (creditsTextRoot == null)
+        {
+            GameDebug.Advertencia(
+                "EndMenu",
+                "PanelController necesita creditsTextRoot asignado desde el inspector.",
+                this);
+        }
+
+        if (creditsAudioSource == null)
+        {
+            GameDebug.Advertencia(
+                "EndMenu",
+                "PanelController necesita creditsAudioSource asignado desde el inspector.",
+                this);
+        }
+    }
+
+    private void ValidatePanelReference(GameObject panel, string fieldName)
+    {
+        if (panel != null)
+        {
+            return;
+        }
+
+        GameDebug.Advertencia(
+            "EndMenu",
+            $"PanelController no tiene la referencia '{fieldName}' asignada en el inspector.",
+            this);
     }
 }

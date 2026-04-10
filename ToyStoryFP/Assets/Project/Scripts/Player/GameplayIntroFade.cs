@@ -26,7 +26,12 @@ public class GameplayIntroFade : MonoBehaviour
 
     void Awake()
     {
-        EnsurePostProcessingVolume();
+        if (!EnsurePostProcessingVolume())
+        {
+            enabled = false;
+            return;
+        }
+
         CacheUiFadeTargets();
         ApplyFadeState(0f);
         ApplyUiFadeState(0f);
@@ -80,7 +85,7 @@ public class GameplayIntroFade : MonoBehaviour
     }
 
     // Asegura posterior processing volumen.
-    private void EnsurePostProcessingVolume()
+    private bool EnsurePostProcessingVolume()
     {
         cameraData = GetComponent<UniversalAdditionalCameraData>();
 
@@ -94,7 +99,11 @@ public class GameplayIntroFade : MonoBehaviour
 
         if (introVolume == null)
         {
-            introVolume = gameObject.AddComponent<Volume>();
+            GameDebug.Advertencia(
+                "Gameplay",
+                "GameplayIntroFade necesita un Volume explicito en la camara para aplicar el fade inicial.",
+                this);
+            return false;
         }
 
         introVolume.isGlobal = true;
@@ -117,6 +126,7 @@ public class GameplayIntroFade : MonoBehaviour
 
         introVolume.sharedProfile = null;
         introVolume.profile = runtimeProfile;
+        return true;
     }
 
     // Aplica fade estado.

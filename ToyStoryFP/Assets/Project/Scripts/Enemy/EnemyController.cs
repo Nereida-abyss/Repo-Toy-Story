@@ -4,7 +4,7 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(MovementScript))]
 [RequireComponent(typeof(NavMeshAgent))]
-public class EnemyController : MonoBehaviour
+public partial class EnemyController : MonoBehaviour
 {
     private enum AIState { Patrol, Investigate, Combat }
     private enum CombatMovementMode { Advance, StrafeLeft, StrafeRight, Retreat }
@@ -89,11 +89,10 @@ public class EnemyController : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private WeaponScript weaponScript;
     private PlayerHealthScript healthScript;
-    private EnemyAlertIndicator alertIndicator;
+    [SerializeField] private EnemyAlertIndicator alertIndicator;
     private EnemyAudioController enemyAudio;
-    private EnemyTacticsCoordinator tacticsCoordinator;
+    [SerializeField] private EnemyTacticsCoordinator tacticsCoordinator;
     private PlayerHealthScript cachedTargetHealth;
-    private PlayerController cachedPlayerController;
     private Vector3 lastKnownPlayerPosition;
     private Vector3 lastMeasuredPosition;
     private Vector3 measuredPlanarVelocity;
@@ -121,6 +120,8 @@ public class EnemyController : MonoBehaviour
     private bool hasLastKnownPlayerPosition;
     private bool hasTacticalDestination;
     private bool forceDestinationRefresh;
+    private bool hasLoggedMissingTarget;
+    private bool hasLoggedMissingAlertIndicator;
     private AIState currentState = AIState.Patrol;
     private CombatMovementMode currentCombatMovementMode = CombatMovementMode.StrafeRight;
 
@@ -132,7 +133,12 @@ public class EnemyController : MonoBehaviour
         healthScript = GetComponent<PlayerHealthScript>();
         if (healthScript == null) healthScript = GetComponentInChildren<PlayerHealthScript>(true);
         enemyAudio = GetComponent<EnemyAudioController>();
-        ResolveCoordinator();
+        if (weaponScript != null)
+        {
+            weaponScript.SetPlayerOwned(false);
+            weaponScript.ConfigureAudioControllers(null, enemyAudio);
+        }
+
         CacheBaseScalingStats();
         ConfigureNavigation();
         CacheTargetHealth();
@@ -145,14 +151,31 @@ public class EnemyController : MonoBehaviour
 
     void OnEnable()
     {
-        ResolveCoordinator();
         ResetMeasuredMotion();
         ResetCombatMovementState();
-        tacticsCoordinator?.RegisterEnemy(this, avoidancePriorityMin, avoidancePriorityMax);
+        RegisterWithTacticsCoordinator();
     }
 
     void OnDisable() => tacticsCoordinator?.UnregisterEnemy(this);
     void OnDestroy() => tacticsCoordinator?.UnregisterEnemy(this);
+
+    public void ConfigureRuntimeContext(Transform runtimeTarget, EnemyTacticsCoordinator coordinator)
+    {
+        if (runtimeTarget != null)
+        {
+            target = runtimeTarget;
+            hasLoggedMissingTarget = false;
+            CacheTargetHealth();
+        }
+
+        if (tacticsCoordinator != coordinator)
+        {
+            tacticsCoordinator?.UnregisterEnemy(this);
+            tacticsCoordinator = coordinator;
+        }
+
+        RegisterWithTacticsCoordinator();
+    }
 
     // Aplica el escalado por ronda.
     public void ApplyRoundScaling(float healthMultiplier, float damageMultiplier)
@@ -183,8 +206,7 @@ public class EnemyController : MonoBehaviour
 
         if (playerTarget == null)
         {
-            PlayerController playerController = ResolvePlayerController();
-            playerTarget = playerController != null ? playerController.transform : null;
+            playerTarget = target;
         }
 
         if (playerTarget == null)
@@ -196,7 +218,6 @@ public class EnemyController : MonoBehaviour
         damageSpeedBoostTimer = Mathf.Max(damageSpeedBoostTimer, Mathf.Max(0f, damageSpeedBoostDuration));
         EnterEnragedState(playerTarget);
         UpdateAgentSpeedByState();
-        ResolveCoordinator();
         tacticsCoordinator?.BroadcastAggro(this, lastKnownPlayerPosition, allyAlertRadius, aggressor);
     }
 
@@ -556,8 +577,6 @@ public class EnemyController : MonoBehaviour
     // Si eso falla, prueba una posición libre y simple en NavMesh.
     private bool TryResolveCombatDestination(Vector3 center, out Vector3 destination)
     {
-        ResolveCoordinator();
-
         if (tacticsCoordinator != null &&
             tacticsCoordinator.RequestCombatSlot(this, center, slotInnerRadius, slotOuterRadius, slotInnerCount, slotOuterCount, GetAreaMask(), out destination))
         {
@@ -571,8 +590,6 @@ public class EnemyController : MonoBehaviour
     // no se amontonen todos en el mismo punto.
     private bool TryResolveInvestigateDestination(Vector3 center, out Vector3 destination)
     {
-        ResolveCoordinator();
-
         if (tacticsCoordinator != null &&
             tacticsCoordinator.RequestInvestigatePoint(this, center, slotInnerRadius, slotOuterRadius, slotInnerCount, slotOuterCount, GetAreaMask(), out destination))
         {
@@ -828,7 +845,6 @@ public class EnemyController : MonoBehaviour
                 break;
         }
 
-        ResolveCoordinator();
         if (tacticsCoordinator != null &&
             tacticsCoordinator.RequestCombatMovePoint(
                 this,
@@ -924,73 +940,6 @@ public class EnemyController : MonoBehaviour
             : Vector3.zero;
     }
 
-    // Intenta resolver objetivo.
-    private bool TryResolveTarget()
-    {
-        if (target == null)
-        {
-            PlayerController playerController = ResolvePlayerController();
-            if (playerController != null)
-            {
-                target = playerController.transform;
-                CacheTargetHealth();
-            }
-        }
-
-        if (target == null) return false;
-        if (cachedTargetHealth == null) CacheTargetHealth();
-        return cachedTargetHealth == null || cachedTargetHealth.IsAlive;
-    }
-
-    // Guarda en cache objetivo vida.
-    private void CacheTargetHealth()
-    {
-        if (target == null)
-        {
-            cachedTargetHealth = null;
-            return;
-        }
-
-        PlayerController playerController = ResolvePlayerController();
-        if (playerController != null && target == playerController.transform)
-        {
-            cachedTargetHealth = playerController.Health;
-            return;
-        }
-
-        cachedTargetHealth = target.GetComponent<PlayerHealthScript>();
-    }
-
-    // Resuelve jugador controller.
-    private PlayerController ResolvePlayerController()
-    {
-        if (cachedPlayerController != null) return cachedPlayerController;
-        cachedPlayerController = PlayerController.Instance;
-        if (cachedPlayerController == null) cachedPlayerController = FindFirstObjectByType<PlayerController>();
-        return cachedPlayerController;
-    }
-
-    // Resuelve coordinator.
-    private void ResolveCoordinator()
-    {
-        if (tacticsCoordinator == null) tacticsCoordinator = EnemyTacticsCoordinator.Resolve();
-    }
-
-    // Resuelve alerta indicator.
-    private void ResolveAlertIndicator()
-    {
-        alertIndicator = GetComponentInChildren<EnemyAlertIndicator>(true);
-        if (alertIndicator == null)
-        {
-            GameObject indicatorObject = new GameObject("AlertIndicator");
-            indicatorObject.transform.SetParent(transform, false);
-            alertIndicator = indicatorObject.AddComponent<EnemyAlertIndicator>();
-        }
-
-        Transform anchor = alertAnchor != null ? alertAnchor : transform;
-        alertIndicator.Configure(anchor, GetAlertHeightOffset());
-    }
-
     // Configura navegación.
     private void ConfigureNavigation()
     {
@@ -1004,40 +953,6 @@ public class EnemyController : MonoBehaviour
         if (rigidbody != null) rigidbody.isKinematic = true;
 
         EnsureAgentOnNavMesh();
-    }
-
-    // Comprueba si hay visión limpia entre los ojos del enemigo y el punto de apuntado del objetivo.
-    private bool HasLineOfSight()
-    {
-        if (target == null) return false;
-
-        Vector3 origin = GetEyeOrigin();
-        Vector3 destination = GetTargetAimPoint();
-        Vector3 direction = destination - origin;
-        float distance = direction.magnitude;
-        if (distance <= 0.001f) return true;
-
-        int mask = visionBlockLayers.value != 0 ? visionBlockLayers.value : Physics.DefaultRaycastLayers;
-        if (Physics.Raycast(origin, direction.normalized, out RaycastHit hit, distance, mask, QueryTriggerInteraction.Ignore))
-        {
-            return hit.transform == target || hit.transform.IsChildOf(target);
-        }
-
-        return true;
-    }
-
-    // Atajo para saber si el objetivo actual está vivo, cerca y sin obstáculos delante.
-    private bool CanSeeCurrentTarget()
-    {
-        if (!TryResolveTarget() || target == null) return false;
-        Vector3 flatDirection = Vector3.ProjectOnPlane(target.position - transform.position, Vector3.up);
-        return flatDirection.magnitude <= GetDetectionRange() && HasLineOfSight();
-    }
-
-    // Define desde dónde "mira" el enemigo al lanzar raycasts de visión.
-    private Vector3 GetEyeOrigin()
-    {
-        return eyeOrigin != null ? eyeOrigin.position : transform.position + Vector3.up * GetEyeHeight();
     }
 
     // Cambia de estado y hace toda la limpieza asociada en un único sitio.
@@ -1173,13 +1088,6 @@ public class EnemyController : MonoBehaviour
     private void ResetAttackWarmup()
     {
         attackWarmupTimer = attackWarmup;
-    }
-
-    // El enemigo no apunta al suelo del objetivo, sino a una altura útil para que el tiro se vea lógico.
-    private Vector3 GetTargetAimPoint()
-    {
-        if (target == null) return transform.position + (transform.forward * Mathf.Max(0.1f, GetAttackRange()));
-        return target.position + Vector3.up * targetAimHeight;
     }
 
     // Mantiene viva la patrulla: comprueba si llegó, espera si hace falta

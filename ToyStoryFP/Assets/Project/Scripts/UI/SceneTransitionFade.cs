@@ -53,11 +53,10 @@ public class SceneTransitionFade : MonoBehaviour
 
         if (fade == null)
         {
-            fade = targetCamera.gameObject.AddComponent<SceneTransitionFade>();
+            return false;
         }
 
-        fade.BeginFade(sceneName);
-        return true;
+        return fade.BeginFade(sceneName);
     }
 
     void OnDestroy()
@@ -99,20 +98,25 @@ public class SceneTransitionFade : MonoBehaviour
     }
 
     // Arranca la transición si no hay otra corriendo ya.
-    private void BeginFade(string sceneName)
+    private bool BeginFade(string sceneName)
     {
         if (fadeCoroutine != null)
         {
-            return;
+            return true;
         }
 
-        EnsurePostProcessingVolume();
+        if (!EnsurePostProcessingVolume())
+        {
+            return false;
+        }
+
         CacheUiFadeTargets();
         ApplyFadeState(0f);
         ApplyUiFadeState(0f);
         isTransitioning = true;
         SceneManager.sceneLoaded += HandleSceneLoaded;
         fadeCoroutine = StartCoroutine(FadeOutAndLoadSceneRoutine(sceneName));
+        return true;
     }
 
     // Secuencia completa del cambio de escena:
@@ -138,7 +142,7 @@ public class SceneTransitionFade : MonoBehaviour
     }
 
     // Garantiza el volumen de postproceso que usa el fade antes de empezar a animar.
-    private void EnsurePostProcessingVolume()
+    private bool EnsurePostProcessingVolume()
     {
         cameraData = GetComponent<UniversalAdditionalCameraData>();
 
@@ -150,7 +154,16 @@ public class SceneTransitionFade : MonoBehaviour
 
         if (transitionVolume == null)
         {
-            transitionVolume = gameObject.AddComponent<Volume>();
+            transitionVolume = GetComponent<Volume>();
+        }
+
+        if (transitionVolume == null)
+        {
+            GameDebug.Advertencia(
+                "Escenas",
+                "SceneTransitionFade necesita un Volume explicito en la camara para aplicar el fade.",
+                this);
+            return false;
         }
 
         transitionVolume.isGlobal = true;
@@ -176,6 +189,7 @@ public class SceneTransitionFade : MonoBehaviour
 
         transitionVolume.sharedProfile = null;
         transitionVolume.profile = runtimeProfile;
+        return true;
     }
 
     // Aplica el valor de fade a cámara y postproceso en un único punto.

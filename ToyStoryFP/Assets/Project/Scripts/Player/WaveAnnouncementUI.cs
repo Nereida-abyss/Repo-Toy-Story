@@ -8,22 +8,21 @@ public class WaveAnnouncementUI : MonoBehaviour
     [SerializeField] private TMP_Text announcementText;
 
     private bool hasLoggedMissingReferences;
+    private bool hasLoggedMissingAudio;
 
     void Awake()
     {
-        ResolveReferences();
+        panelRoot ??= gameObject;
     }
 
     void OnValidate()
     {
-        ResolveReferences();
+        panelRoot ??= gameObject;
     }
 
     // Muestra oleada.
     public void ShowWave(int waveNumber)
     {
-        ResolveReferences();
-
         if (panelRoot == null || announcementText == null)
         {
             LogMissingReferences();
@@ -31,6 +30,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         }
 
         announcementText.text = $"WAVE {waveNumber}";
+        PlayAnnouncementAudio();
         SetVisible(true);
     }
 
@@ -40,22 +40,9 @@ public class WaveAnnouncementUI : MonoBehaviour
         SetVisible(false);
     }
 
-    // Resuelve referencias.
-    private void ResolveReferences()
-    {
-        panelRoot ??= gameObject;
-
-        if (announcementText == null)
-        {
-            announcementText = FindTextByExactName("WaveAnnouncementText");
-        }
-    }
-
     // Actualiza visible.
     private void SetVisible(bool isVisible)
     {
-        ResolveReferences();
-
         if (panelRoot == null)
         {
             return;
@@ -64,20 +51,26 @@ public class WaveAnnouncementUI : MonoBehaviour
         UIFxUtility.SetPanelActive(panelRoot, isVisible);
     }
 
-    // Busca texto por exact nombre.
-    private TMP_Text FindTextByExactName(string targetName)
+    private void PlayAnnouncementAudio()
     {
-        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        AudioManager audioManager = AudioManager.Instance;
 
-        for (int i = 0; i < texts.Length; i++)
+        if (audioManager == null)
         {
-            if (texts[i] != null && texts[i].gameObject.name == targetName)
-            {
-                return texts[i];
-            }
+            LogMissingAudio();
+            return;
         }
 
-        return null;
+        AudioClip clip = audioManager.GetWaveAnnouncementClip();
+        AudioSource source = audioManager.SharedSfxSource;
+
+        if (clip == null || source == null)
+        {
+            LogMissingAudio();
+            return;
+        }
+
+        source.PlayOneShot(clip);
     }
 
     // Gestiona registro faltante referencias.
@@ -90,5 +83,16 @@ public class WaveAnnouncementUI : MonoBehaviour
 
         hasLoggedMissingReferences = true;
         GameDebug.Advertencia("HUDOleadas", "WaveAnnouncementUI no tiene panel o texto asignado.", this);
+    }
+
+    private void LogMissingAudio()
+    {
+        if (hasLoggedMissingAudio)
+        {
+            return;
+        }
+
+        hasLoggedMissingAudio = true;
+        GameDebug.Advertencia("HUDOleadas", "WaveAnnouncementUI no pudo reproducir el audio de anuncio de ronda.", this);
     }
 }

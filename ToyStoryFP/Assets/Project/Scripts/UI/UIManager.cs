@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
@@ -28,7 +27,7 @@ public class UIManager : MonoBehaviour
         }
 
         Instance = this;
-        EnsureEventSystem();
+        ValidateEventSystem();
     }
 
     void Start()
@@ -120,16 +119,17 @@ public class UIManager : MonoBehaviour
         return panelPause != null || panelUI != null;
     }
 
-    // Garantiza que exista un EventSystem para que la UI pueda recibir foco e input.
-    private void EnsureEventSystem()
+    // Comprueba que la escena tenga un EventSystem explÃ­cito para que la UI reciba input.
+    private void ValidateEventSystem()
     {
         if (EventSystem.current != null)
         {
             return;
         }
 
-        GameObject eventSystemObject = new GameObject("EventSystem");
-        eventSystemObject.AddComponent<EventSystem>();
-        eventSystemObject.AddComponent<StandaloneInputModule>();
+        GameDebug.Advertencia(
+            "UI",
+            "No se encontro un EventSystem activo en la escena. Anade uno manualmente en el inspector para la UI.",
+            this);
     }
 }

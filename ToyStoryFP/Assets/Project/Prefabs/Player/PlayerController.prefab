@@ -12,9 +12,11 @@ GameObject:
   - component: {fileID: 7428757647949270732}
   - component: {fileID: 4702667000344342887}
   - component: {fileID: 3619479782008495306}
+  - component: {fileID: 919900000000004002}
   - component: {fileID: 1017103518327394351}
   - component: {fileID: 3505556120907137829}
   - component: {fileID: 919900000000004001}
+  - component: {fileID: 919900000000004003}
   m_Layer: 0
   m_Name: FPCamara
   m_TagString: Untagged
@@ -191,21 +193,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponLoadoutScript
   weaponCamera: {fileID: 7428757647949270732}
+  playerAudio: {fileID: 8763889996309575755}
   weaponSwitchDuration: 0.33
   weaponSwitchLowerRatio: 0.45
   weaponSwitchRaiseRatio: 0.45
   defaultStartingWeaponId: Low_Poly_1323
   weaponUnlockDefinitions:
   - weaponId: Low_Poly_1323
-    weapon: {fileID: 0}
+    weapon: {fileID: 4655425901243566510}
     price: 0
     unlockedByDefault: 1
   - weaponId: TacticalRifle
-    weapon: {fileID: 0}
+    weapon: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
     price: 0
     unlockedByDefault: 0
   - weaponId: AssaultRifle
-    weapon: {fileID: 0}
+    weapon: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
     price: 0
     unlockedByDefault: 0
 --- !u!114 &919900000000004001
@@ -227,6 +230,42 @@ MonoBehaviour:
   endPostExposure: 0
   startVignetteSmoothness: 1
   endVignetteSmoothness: 0.2
+--- !u!114 &919900000000004002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12284217865056662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 100
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 0}
+--- !u!114 &919900000000004003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12284217865056662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3a40cf52454703b0201f7e40b9ff94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionFade
+  fadeDuration: 1.1
+  startVignetteIntensity: 0
+  endVignetteIntensity: 1
+  startPostExposure: 0
+  endPostExposure: -10
+  startVignetteSmoothness: 0.2
+  endVignetteSmoothness: 1
 --- !u!1 &54641668929060506
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,6 +712,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1824693378594426093}
   - component: {fileID: 2946714627837248818}
+  - component: {fileID: 2946714627837248820}
+  - component: {fileID: 919900000000005111}
   m_Layer: 0
   m_Name: UIPlayer
   m_TagString: Untagged
@@ -711,6 +752,36 @@ MonoBehaviour:
   panelPause: {fileID: 2852006045536350014}
   panelUI: {fileID: 7009948666917715635}
   settingsPanel: {fileID: 6667787602384711056}
+--- !u!114 &2946714627837248820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 431303215532923113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4f0e10e5a44a0bbf9d7b8d7c4f0a21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FullscreenHotkeyHandler
+  settingsPanelController: {fileID: 1521112854382354753}
+  applySavedSettingsOnAwake: 1
+--- !u!114 &919900000000005111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 431303215532923113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b9f1cc5d8ad4f0a9cfc72e7b5b7431e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveHudController
+  waveManager: {fileID: 0}
+  waveAnnouncementUi: {fileID: 919900000000001005}
+  waveIntermissionUi: {fileID: 919900000000002005}
+  waveTimersUi: {fileID: 919900000000003003}
 --- !u!1 &724325027718993649
 GameObject:
   m_ObjectHideFlags: 0
@@ -4487,8 +4558,10 @@ GameObject:
   - component: {fileID: 1966027077784214151}
   - component: {fileID: 8524817490402705243}
   - component: {fileID: 879036673528475793}
+  - component: {fileID: 1142213344556677889}
   - component: {fileID: 8763889996309575755}
   - component: {fileID: 6571116937149603781}
+  - component: {fileID: 919900000000005112}
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Player
@@ -4620,6 +4693,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d20cb9f4be89438c9eb6fe3156b0bd45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  movementScript: {fileID: 1966027077784214151}
+  healthScript: {fileID: 8524817490402705243}
+  currencyController: {fileID: 6571116937149603781}
+  audioController: {fileID: 8763889996309575755}
+  weaponLoadout: {fileID: 3505556120907137829}
+  shopController: {fileID: 1142213344556677889}
+--- !u!114 &1142213344556677889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4978345595291347896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e6b8e4566d14a94b6c4f2ea80e6a214, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShopController
+  waveManager: {fileID: 0}
+  panelShop: {fileID: 6938587728798845622}
+  moneyText: {fileID: 7939850641683457737}
+  speedStatText: {fileID: 7181790239608446941}
+  jumpStatText: {fileID: 8852613568166506123}
+  ammoButton: {fileID: 5975369471569124276}
+  healButton: {fileID: 1471878894728813025}
+  speedButton: {fileID: 1768907508895972747}
+  jumpButton: {fileID: 2585033385817779288}
+  m16Button: {fileID: 7030395761440280935}
+  akButton: {fileID: 8242639947445118542}
 --- !u!114 &8763889996309575755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4667,6 +4769,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCurrencyController
   startingCoins: 0
+  playerAudio: {fileID: 8763889996309575755}
+--- !u!114 &919900000000005112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4978345595291347896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73de8c8efaae4f40a9b64721d3f22b5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathFlow
+  playerHealth: {fileID: 8524817490402705243}
+  destroyDelay: 2
 --- !u!1 &5068890236411316645
 GameObject:
   m_ObjectHideFlags: 0
@@ -9288,12 +9405,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4260021155387469253, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: _camera
       value: 
       objectReference: {fileID: 7428757647949270732}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: playerAudio
+      value: 
+      objectReference: {fileID: 8763889996309575755}
+    - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
+      propertyPath: enemyAudio
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8157757337817628071, guid: 8ec4cfd3f7f261d4ebb9097453535dec, type: 3}
       propertyPath: fireSound
       value: 
@@ -9714,6 +9839,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7428757647949270732}
     - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: playerAudio
+      value: 
+      objectReference: {fileID: 8763889996309575755}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
+      propertyPath: enemyAudio
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5387396049095525908, guid: 4f7bc8fee64a49b4db38c54464c14f5b, type: 3}
       propertyPath: fireRate
       value: 8
       objectReference: {fileID: 0}
@@ -9940,6 +10073,8 @@ MonoBehaviour:
   fireOrigin: {fileID: 0}
   maxRange: 100
   playerOwnedWeapon: 0
+  playerAudio: {fileID: 8763889996309575755}
+  enemyAudio: {fileID: 0}
   fireRate: 3
   damagePerShot: 45
   magazineSize: 16

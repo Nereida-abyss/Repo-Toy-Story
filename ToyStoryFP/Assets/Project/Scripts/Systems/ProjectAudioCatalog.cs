@@ -9,8 +9,13 @@ public class ProjectAudioCatalog : ScriptableObject
         public AudioClip mainMenu;
         public AudioClip gameplay;
         public AudioClip shop;
-        public AudioClip defeat;
-        public AudioClip victory;
+        public AudioClip endMenu;
+    }
+
+    [System.Serializable]
+    public sealed class WaveGroup
+    {
+        public AudioClip announcement;
     }
 
     [System.Serializable]
@@ -72,6 +77,9 @@ public class ProjectAudioCatalog : ScriptableObject
     [Header("UI")]
     [SerializeField] private UiGroup ui = new UiGroup();
 
+    [Header("Waves")]
+    [SerializeField] private WaveGroup waves = new WaveGroup();
+
     [Header("Credits")]
     [SerializeField] private CreditsGroup credits = new CreditsGroup();
 
@@ -80,5 +88,6 @@ public class ProjectAudioCatalog : ScriptableObject
     public EnemyGroup Enemy => enemy;
     public WeaponGroup Weapons => weapons;
     public UiGroup Ui => ui;
+    public WaveGroup Waves => waves;
     public CreditsGroup Credits => credits;
 }

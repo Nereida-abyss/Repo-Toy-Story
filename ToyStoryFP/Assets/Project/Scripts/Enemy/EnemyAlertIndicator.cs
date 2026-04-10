@@ -11,22 +11,28 @@ public class EnemyAlertIndicator : MonoBehaviour
     [SerializeField] private float pulseScale = 1.25f;
     [SerializeField] private Vector2 canvasSize = new Vector2(50f, 50f);
     [SerializeField] private float worldScale = 0.006f;
+    [SerializeField] private Canvas canvas;
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private RectTransform textRect;
+    [SerializeField] private TextMeshProUGUI alertText;
 
     private Transform followTarget;
     private float heightOffset;
-    private Canvas canvas;
-    private CanvasGroup canvasGroup;
-    private RectTransform textRect;
     private Camera cachedCamera;
     private bool isVisible;
     private float pulseTimer;
+    private bool hasLoggedMissingReferences;
 
     // Gestiona configure.
     public void Configure(Transform target, float offset)
     {
         followTarget = target;
         heightOffset = offset;
-        EnsureVisuals();
+        if (!ResolveReferences())
+        {
+            return;
+        }
+
         UpdateTransform();
         canvasGroup.alpha = 0f;
         textRect.localScale = Vector3.one;
@@ -35,7 +41,11 @@ public class EnemyAlertIndicator : MonoBehaviour
     // Actualiza visible.
     public void SetVisible(bool visible, bool playPulse)
     {
-        EnsureVisuals();
+        if (!ResolveReferences())
+        {
+            return;
+        }
+
         isVisible = visible;
 
         if (playPulse)
@@ -52,72 +62,76 @@ public class EnemyAlertIndicator : MonoBehaviour
 
     void Awake()
     {
-        EnsureVisuals();
+        ResolveReferences();
     }
 
     void LateUpdate()
     {
-        EnsureVisuals();
+        if (!ResolveReferences())
+        {
+            return;
+        }
+
         UpdateTransform();
         UpdateVisibility();
         UpdatePulse();
     }
 
-    // Asegura visuals.
-    private void EnsureVisuals()
+    // Asegura referencias serializadas sin crear UI en runtime.
+    private bool ResolveReferences()
     {
-        if (canvas != null && canvasGroup != null && textRect != null)
-        {
-            return;
-        }
-
-        canvas = GetComponent<Canvas>();
-
         if (canvas == null)
         {
-            canvas = gameObject.AddComponent<Canvas>();
+            canvas = GetComponent<Canvas>();
+        }
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+        }
+
+        if (alertText == null)
+        {
+            alertText = GetComponentInChildren<TextMeshProUGUI>(true);
+        }
+
+        if (textRect == null && alertText != null)
+        {
+            textRect = alertText.rectTransform;
+        }
+
+        if (canvas == null || canvasGroup == null || textRect == null || alertText == null)
+        {
+            if (!hasLoggedMissingReferences)
+            {
+                hasLoggedMissingReferences = true;
+                GameDebug.Advertencia("IA", "EnemyAlertIndicator necesita Canvas, CanvasGroup y TextMeshProUGUI configurados en el prefab enemigo.", this);
+            }
+
+            return false;
         }
 
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.sortingOrder = 200;
 
-        if (GetComponent<CanvasScaler>() == null)
-        {
-            gameObject.AddComponent<CanvasScaler>();
-        }
-
-        canvasGroup = GetComponent<CanvasGroup>();
-
-        if (canvasGroup == null)
-        {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
-        }
-
         RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-        canvasRect.sizeDelta = canvasSize;
-        canvasRect.localScale = Vector3.one * worldScale;
-
-        TextMeshProUGUI text = GetComponentInChildren<TextMeshProUGUI>(true);
-
-        if (text == null)
+        if (canvasRect != null)
         {
-            GameObject textObject = new GameObject("AlertText", typeof(RectTransform));
-            textObject.transform.SetParent(transform, false);
-            text = textObject.AddComponent<TextMeshProUGUI>();
+            canvasRect.sizeDelta = canvasSize;
+            canvasRect.localScale = Vector3.one * worldScale;
         }
 
-        textRect = text.rectTransform;
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
-        text.alignment = TextAlignmentOptions.Center;
-        text.text = "!";
-        text.fontSize = 42f;
-        text.color = alertColor;
-        text.raycastTarget = false;
-        text.textWrappingMode = TextWrappingModes.NoWrap;
-        canvasGroup.alpha = 0f;
+        alertText.alignment = TextAlignmentOptions.Center;
+        alertText.text = "!";
+        alertText.fontSize = 42f;
+        alertText.color = alertColor;
+        alertText.raycastTarget = false;
+        alertText.textWrappingMode = TextWrappingModes.NoWrap;
+        return true;
     }
 
     // Actualiza transform.

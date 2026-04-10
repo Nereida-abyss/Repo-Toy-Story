@@ -25,7 +25,6 @@ public class ScorePanelController : MonoBehaviour
     // Inicializa referencias antes de usar el componente.
     private void Awake()
     {
-        ResolveUiReferences();
         BindListeners();
         ClosePanelImmediate();
     }
@@ -42,7 +41,7 @@ public class ScorePanelController : MonoBehaviour
         UnbindListeners();
     }
 
-    // Actualiza la lógica en cada frame.
+    // Actualiza la logica en cada frame.
     private void Update()
     {
         if (panelScoreRoot == null || !panelScoreRoot.activeSelf)
@@ -69,7 +68,6 @@ public class ScorePanelController : MonoBehaviour
             panelScoreRoot = existingScorePanel;
         }
 
-        ResolveUiReferences();
         BindListeners();
         ClosePanelImmediate();
     }
@@ -77,8 +75,6 @@ public class ScorePanelController : MonoBehaviour
     // Abre panel.
     public void OpenPanel()
     {
-        ResolveUiReferences();
-
         if (panelScoreRoot == null)
         {
             GameDebug.Advertencia("Score", "No se puede abrir SCORE porque falta PanelScore en la escena.", this);
@@ -118,7 +114,7 @@ public class ScorePanelController : MonoBehaviour
         }
     }
 
-    // Refresca best estadísticas.
+    // Refresca best estadisticas.
     private void RefreshBestStats()
     {
         RunStatsStore.GetLastRunStats(out int coins, out int wave, out int bots);
@@ -147,8 +143,6 @@ public class ScorePanelController : MonoBehaviour
             return;
         }
 
-        ResolveUiReferences();
-
         if (scoreButton != null)
         {
             scoreButton.onClick.RemoveListener(OpenPanel);
@@ -156,7 +150,7 @@ public class ScorePanelController : MonoBehaviour
         }
         else
         {
-            GameDebug.Advertencia("Score", "No se encontró ScoreButton dentro de PanelButtons.", this);
+            GameDebug.Advertencia("Score", "ScorePanelController no tiene ScoreButton asignado en Inspector.", this);
         }
 
         if (closeButton != null)
@@ -166,7 +160,7 @@ public class ScorePanelController : MonoBehaviour
         }
         else
         {
-            GameDebug.Advertencia("Score", "No se encontró BackButton dentro de PanelScore.", this);
+            GameDebug.Advertencia("Score", "ScorePanelController no tiene BackButton asignado en Inspector.", this);
         }
 
         listenersBound = true;
@@ -186,128 +180,5 @@ public class ScorePanelController : MonoBehaviour
         }
 
         listenersBound = false;
-    }
-
-    // Resuelve UI referencias.
-    private void ResolveUiReferences()
-    {
-        Transform canvasRoot = ResolveCanvasRoot();
-
-        if (previousPanelToHide == null)
-        {
-            Transform panelButtonsTransform = FindChildByName(canvasRoot, "PanelButtons");
-            previousPanelToHide = panelButtonsTransform != null ? panelButtonsTransform.gameObject : null;
-        }
-
-        if (scoreButton == null && previousPanelToHide != null)
-        {
-            Transform scoreButtonTransform = FindChildByName(previousPanelToHide.transform, "ScoreButton");
-            scoreButton = scoreButtonTransform != null ? scoreButtonTransform.GetComponent<Button>() : null;
-        }
-
-        if (panelScoreRoot == null)
-        {
-            Transform scorePanelTransform = FindChildByName(canvasRoot, "PanelScore");
-            panelScoreRoot = scorePanelTransform != null ? scorePanelTransform.gameObject : null;
-        }
-
-        if (panelScoreRoot == null)
-        {
-            GameDebug.Advertencia("Score", "ScorePanelController necesita un PanelScore existente bajo EndMenu_Canvas.", this);
-            return;
-        }
-
-        if (bestCoinsText == null)
-        {
-            bestCoinsText = FindTextUnderPanel("BestCoinsText");
-        }
-
-        if (bestWaveText == null)
-        {
-            bestWaveText = FindTextUnderPanel("BestWaveText");
-        }
-
-        if (bestBotsText == null)
-        {
-            bestBotsText = FindTextUnderPanel("BestBotsText");
-        }
-
-        if (closeButton == null)
-        {
-            Transform closeButtonTransform = FindChildByName(panelScoreRoot.transform, "BackButton");
-            closeButton = closeButtonTransform != null ? closeButtonTransform.GetComponent<Button>() : null;
-        }
-    }
-
-    // Busca texto under panel.
-    private TMP_Text FindTextUnderPanel(string nameToFind)
-    {
-        if (panelScoreRoot == null || string.IsNullOrWhiteSpace(nameToFind))
-        {
-            return null;
-        }
-
-        TMP_Text[] texts = panelScoreRoot.GetComponentsInChildren<TMP_Text>(true);
-
-        for (int i = 0; i < texts.Length; i++)
-        {
-            TMP_Text text = texts[i];
-
-            if (text != null && text.name == nameToFind)
-            {
-                return text;
-            }
-        }
-
-        return null;
-    }
-
-    // Resuelve canvas raíz.
-    private Transform ResolveCanvasRoot()
-    {
-        if (endMenuCanvasRoot != null)
-        {
-            return endMenuCanvasRoot;
-        }
-
-        Canvas parentCanvas = GetComponentInParent<Canvas>(true);
-
-        if (parentCanvas != null)
-        {
-            endMenuCanvasRoot = parentCanvas.transform;
-            return endMenuCanvasRoot;
-        }
-
-        if (transform.parent != null)
-        {
-            endMenuCanvasRoot = transform.parent;
-            return endMenuCanvasRoot;
-        }
-
-        endMenuCanvasRoot = transform;
-        return endMenuCanvasRoot;
-    }
-
-    // Busca hijo por nombre.
-    private Transform FindChildByName(Transform root, string nameToFind)
-    {
-        if (root == null || string.IsNullOrWhiteSpace(nameToFind))
-        {
-            return null;
-        }
-
-        Transform[] transforms = root.GetComponentsInChildren<Transform>(true);
-
-        for (int i = 0; i < transforms.Length; i++)
-        {
-            Transform candidate = transforms[i];
-
-            if (candidate != null && candidate.name == nameToFind)
-            {
-                return candidate;
-            }
-        }
-
-        return null;
     }
 }

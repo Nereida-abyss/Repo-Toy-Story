@@ -27,7 +27,6 @@ public class UIPanelFx : MonoBehaviour
     [SerializeField] private float openVolume = 0.5f;
     [SerializeField] private float closeVolume = 0.38f;
 
-    private static AudioSource sharedAudioSource;
     private RectTransform rectTransform;
     private Coroutine activeRoutine;
     private Vector2 baseAnchoredPosition;
@@ -35,6 +34,7 @@ public class UIPanelFx : MonoBehaviour
     private bool initialized;
     private bool suppressOpenAnimation;
     private bool missingCanvasGroupWarningShown;
+    private bool missingSharedAudioWarningShown;
 
     // Inicializa referencias antes de usar el componente.
     private void Awake()
@@ -343,18 +343,23 @@ public class UIPanelFx : MonoBehaviour
             return null;
         }
 
-        if (sharedAudioSource != null)
+        AudioManager audioManager = AudioManager.Instance;
+
+        if (audioManager != null && audioManager.SharedSfxSource != null)
         {
-            return sharedAudioSource;
+            return audioManager.SharedSfxSource;
         }
 
-        GameObject audioRoot = new GameObject("UIPanelFX_Audio");
-        DontDestroyOnLoad(audioRoot);
-        sharedAudioSource = audioRoot.AddComponent<AudioSource>();
-        sharedAudioSource.playOnAwake = false;
-        sharedAudioSource.spatialBlend = 0f;
-        sharedAudioSource.loop = false;
-        return sharedAudioSource;
+        if (!missingSharedAudioWarningShown)
+        {
+            missingSharedAudioWarningShown = true;
+            GameDebug.Advertencia(
+                "UI",
+                $"UIPanelFx en '{name}' necesita un AudioSource local o un AudioManager con SFX asignado.",
+                this);
+        }
+
+        return null;
     }
 
     // Intenta sacar un clip de apertura de respaldo desde el AudioManager.

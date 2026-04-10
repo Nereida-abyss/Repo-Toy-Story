@@ -5,16 +5,19 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerHealthScript))]
 [RequireComponent(typeof(PlayerCurrencyController))]
 [RequireComponent(typeof(PlayerAudioController))]
+[RequireComponent(typeof(PlayerShopController))]
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
 
-    private MovementScript movementScript;
-    private PlayerHealthScript healthScript;
-    private PlayerCurrencyController currencyController;
-    private PlayerAudioController audioController;
-    private WeaponLoadoutScript weaponLoadout;
-    private PlayerShopController shopController;
+    [SerializeField] private MovementScript movementScript;
+    [SerializeField] private PlayerHealthScript healthScript;
+    [SerializeField] private PlayerCurrencyController currencyController;
+    [SerializeField] private PlayerAudioController audioController;
+    [SerializeField] private WeaponLoadoutScript weaponLoadout;
+    [SerializeField] private PlayerShopController shopController;
+
+    private bool hasLoggedMissingDependencies;
 
     public PlayerHealthScript Health => healthScript;
     public PlayerCurrencyController Currency => currencyController;
@@ -32,18 +35,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Instance = this;
-        movementScript = GetComponent<MovementScript>();
-        healthScript = GetComponent<PlayerHealthScript>();
-        currencyController = GetComponent<PlayerCurrencyController>();
-        audioController = GetComponent<PlayerAudioController>();
-        weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
-        shopController = GetComponent<PlayerShopController>();
-
-        if (shopController == null)
-        {
-            shopController = gameObject.AddComponent<PlayerShopController>();
-        }
-
+        ValidateDependencies();
         RunStatsStore.BeginRun();
         weaponLoadout?.BeginRunLoadout();
     }
@@ -58,6 +50,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (movementScript == null)
+        {
+            ValidateDependencies();
+            return;
+        }
+
         if (UIManager.IsGamePaused || PlayerShopController.IsInputBlocked)
         {
             movementScript.SetMoveInput(Vector2.zero);
@@ -75,11 +73,11 @@ public class PlayerController : MonoBehaviour
         HandleWeaponInput();
     }
 
-    // Gestiona arma entrada.
     private void HandleWeaponInput()
     {
         if (weaponLoadout == null)
         {
+            ValidateDependencies();
             return;
         }
 
@@ -106,7 +104,31 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButton("Fire1"))
         {
-            weaponLoadout?.CurrentWeapon?.TryFire();
+            weaponLoadout.CurrentWeapon?.TryFire();
         }
+    }
+
+    private void ValidateDependencies()
+    {
+        if (movementScript != null
+            && healthScript != null
+            && currencyController != null
+            && audioController != null
+            && weaponLoadout != null
+            && shopController != null)
+        {
+            return;
+        }
+
+        if (hasLoggedMissingDependencies)
+        {
+            return;
+        }
+
+        hasLoggedMissingDependencies = true;
+        GameDebug.Advertencia(
+            "Jugador",
+            "PlayerController necesita referencias serializadas a Movement, Health, Currency, Audio, WeaponLoadout y Shop.",
+            this);
     }
 }

@@ -14,19 +14,17 @@ public class WaveTimersUI : MonoBehaviour
 
     void Awake()
     {
-        ResolveReferences();
+        panelRoot ??= gameObject;
     }
 
     void OnValidate()
     {
-        ResolveReferences();
+        panelRoot ??= gameObject;
     }
 
     // Gestiona refresco.
     public void Refresh(WaveManager.WaveRuntimeState state, float roundElapsedTime, float remainingIntermissionTime)
     {
-        ResolveReferences();
-
         if (roundTimerText == null || intermissionTimerText == null)
         {
             LogMissingReferences();
@@ -72,20 +70,6 @@ public class WaveTimersUI : MonoBehaviour
         }
     }
 
-    // Resuelve referencias.
-    private void ResolveReferences()
-    {
-        panelRoot ??= gameObject;
-
-        if (roundTimerText != null && intermissionTimerText != null)
-        {
-            return;
-        }
-
-        roundTimerText ??= FindTextByExactName("RoundTimerText");
-        intermissionTimerText ??= FindTextByExactName("IntermissionTimerText");
-    }
-
     // Gestiona format elapsed time.
     private string FormatElapsedTime(float seconds)
     {
@@ -102,22 +86,6 @@ public class WaveTimersUI : MonoBehaviour
         int minutes = totalSeconds / 60;
         int remainingSeconds = totalSeconds % 60;
         return $"{minutes:00}:{remainingSeconds:00}";
-    }
-
-    // Busca texto por exact nombre.
-    private TMP_Text FindTextByExactName(string targetName)
-    {
-        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
-
-        for (int i = 0; i < texts.Length; i++)
-        {
-            if (texts[i] != null && texts[i].gameObject.name == targetName)
-            {
-                return texts[i];
-            }
-        }
-
-        return null;
     }
 
     // Gestiona registro faltante referencias.

@@ -1,78 +1,137 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EndMenuUI : MonoBehaviour
 {
-    [Header("Paneles (no elementos sueltos)")]
+    [Header("Paneles (solo compatibilidad)")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject creditsPanel;
     [SerializeField] private GameObject buttonsPanel;
+    [SerializeField] private PanelController panelController;
 
-    [Header("Configuración")]
+    [Header("Configuracion")]
     [SerializeField] private float creditsDisplayTime = 4f;
     [SerializeField] private float fadeDuration = 0.5f;
-    
-    void Start()
+
+    private void Start()
     {
+        if (panelController != null && panelController.isActiveAndEnabled)
+        {
+            enabled = false;
+            return;
+        }
+
         StartCoroutine(EndMenuSequence());
     }
-    
-    IEnumerator EndMenuSequence()
+
+    private IEnumerator EndMenuSequence()
     {
-        
-        gameOverPanel.SetActive(true);
-        creditsPanel.SetActive(false);
-        buttonsPanel.SetActive(false);
-        
-        yield return new WaitForSeconds(2f);
-        
-        
-        yield return StartCoroutine(FadeOut(gameOverPanel));
-        gameOverPanel.SetActive(false);
-        
-        creditsPanel.SetActive(true);
-        yield return StartCoroutine(FadeIn(creditsPanel));
-        
-        yield return new WaitForSeconds(creditsDisplayTime);
-        
-        
-        yield return StartCoroutine(FadeOut(creditsPanel));
-        creditsPanel.SetActive(false);
-        
-        
-        buttonsPanel.SetActive(true);
-        yield return StartCoroutine(FadeIn(buttonsPanel));
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
+
+        if (creditsPanel != null)
+        {
+            creditsPanel.SetActive(false);
+        }
+
+        if (buttonsPanel != null)
+        {
+            buttonsPanel.SetActive(false);
+        }
+
+        yield return new WaitForSecondsRealtime(2f);
+
+        yield return FadeOut(gameOverPanel);
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
+        if (creditsPanel != null)
+        {
+            creditsPanel.SetActive(true);
+        }
+
+        yield return FadeIn(creditsPanel);
+        yield return new WaitForSecondsRealtime(creditsDisplayTime);
+        yield return FadeOut(creditsPanel);
+
+        if (creditsPanel != null)
+        {
+            creditsPanel.SetActive(false);
+        }
+
+        if (buttonsPanel != null)
+        {
+            buttonsPanel.SetActive(true);
+        }
+
+        yield return FadeIn(buttonsPanel);
     }
-    
-    IEnumerator FadeOut(GameObject obj)
+
+    private IEnumerator FadeOut(GameObject target)
     {
-        CanvasGroup group = obj.GetComponent<CanvasGroup>();
-        if (group == null) group = obj.AddComponent<CanvasGroup>();
-        
+        if (!TryGetCanvasGroup(target, out CanvasGroup group))
+        {
+            yield break;
+        }
+
         float elapsed = 0f;
+
         while (elapsed < fadeDuration)
         {
             elapsed += Time.unscaledDeltaTime;
             group.alpha = 1f - (elapsed / fadeDuration);
             yield return null;
         }
+
         group.alpha = 0f;
     }
-    
-    IEnumerator FadeIn(GameObject obj)
+
+    private IEnumerator FadeIn(GameObject target)
     {
-        CanvasGroup group = obj.GetComponent<CanvasGroup>();
-        if (group == null) group = obj.AddComponent<CanvasGroup>();
-        
+        if (!TryGetCanvasGroup(target, out CanvasGroup group))
+        {
+            yield break;
+        }
+
         group.alpha = 0f;
         float elapsed = 0f;
+
         while (elapsed < fadeDuration)
         {
             elapsed += Time.unscaledDeltaTime;
             group.alpha = elapsed / fadeDuration;
             yield return null;
         }
+
         group.alpha = 1f;
+    }
+
+    private bool TryGetCanvasGroup(GameObject target, out CanvasGroup canvasGroup)
+    {
+        canvasGroup = null;
+
+        if (target == null)
+        {
+            return false;
+        }
+
+        canvasGroup = target.GetComponent<CanvasGroup>();
+
+        if (canvasGroup != null)
+        {
+            return true;
+        }
+
+        GameDebug.Advertencia(
+            "EndMenu",
+            $"El panel '{target.name}' necesita un CanvasGroup explicito para que EndMenuUI pueda hacer fade.",
+            this);
+        return false;
     }
 }

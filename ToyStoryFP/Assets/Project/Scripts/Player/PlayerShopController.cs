@@ -17,48 +17,56 @@ public class PlayerShopController : MonoBehaviour
 
     public static bool IsInputBlocked { get; private set; }
 
+    [Header("Scene References")]
+    [SerializeField] private WaveManager waveManager;
+
+    [Header("Shop UI")]
+    [SerializeField] private GameObject panelShop;
+    [SerializeField] private TMP_Text moneyText;
+    [SerializeField] private TMP_Text speedStatText;
+    [SerializeField] private TMP_Text jumpStatText;
+    [SerializeField] private Button ammoButton;
+    [SerializeField] private Button healButton;
+    [SerializeField] private Button speedButton;
+    [SerializeField] private Button jumpButton;
+    [SerializeField] private Button m16Button;
+    [SerializeField] private Button akButton;
+
     private PlayerController playerController;
     private PlayerCurrencyController currencyController;
     private PlayerHealthScript playerHealth;
     private MovementScript movementScript;
     private WeaponLoadoutScript weaponLoadout;
-    private WaveManager waveManager;
-
-    private GameObject panelShop;
-    private TMP_Text moneyText;
-    private TMP_Text speedStatText;
-    private TMP_Text jumpStatText;
-    private Button ammoButton;
-    private Button healButton;
-    private Button speedButton;
-    private Button jumpButton;
-    private Button m16Button;
-    private Button akButton;
 
     private int speedLevel = 1;
     private int jumpLevel = 1;
     private bool buttonListenersBound;
+    private bool hasLoggedMissingReferences;
 
     private bool IsShopOpen => panelShop != null && panelShop.activeSelf;
 
-    void Awake()
+    private void Awake()
     {
         ResolveGameplayReferences();
-        ResolveUiReferences();
         ConfigureWeaponShopPrices();
         BindButtonListeners();
         ApplyMovementUpgradeLevels();
         CloseShopImmediate();
         RefreshUi();
+        WarnIfReferencesAreMissing();
     }
 
-    void Update()
+    private void OnEnable()
     {
         ResolveGameplayReferences();
-        ResolveUiReferences();
         ConfigureWeaponShopPrices();
         BindButtonListeners();
+        RefreshUi();
+        WarnIfReferencesAreMissing();
+    }
 
+    private void Update()
+    {
         if (IsShopOpen)
         {
             RefreshUi();
@@ -96,7 +104,7 @@ public class PlayerShopController : MonoBehaviour
         }
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         UnbindButtonListeners();
 
@@ -120,11 +128,11 @@ public class PlayerShopController : MonoBehaviour
     private void OpenShop()
     {
         ResolveGameplayReferences();
-        ResolveUiReferences();
         ConfigureWeaponShopPrices();
 
         if (panelShop == null)
         {
+            WarnIfReferencesAreMissing();
             return;
         }
 
@@ -184,12 +192,13 @@ public class PlayerShopController : MonoBehaviour
 
     private bool IsIntermissionActive()
     {
-        waveManager ??= FindFirstObjectByType<WaveManager>();
         return waveManager != null && waveManager.CurrentState == WaveManager.WaveRuntimeState.Intermission;
     }
 
     private void HandleAmmoPurchase()
     {
+        ResolveGameplayReferences();
+
         if (currencyController == null || weaponLoadout == null)
         {
             return;
@@ -213,6 +222,8 @@ public class PlayerShopController : MonoBehaviour
 
     private void HandleHealPurchase()
     {
+        ResolveGameplayReferences();
+
         if (currencyController == null || playerHealth == null)
         {
             return;
@@ -235,6 +246,8 @@ public class PlayerShopController : MonoBehaviour
 
     private void HandleSpeedPurchase()
     {
+        ResolveGameplayReferences();
+
         if (currencyController == null || movementScript == null)
         {
             return;
@@ -252,6 +265,8 @@ public class PlayerShopController : MonoBehaviour
 
     private void HandleJumpPurchase()
     {
+        ResolveGameplayReferences();
+
         if (currencyController == null || movementScript == null)
         {
             return;
@@ -279,6 +294,9 @@ public class PlayerShopController : MonoBehaviour
 
     private void TryPurchaseWeapon(string weaponId)
     {
+        ResolveGameplayReferences();
+        ConfigureWeaponShopPrices();
+
         if (currencyController == null || weaponLoadout == null)
         {
             return;
@@ -311,7 +329,8 @@ public class PlayerShopController : MonoBehaviour
 
     private void RefreshUi()
     {
-        ResolveUiReferences();
+        ResolveGameplayReferences();
+        ConfigureWeaponShopPrices();
 
         if (moneyText != null)
         {
@@ -346,6 +365,8 @@ public class PlayerShopController : MonoBehaviour
 
     private bool CanPurchaseAmmo()
     {
+        ResolveGameplayReferences();
+
         WeaponScript currentWeapon = weaponLoadout != null ? weaponLoadout.CurrentWeapon : null;
         return currentWeapon != null
             && currentWeapon.IsPlayerOwnedWeapon
@@ -355,11 +376,14 @@ public class PlayerShopController : MonoBehaviour
 
     private bool CanPurchaseHeal()
     {
+        ResolveGameplayReferences();
         return playerHealth != null && playerHealth.IsAlive && playerHealth.CurrentHealth < playerHealth.MaxHealth;
     }
 
     private bool CanPurchaseWeapon(string weaponId, int currentCoins)
     {
+        ResolveGameplayReferences();
+
         if (weaponLoadout == null)
         {
             return false;
@@ -386,25 +410,25 @@ public class PlayerShopController : MonoBehaviour
     private void ResolveGameplayReferences()
     {
         playerController ??= GetComponent<PlayerController>();
-        playerHealth ??= playerController != null ? playerController.Health : GetComponent<PlayerHealthScript>();
-        currencyController ??= playerController != null ? playerController.Currency : GetComponent<PlayerCurrencyController>();
-        movementScript ??= GetComponent<MovementScript>();
-        weaponLoadout ??= playerController != null ? playerController.WeaponLoadout : GetComponentInChildren<WeaponLoadoutScript>(true);
-        waveManager ??= FindFirstObjectByType<WaveManager>();
-    }
+        playerHealth = GetComponent<PlayerHealthScript>();
+        currencyController = GetComponent<PlayerCurrencyController>();
+        movementScript = GetComponent<MovementScript>();
+        weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
 
-    private void ResolveUiReferences()
-    {
-        panelShop ??= FindObjectByExactName("PanelShop");
-        moneyText ??= FindComponentInChildrenByExactName<TMP_Text>("Money");
-        speedStatText ??= FindComponentInChildrenByExactName<TMP_Text>("SpeedStat");
-        jumpStatText ??= FindComponentInChildrenByExactName<TMP_Text>("JumpStat");
-        ammoButton ??= FindComponentInChildrenByAnyName<Button>("ButtonMunicion", "ButtonMunici\u00F3n");
-        healButton ??= FindComponentInChildrenByAnyName<Button>("ButtonCuracion", "ButtonCuraci\u00F3n");
-        speedButton ??= FindComponentInChildrenByExactName<Button>("ButtonBoostVelocity");
-        jumpButton ??= FindComponentInChildrenByExactName<Button>("ButtonBoostJump");
-        m16Button ??= FindComponentInChildrenByExactName<Button>("ButtonM16");
-        akButton ??= FindComponentInChildrenByExactName<Button>("ButtonAk");
+        if (playerHealth == null && playerController != null)
+        {
+            playerHealth = playerController.Health;
+        }
+
+        if (currencyController == null && playerController != null)
+        {
+            currencyController = playerController.Currency;
+        }
+
+        if (weaponLoadout == null && playerController != null)
+        {
+            weaponLoadout = playerController.WeaponLoadout;
+        }
     }
 
     private void BindButtonListeners()
@@ -414,25 +438,24 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        ResolveUiReferences();
+        BindButtonListener(ammoButton, HandleAmmoPurchase);
+        BindButtonListener(healButton, HandleHealPurchase);
+        BindButtonListener(speedButton, HandleSpeedPurchase);
+        BindButtonListener(jumpButton, HandleJumpPurchase);
+        BindButtonListener(m16Button, HandleM16Purchase);
+        BindButtonListener(akButton, HandleAkPurchase);
+        buttonListenersBound = true;
+    }
 
-        if (ammoButton == null
-            || healButton == null
-            || speedButton == null
-            || jumpButton == null
-            || m16Button == null
-            || akButton == null)
+    private void BindButtonListener(Button button, UnityEngine.Events.UnityAction listener)
+    {
+        if (button == null || listener == null)
         {
             return;
         }
 
-        ammoButton?.onClick.AddListener(HandleAmmoPurchase);
-        healButton?.onClick.AddListener(HandleHealPurchase);
-        speedButton?.onClick.AddListener(HandleSpeedPurchase);
-        jumpButton?.onClick.AddListener(HandleJumpPurchase);
-        m16Button?.onClick.AddListener(HandleM16Purchase);
-        akButton?.onClick.AddListener(HandleAkPurchase);
-        buttonListenersBound = true;
+        button.onClick.RemoveListener(listener);
+        button.onClick.AddListener(listener);
     }
 
     private void UnbindButtonListeners()
@@ -451,73 +474,97 @@ public class PlayerShopController : MonoBehaviour
         buttonListenersBound = false;
     }
 
-    private GameObject FindObjectByExactName(string targetName)
+    private void WarnIfReferencesAreMissing()
     {
-        if (string.IsNullOrWhiteSpace(targetName))
+        if (hasLoggedMissingReferences)
         {
-            return null;
+            return;
         }
 
-        Transform[] transforms = GetComponentsInChildren<Transform>(true);
+        string missing = string.Empty;
 
-        for (int i = 0; i < transforms.Length; i++)
+        if (waveManager == null)
         {
-            if (transforms[i] != null && transforms[i].name == targetName)
-            {
-                return transforms[i].gameObject;
-            }
+            missing += "WaveManager, ";
         }
 
-        return null;
-    }
-
-    private T FindComponentInChildrenByExactName<T>(string targetName) where T : Component
-    {
-        if (string.IsNullOrWhiteSpace(targetName))
+        if (currencyController == null)
         {
-            return null;
+            missing += "PlayerCurrencyController, ";
         }
 
-        T[] components = GetComponentsInChildren<T>(true);
-
-        for (int i = 0; i < components.Length; i++)
+        if (playerHealth == null)
         {
-            if (components[i] != null && components[i].gameObject.name == targetName)
-            {
-                return components[i];
-            }
+            missing += "PlayerHealthScript, ";
         }
 
-        return null;
-    }
-
-    private T FindComponentInChildrenByAnyName<T>(params string[] targetNames) where T : Component
-    {
-        if (targetNames == null || targetNames.Length == 0)
+        if (movementScript == null)
         {
-            return null;
+            missing += "MovementScript, ";
         }
 
-        T[] components = GetComponentsInChildren<T>(true);
-
-        for (int i = 0; i < components.Length; i++)
+        if (weaponLoadout == null)
         {
-            T component = components[i];
-
-            if (component == null)
-            {
-                continue;
-            }
-
-            for (int nameIndex = 0; nameIndex < targetNames.Length; nameIndex++)
-            {
-                if (component.gameObject.name == targetNames[nameIndex])
-                {
-                    return component;
-                }
-            }
+            missing += "WeaponLoadoutScript, ";
         }
 
-        return null;
+        if (panelShop == null)
+        {
+            missing += "PanelShop, ";
+        }
+
+        if (moneyText == null)
+        {
+            missing += "MoneyText, ";
+        }
+
+        if (speedStatText == null)
+        {
+            missing += "SpeedStatText, ";
+        }
+
+        if (jumpStatText == null)
+        {
+            missing += "JumpStatText, ";
+        }
+
+        if (ammoButton == null)
+        {
+            missing += "AmmoButton, ";
+        }
+
+        if (healButton == null)
+        {
+            missing += "HealButton, ";
+        }
+
+        if (speedButton == null)
+        {
+            missing += "SpeedButton, ";
+        }
+
+        if (jumpButton == null)
+        {
+            missing += "JumpButton, ";
+        }
+
+        if (m16Button == null)
+        {
+            missing += "M16Button, ";
+        }
+
+        if (akButton == null)
+        {
+            missing += "AkButton, ";
+        }
+
+        if (string.IsNullOrEmpty(missing))
+        {
+            return;
+        }
+
+        hasLoggedMissingReferences = true;
+        missing = missing.TrimEnd(' ', ',');
+        GameDebug.Advertencia("Shop", $"PlayerShopController tiene referencias sin asignar: {missing}", this);
     }
 }
