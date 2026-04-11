@@ -49,7 +49,7 @@ public class ScorePanelController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(closeKey))
+        if (ProjectInput.WasUiClosePressed(closeKey))
         {
             ClosePanel();
         }

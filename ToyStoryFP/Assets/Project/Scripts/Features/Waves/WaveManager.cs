@@ -93,7 +93,7 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (!PlayerShopController.IsInputBlocked && ProjectInput.WasNextWavePressed())
         {
             StartNextWave();
             return;

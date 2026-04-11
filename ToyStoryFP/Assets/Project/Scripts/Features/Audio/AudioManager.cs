@@ -311,6 +311,16 @@ public class AudioManager : MonoBehaviour
         return resolvedCatalog != null ? resolvedCatalog.Credits.outroSwish : null;
     }
 
+    public AudioClip GetSceneMusicClip(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+        {
+            return null;
+        }
+
+        return GetMusicClipForScene(sceneName.Trim());
+    }
+
     // Sincroniza la musica segun la escena activa sin pisar escenas no configuradas.
     private void SyncMusicForScene(string sceneName)
     {

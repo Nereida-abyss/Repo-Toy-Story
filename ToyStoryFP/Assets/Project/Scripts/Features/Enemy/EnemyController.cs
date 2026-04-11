@@ -362,41 +362,14 @@ public partial class EnemyController : MonoBehaviour
     // y orienta la animación según el movimiento real del agente.
     private void HandlePatrol()
     {
-        ResetAttackWarmup();
-        UpdatePatrolNavigation();
-        UpdateMovementPresentation(GetMovementFacingDirection());
+        HandlePatrolState();
     }
 
     // Investigar significa ir al último sitio donde parecía estar el jugador.
     // Si llega allí y no encuentra nada durante un rato, vuelve a patrullar.
     private void HandleInvestigate()
     {
-        ResetAttackWarmup();
-        if (!hasLastKnownPlayerPosition)
-        {
-            SetState(AIState.Patrol, false);
-            HandlePatrol();
-            return;
-        }
-
-        if (ShouldRefreshTacticalDestination() || HasReachedDestination(GetPatrolPointReachThreshold()))
-        {
-            RefreshInvestigateDestination();
-        }
-
-        if (hasTacticalDestination)
-        {
-            SetAgentDestination(tacticalDestination, GetPatrolPointReachThreshold());
-        }
-
-        MonitorNavigationRecovery(false);
-        UpdateMovementPresentation(GetMovementFacingDirection());
-
-        if (HasReachedDestination(GetPatrolPointReachThreshold()) && investigationTimer <= 0f && damageAggroTimer <= 0f)
-        {
-            ClearLastKnownPlayerPosition();
-            SetState(AIState.Patrol, false);
-        }
+        HandleInvestigateState();
     }
 
     // Este es el combate "normal".
@@ -661,75 +634,20 @@ public partial class EnemyController : MonoBehaviour
     // forzamos un nuevo destino para que no parezca "tonto" o bloqueado.
     private void MonitorNavigationRecovery(bool canSeeTarget)
     {
-        if (!hasTacticalDestination || !IsNavigationAvailable())
-        {
-            ResetNavigationRecoveryState();
-            return;
-        }
-
-        if (navMeshAgent.pathPending) return;
-
-        if (!navMeshAgent.hasPath || navMeshAgent.pathStatus != NavMeshPathStatus.PathComplete)
-        {
-            ForceDestinationRefresh();
-            return;
-        }
-
-        if (stuckCheckTimer > 0f) return;
-
-        float checkInterval = Mathf.Max(0.05f, GetStuckCheckInterval());
-        stuckCheckTimer = checkInterval;
-        float remainingDistance = navMeshAgent.remainingDistance;
-
-        if (float.IsInfinity(previousRemainingDistance) ||
-            remainingDistance < previousRemainingDistance - Mathf.Max(0.001f, GetStuckProgressThreshold()))
-        {
-            timeWithoutProgress = 0f;
-        }
-        else
-        {
-            timeWithoutProgress += checkInterval;
-        }
-
-        previousRemainingDistance = remainingDistance;
-        bool wallAhead = !canSeeTarget && ProbeWallAhead();
-
-        if (wallAhead || timeWithoutProgress >= Mathf.Max(0.1f, GetStuckTimeout()))
-        {
-            ForceDestinationRefresh();
-        }
+        MonitorNavigationRecoveryState(canSeeTarget);
     }
 
     // Lanza una sonda corta hacia delante para detectar paredes.
     // Solo la usamos cuando no vemos al jugador, porque si no podríamos confundir al propio objetivo con un obstáculo.
     private bool ProbeWallAhead()
     {
-        Vector3 probeDirection = GetDirectionToCurrentDestination();
-        if (probeDirection.sqrMagnitude <= 0.0001f)
-        {
-            probeDirection = lastMovementDirection.sqrMagnitude > 0.0001f ? lastMovementDirection : transform.forward;
-        }
-
-        Vector3 flattenedDirection = Vector3.ProjectOnPlane(probeDirection, Vector3.up);
-        if (flattenedDirection.sqrMagnitude <= 0.0001f) return false;
-
-        Vector3 rayOrigin = transform.position + (Vector3.up * Mathf.Max(0.05f, GetEyeHeight() * 0.5f));
-        int mask = visionBlockLayers.value != 0 ? visionBlockLayers.value : Physics.DefaultRaycastLayers;
-
-        if (!Physics.Raycast(rayOrigin, flattenedDirection.normalized, out RaycastHit hit, Mathf.Max(0.05f, GetWallProbeDistance()), mask, QueryTriggerInteraction.Ignore))
-        {
-            return false;
-        }
-
-        return target == null || (hit.transform != target && !hit.transform.IsChildOf(target));
+        return ProbeWallAheadInternal();
     }
 
     // Borra las medidas de atasco para empezar una observación nueva.
     private void ResetNavigationRecoveryState()
     {
-        timeWithoutProgress = 0f;
-        previousRemainingDistance = float.PositiveInfinity;
-        stuckCheckTimer = 0f;
+        ResetNavigationRecoveryStateInternal();
     }
 
     // La navegación decide hacia dónde ir, pero este método traduce eso a "cómo se ve".
@@ -946,16 +864,7 @@ public partial class EnemyController : MonoBehaviour
     // Configura navegación.
     private void ConfigureNavigation()
     {
-        if (navMeshAgent == null) return;
-        baseNavSpeed = Mathf.Max(0.01f, navMeshAgent.speed);
-        navMeshAgent.updateRotation = false;
-        navMeshAgent.stoppingDistance = GetEffectiveStoppingDistance();
-        UpdateAgentSpeedByState();
-
-        Rigidbody rigidbody = GetComponent<Rigidbody>();
-        if (rigidbody != null) rigidbody.isKinematic = true;
-
-        EnsureAgentOnNavMesh();
+        ConfigureNavigationState();
     }
 
     // Cambia de estado y hace toda la limpieza asociada en un único sitio.
@@ -1075,75 +984,6 @@ public partial class EnemyController : MonoBehaviour
             : CombatMovementMode.StrafeRight;
     }
 
-    private void WarnIfMissingBehaviorProfile()
-    {
-        if (behaviorProfile != null)
-        {
-            hasLoggedMissingBehaviorProfile = false;
-            return;
-        }
-
-        if (hasLoggedMissingBehaviorProfile)
-        {
-            return;
-        }
-
-        hasLoggedMissingBehaviorProfile = true;
-        GameDebug.Advertencia("IA", "EnemyController no tiene EnemyBehaviorProfile asignado. Se usaran los valores locales del prefab.", this);
-    }
-
-    private float GetTargetAimHeight() => behaviorProfile != null ? behaviorProfile.TargetAimHeight : targetAimHeight;
-    private float GetDetectionRange() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.DetectionRange : detectionRange, DefaultDetectionRange);
-    private float GetLoseSightGraceTime() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.LoseSightGraceTime : loseSightGraceTime, DefaultLoseSightGraceTime);
-    private float GetEyeHeight() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.EyeHeight : eyeHeight, DefaultEyeHeight);
-    private float GetAlertHeightOffset() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.AlertHeightOffset : alertHeightOffset, DefaultAlertHeightOffset);
-    private float GetStoppingDistance() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.StoppingDistance : stoppingDistance, DefaultStoppingDistance);
-    private float GetAttackRange() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.AttackRange : attackRange, DefaultAttackRange);
-    private float GetTurnSpeed() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.TurnSpeed : turnSpeed, 360f);
-    private float GetAlertSpeedMultiplier() => Mathf.Max(1f, behaviorProfile != null ? behaviorProfile.AlertSpeedMultiplier : alertSpeedMultiplier);
-    private float GetDamageSpeedMultiplier() => Mathf.Max(1f, behaviorProfile != null ? behaviorProfile.DamageSpeedMultiplier : damageSpeedMultiplier);
-    private float GetDamageSpeedBoostDuration() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.DamageSpeedBoostDuration : damageSpeedBoostDuration);
-    private float GetPatrolPointReachThreshold() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.PatrolPointReachThreshold : patrolPointReachThreshold, DefaultPatrolPointReachThreshold);
-    private float GetPatrolRetargetDelay() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.PatrolRetargetDelay : patrolRetargetDelay, DefaultPatrolRetargetDelay);
-    private float GetPatrolSearchRadius() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.PatrolSearchRadius : patrolSearchRadius, DefaultPatrolSearchRadius);
-    private float GetPatrolMinTravelDistance() => GetPositiveOrDefault(behaviorProfile != null ? behaviorProfile.PatrolMinTravelDistance : patrolMinTravelDistance, DefaultPatrolMinTravelDistance);
-    private float GetAttackWarmup() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.AttackWarmup : attackWarmup);
-    private float GetAttackAimDotThreshold() => Mathf.Clamp01(behaviorProfile != null ? behaviorProfile.AttackAimDotThreshold : attackAimDotThreshold);
-    private float GetAllyAlertRadius() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.AllyAlertRadius : allyAlertRadius);
-    private float GetInvestigationDuration() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.InvestigationDuration : investigationDuration);
-    private float GetSlotRefreshInterval() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.SlotRefreshInterval : slotRefreshInterval);
-    private float GetSlotInnerRadius() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.SlotInnerRadius : slotInnerRadius);
-    private float GetSlotOuterRadius() => Mathf.Max(GetSlotInnerRadius(), behaviorProfile != null ? behaviorProfile.SlotOuterRadius : slotOuterRadius);
-    private int GetSlotInnerCount() => Mathf.Max(1, behaviorProfile != null ? behaviorProfile.SlotInnerCount : slotInnerCount);
-    private int GetSlotOuterCount() => Mathf.Max(1, behaviorProfile != null ? behaviorProfile.SlotOuterCount : slotOuterCount);
-    private float GetStuckCheckInterval() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.StuckCheckInterval : stuckCheckInterval);
-    private float GetStuckProgressThreshold() => Mathf.Max(0.001f, behaviorProfile != null ? behaviorProfile.StuckProgressThreshold : stuckProgressThreshold);
-    private float GetStuckTimeout() => Mathf.Max(0.1f, behaviorProfile != null ? behaviorProfile.StuckTimeout : stuckTimeout);
-    private float GetWallProbeDistance() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.WallProbeDistance : wallProbeDistance);
-    private int GetAvoidancePriorityMin() => Mathf.Clamp(behaviorProfile != null ? behaviorProfile.AvoidancePriorityMin : avoidancePriorityMin, 0, 99);
-    private int GetAvoidancePriorityMax() => Mathf.Clamp(behaviorProfile != null ? behaviorProfile.AvoidancePriorityMax : avoidancePriorityMax, 0, 99);
-    private float GetAnimationSpeedReference() => Mathf.Max(0.01f, behaviorProfile != null ? behaviorProfile.AnimationSpeedReference : animationSpeedReference);
-    private float GetMinimumMoveBlend() => Mathf.Clamp01(behaviorProfile != null ? behaviorProfile.MinimumMoveBlend : minimumMoveBlend);
-    private float GetAnimationMoveThreshold() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.AnimationMoveThreshold : animationMoveThreshold);
-    private float GetCombatDecisionInterval() => Mathf.Max(0.1f, behaviorProfile != null ? behaviorProfile.CombatDecisionInterval : combatDecisionInterval);
-    private float GetCombatMovePointRefreshInterval() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.CombatMovePointRefreshInterval : combatMovePointRefreshInterval);
-    private float GetCombatStrafeDistance() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.CombatStrafeDistance : combatStrafeDistance);
-    private float GetCombatAdvanceDistance() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.CombatAdvanceDistance : combatAdvanceDistance);
-    private float GetCombatRetreatDistance() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.CombatRetreatDistance : combatRetreatDistance);
-    private float GetPreferredCombatDistance() => Mathf.Max(0.05f, behaviorProfile != null ? behaviorProfile.PreferredCombatDistance : preferredCombatDistance);
-    private float GetPreferredDistanceTolerance() => Mathf.Max(0.01f, behaviorProfile != null ? behaviorProfile.PreferredDistanceTolerance : preferredDistanceTolerance);
-    private float GetCombatMovementJitter() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.CombatMovementJitter : combatMovementJitter);
-    private float GetCombatLateralWeight() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.CombatLateralWeight : combatLateralWeight);
-    private float GetCombatAdvanceWeight() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.CombatAdvanceWeight : combatAdvanceWeight);
-    private float GetCombatRetreatWeight() => Mathf.Max(0f, behaviorProfile != null ? behaviorProfile.CombatRetreatWeight : combatRetreatWeight);
-    private float GetMovementFacingDeadzone() => Mathf.Max(0.001f, behaviorProfile != null ? behaviorProfile.MovementFacingDeadzone : movementFacingDeadzone);
-    private float GetEffectiveStoppingDistance() => Mathf.Max(0.05f, Mathf.Min(GetStoppingDistance(), GetAttackRange()));
-
-    private static float GetPositiveOrDefault(float value, float fallback)
-    {
-        return value > 0f ? value : fallback;
-    }
-
     // Reinicia attack warmup.
     private void ResetAttackWarmup()
     {
@@ -1154,100 +994,42 @@ public partial class EnemyController : MonoBehaviour
     // y busca un nuevo punto cuando toca.
     private void UpdatePatrolNavigation()
     {
-        if (!EnsureAgentOnNavMesh())
-        {
-            hasPatrolDestination = false;
-            return;
-        }
-
-        if (hasPatrolDestination && HasReachedDestination(GetPatrolPointReachThreshold()))
-        {
-            StopNavigation();
-            hasPatrolDestination = false;
-            patrolRetargetTimer = GetPatrolRetargetDelay();
-        }
-
-        if (hasPatrolDestination) return;
-
-        if (patrolRetargetTimer > 0f)
-        {
-            patrolRetargetTimer -= Time.deltaTime;
-            return;
-        }
-
-        if (!TrySetNextPatrolDestination()) patrolRetargetTimer = GetPatrolRetargetDelay();
+        UpdatePatrolNavigationState();
     }
 
     // Intenta set siguiente patrulla destino.
     private bool TrySetNextPatrolDestination()
     {
-        if (navMeshAgent == null) return false;
-
-        float radius = GetPatrolSearchRadius();
-        float minTravelDistance = GetPatrolMinTravelDistance();
-        float minTravelDistanceSqr = minTravelDistance * minTravelDistance;
-
-        for (int attempt = 0; attempt < PatrolPointSearchAttempts; attempt++)
-        {
-            Vector2 offset2D = Random.insideUnitCircle * radius;
-            Vector3 candidate = transform.position + new Vector3(offset2D.x, 0f, offset2D.y);
-
-            if ((candidate - transform.position).sqrMagnitude < minTravelDistanceSqr) continue;
-            if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, radius, navMeshAgent.areaMask)) continue;
-
-            Vector3 travel = Vector3.ProjectOnPlane(hit.position - transform.position, Vector3.up);
-            if (travel.sqrMagnitude < minTravelDistanceSqr) continue;
-            if (!SetAgentDestination(hit.position, GetPatrolPointReachThreshold())) continue;
-
-            hasPatrolDestination = true;
-            return true;
-        }
-
-        return false;
+        return TrySetNextPatrolDestinationState();
     }
 
     // Envía un destino al agente usando la distancia de frenado adecuada para este momento.
     private bool SetAgentDestination(Vector3 destination, float desiredStoppingDistance)
     {
-        if (!EnsureAgentOnNavMesh()) return false;
-        navMeshAgent.stoppingDistance = Mathf.Max(0.01f, desiredStoppingDistance);
-        if (navMeshAgent.isStopped) navMeshAgent.isStopped = false;
-        return navMeshAgent.SetDestination(destination);
+        return SetAgentDestinationInternal(destination, desiredStoppingDistance);
     }
 
     // Solo cuenta como llegado si la navegación está estable y la distancia restante es pequeña.
     private bool HasReachedDestination(float reachThreshold)
     {
-        if (!IsNavigationAvailable() || navMeshAgent.pathPending || !navMeshAgent.hasPath) return false;
-        return navMeshAgent.remainingDistance <= Mathf.Max(0.01f, reachThreshold);
+        return HasReachedDestinationInternal(reachThreshold);
     }
 
     // Detiene navegación.
     private void StopNavigation()
     {
-        if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
-        navMeshAgent.isStopped = true;
-        navMeshAgent.ResetPath();
+        StopNavigationInternal();
     }
 
     // Asegura agente en nav mesh.
     private bool EnsureAgentOnNavMesh()
     {
-        if (navMeshAgent == null) return false;
-        if (navMeshAgent.isOnNavMesh) return true;
-
-        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, DefaultNavMeshSnapDistance, navMeshAgent.areaMask))
-        {
-            navMeshAgent.Warp(hit.position);
-            return navMeshAgent.isOnNavMesh;
-        }
-
-        return false;
+        return EnsureAgentOnNavMeshInternal();
     }
 
-    private bool IsNavigationAvailable() => navMeshAgent != null && navMeshAgent.isOnNavMesh;
-    private Vector3 GetPlanarAgentVelocity() => IsNavigationAvailable() ? Vector3.ProjectOnPlane(navMeshAgent.velocity, Vector3.up) : Vector3.zero;
-    private int GetAreaMask() => navMeshAgent != null ? navMeshAgent.areaMask : NavMesh.AllAreas;
+    private bool IsNavigationAvailable() => IsNavigationAvailableInternal();
+    private Vector3 GetPlanarAgentVelocity() => GetPlanarAgentVelocityInternal();
+    private int GetAreaMask() => GetAreaMaskInternal();
 
     // Guarda en cache base escalado estadísticas.
     private void CacheBaseScalingStats()

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[AddComponentMenu("Debug/Animation Test")]
 public class AnimationTest : MonoBehaviour
 {
     [Range(-2, 2)]

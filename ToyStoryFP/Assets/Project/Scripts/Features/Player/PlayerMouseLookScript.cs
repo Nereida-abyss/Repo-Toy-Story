@@ -218,7 +218,7 @@ public class MouseLookScript : MonoBehaviour
         var targetOrientation = Quaternion.Euler(targetDirection);
         var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
 
-        mouseDelta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+        mouseDelta = ProjectInput.GetLookDelta();
 
         if (postUnpauseSpikeFilterTimer > 0f)
         {

@@ -62,10 +62,10 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        Vector2 moveInput = ProjectInput.GetMoveInput().normalized;
         movementScript.SetMoveInput(moveInput);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (ProjectInput.WasJumpPressed())
         {
             movementScript.RequestJump();
         }
@@ -81,7 +81,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
+        float scroll = ProjectInput.GetWeaponCycleScroll();
 
         if (scroll > 0f)
         {
@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour
             weaponLoadout.TryCycleWeapon(-1);
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (ProjectInput.WasReloadPressed())
         {
             weaponLoadout.CurrentWeapon?.TryReload();
         }
@@ -102,7 +102,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Input.GetButton("Fire1"))
+        if (ProjectInput.IsPrimaryFireHeld())
         {
             weaponLoadout.CurrentWeapon?.TryFire();
         }

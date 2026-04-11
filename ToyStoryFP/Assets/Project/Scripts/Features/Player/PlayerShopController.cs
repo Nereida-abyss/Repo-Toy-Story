@@ -92,15 +92,19 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (IsShopOpen)
         {
-            ToggleShop();
+            if (ProjectInput.WasUiBackPressed() || ProjectInput.WasShopTogglePressed())
+            {
+                CloseShop();
+            }
+
             return;
         }
 
-        if (IsShopOpen && Input.GetKeyDown(KeyCode.Q))
+        if (ProjectInput.WasShopTogglePressed())
         {
-            CloseShop();
+            ToggleShop();
         }
     }
 

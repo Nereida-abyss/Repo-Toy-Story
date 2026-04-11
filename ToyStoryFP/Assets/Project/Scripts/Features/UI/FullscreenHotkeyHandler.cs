@@ -36,7 +36,7 @@ public class FullscreenHotkeyHandler : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.F11))
+        if (ProjectInput.WasFullscreenTogglePressed())
         {
             settingsPanelController.ToggleFullscreenFromHotkey();
         }

@@ -54,7 +54,12 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (PlayerShopController.IsInputBlocked)
+        {
+            return;
+        }
+
+        if (ProjectInput.WasPauseTogglePressed())
         {
             TogglePausa();
         }

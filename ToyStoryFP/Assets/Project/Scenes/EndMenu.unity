@@ -12234,7 +12234,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1494497725}
-  - component: {fileID: 1494497724}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -12242,24 +12241,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1494497724
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494497723}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c0189a7bf8cc3744aa148243ea81182, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EndMenuUI
-  gameOverPanel: {fileID: 372974926}
-  creditsPanel: {fileID: 522448090}
-  buttonsPanel: {fileID: 1826629845}
-  panelController: {fileID: 1923296818}
-  creditsDisplayTime: 4
-  fadeDuration: 0.5
 --- !u!4 &1494497725
 Transform:
   m_ObjectHideFlags: 0
