@@ -1,0 +1,17 @@
+{
+  "name": "Project.Legacy",
+  "rootNamespace": "",
+  "references": [
+    "Project.Core",
+    "Project.Features"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

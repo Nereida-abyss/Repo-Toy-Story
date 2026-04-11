@@ -4,8 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerHealthScript))]
 public class PlayerDeathFlow : MonoBehaviour
 {
-    private const string EndMenuSceneName = "EndMenu";
-
     [SerializeField] private PlayerHealthScript playerHealth;
     [SerializeField] private float destroyDelay = 2f;
 
@@ -45,7 +43,7 @@ public class PlayerDeathFlow : MonoBehaviour
         RunStatsStore.CommitLastRun();
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        CambioEscena.LoadSceneSafely(EndMenuSceneName);
+        SceneFlow.LoadEndMenu();
         Destroy(gameObject, Mathf.Max(0f, destroyDelay));
     }
 

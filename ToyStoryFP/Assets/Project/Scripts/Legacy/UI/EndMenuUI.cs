@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Obsolete("Use PanelController as the single EndMenu flow authority.")]
 public class EndMenuUI : MonoBehaviour
 {
     [Header("Paneles (solo compatibilidad)")]

@@ -1,12 +1,6 @@
 using UnityEngine;
 
-public class EliminarVFXScript : MonoBehaviour
+[System.Obsolete("Use DestroyAfterDelay instead.")]
+public class EliminarVFXScript : DestroyAfterDelay
 {
-
-    void Start()
-    {
-        Destroy(gameObject, 2f);
-    }
-
-    
 }
