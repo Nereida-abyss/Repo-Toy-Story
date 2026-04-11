@@ -21,7 +21,7 @@ MonoBehaviour:
   reserveMagazineCapacity: 2
   reloadDuration: 1.2
   dryFireCooldown: 0.2
-  muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
+  muzzleFlashPrefab: {fileID: 0}
   fireSound: {fileID: 0}
   dryFireSound: {fileID: 0}
   reloadSound: {fileID: 0}

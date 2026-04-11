@@ -43,5 +43,5 @@ MonoBehaviour:
     introWhoosh: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
     nameHit: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
     nameTick: {fileID: 8300000, guid: 557b4ced3b7f5de49a3d4e810fa15236, type: 3}
-    finalSting: {fileID: 8300000, guid: 8a701eab4658c674a87557384398ccd8, type: 3}
-    outroSwish: {fileID: 8300000, guid: 28abffd6836ef6745ade07903864dfe8, type: 3}
+    finalSting: {fileID: 0}
+    outroSwish: {fileID: 0}
