@@ -6,6 +6,9 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class WaveManager : MonoBehaviour
 {
+    [Header("Dialogue")]
+    [SerializeField] private RoundDialogueController dialogueController;
+
     private readonly struct EnemyRoundScalingSnapshot
     {
         public EnemyRoundScalingSnapshot(float healthMultiplier, float damageMultiplier)
@@ -134,6 +137,11 @@ public class WaveManager : MonoBehaviour
         if (currentState == WaveRuntimeState.WaveInProgress || !HasValidSpawner())
         {
             return;
+        }
+
+        if (currentWaveIndex > 0)
+        {
+            StartCoroutine(ShowDialogueBeforeWave());
         }
 
         PruneDeadEnemies();
@@ -288,6 +296,8 @@ public class WaveManager : MonoBehaviour
         currentState = WaveRuntimeState.Intermission;
         remainingIntermissionTime = Mathf.Max(0f, GetIntermissionDuration());
         IntermissionStarted?.Invoke();
+
+        RoundDialogueManager.Instance.AdvanceToNextRound();
     }
 
     private void ResetRuntimeState()
@@ -355,6 +365,18 @@ public class WaveManager : MonoBehaviour
 
         hasLoggedMissingBalanceProfile = true;
         GameDebug.Advertencia("Oleadas", "WaveManager no tiene WaveBalanceProfile asignado. Se usaran los valores locales del componente.", this);
+    }
+
+    private IEnumerator ShowDialogueBeforeWave()
+    {
+        isSpawningCurrentWave = false;
+
+        if (dialogueController != null)
+        {
+            yield return dialogueController.ShowDialogueAndWait();
+        }
+
+        isSpawningCurrentWave = true;
     }
 
     private float GetInitialWaveDelay() => balanceProfile != null ? balanceProfile.InitialWaveDelay : initialWaveDelay;

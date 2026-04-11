@@ -6,8 +6,8 @@ using TMPro;
 public class RoundDialogueController : MonoBehaviour
 {
     [Header("UI References")]
-    public Text npcNameText;
-    public Text sentenceText;
+    public TMP_Text npcNameText;
+    public TMP_Text sentenceText;
     public GameObject dialoguePanel;
 
     [Header("Dialogue Settings")]
