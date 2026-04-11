@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94f5d8f9c5e24cbb9ecf6a5ae4977c11, type: 3}
+  m_Name: DefaultUiAudioProfile
+  m_EditorClassIdentifier: 
+  clickClip: {fileID: 8300000, guid: c4ade59720ca758408ccdcbeb9cb5098, type: 3}
+  hoverClip: {fileID: 8300000, guid: 1c68a3829e5c02041b0c5257e6226707, type: 3}
+  panelOpenClip: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
+  panelCloseClip: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}

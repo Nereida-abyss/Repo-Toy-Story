@@ -1629,9 +1629,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -3670,9 +3667,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &379786204
@@ -4534,9 +4528,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -4969,9 +4960,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &566725200
@@ -7598,6 +7586,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   catalog: {fileID: 11400000, guid: 5f7b2d6a3c9e49a8b3d2e1f0a4c6b8d1, type: 2}
+  uiAudioProfile: {fileID: 11400000, guid: e8f9736d16dd40d2b8ee34bd0c4fc1ea, type: 2}
   musicList: []
   sfxList: []
   musicSource: {fileID: 880100004}
@@ -9139,9 +9128,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -10864,9 +10850,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -15098,9 +15081,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -15538,9 +15518,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &1836136596
@@ -16463,12 +16440,6 @@ MonoBehaviour:
   microShakeAmount: 4
   microShakeDuration: 0.08
   creditsAudioSource: {fileID: 1923296820}
-  nameHitClip: {fileID: 0}
-  nameTickClip: {fileID: 0}
-  introWhooshClip: {fileID: 0}
-  finalStingClip: {fileID: 0}
-  outroSwishClip: {fileID: 0}
-  useAudioManagerFallback: 1
   fallbackCreditsDuration: 3
   textStagger: 0.18
   textFadeInDuration: 0.45
@@ -17174,9 +17145,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -18326,9 +18294,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &2146100011
@@ -19021,9 +18986,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04

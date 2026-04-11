@@ -343,11 +343,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioController
   audioSource: {fileID: 8918308276734767724}
-  alertClip: {fileID: 0}
-  alertVolume: 0.07
-  minDistance: 1.2
-  maxDistance: 16
-  firePitchRandomness: 0.02
+  audioProfile: {fileID: 11400000, guid: 80669f5cbccb45418458fd3ce3b46756, type: 2}
 --- !u!195 &8311118204475458611
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -414,9 +414,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -931,9 +928,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -1191,9 +1185,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!225 &6894579731171193867
@@ -1462,9 +1453,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!225 &5515514290338783216
@@ -1696,9 +1684,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!225 &8106870136458639056
@@ -3306,9 +3291,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -3419,9 +3401,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!225 &1425056629462844842
@@ -4738,25 +4717,6 @@ MonoBehaviour:
   generalSource: {fileID: 3145642461339569945}
   weaponSource: {fileID: 7004235822566892732}
   footstepSource: {fileID: 2917685653942069891}
-  jumpClip: {fileID: 0}
-  jumpVolume: 0.12
-  footstepClips: []
-  footstepVolume: 0.06
-  footstepMinInterval: 0.3
-  footstepMaxInterval: 0.5
-  footstepMinMoveAmount: 0.2
-  footstepPitchRandomness: 0.03
-  weaponSwitchClip: {fileID: 0}
-  weaponSwitchVolume: 0.12
-  coinPickupClip: {fileID: 0}
-  coinPickupVolume: 0.24
-  coinPickupPitchRandomness: 0.04
-  killConfirmClip: {fileID: 0}
-  killConfirmVolume: 0.3
-  hurtClip: {fileID: 0}
-  hurtVolume: 0.2
-  hurtPitchRandomness: 0.035
-  hurtMinInterval: 0.08
 --- !u!114 &6571116937149603781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7999,9 +7959,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 0}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -8665,9 +8622,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -8997,9 +8951,6 @@ MonoBehaviour:
   enableAudio: 1
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04
@@ -10096,16 +10047,6 @@ MonoBehaviour:
   reserveMagazineCapacity: 2
   reloadDuration: 1.2
   dryFireCooldown: 0.2
-  muzzleFlashPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
-  fireSound: {fileID: 0}
-  dryFireSound: {fileID: 0}
-  reloadSound: {fileID: 0}
-  fireVolume: 0.42
-  dryFireVolume: 0.2
-  reloadVolume: 0.26
-  firePitchRandomness: 0.008
-  dryFirePitchRandomness: 0.005
-  reloadPitchRandomness: 0.01
   cameraRecoilPitch: 1.1
   cameraRecoilYaw: 0.2
   weaponRecoilPosition: {x: 0, y: 0.01, z: -0.05}

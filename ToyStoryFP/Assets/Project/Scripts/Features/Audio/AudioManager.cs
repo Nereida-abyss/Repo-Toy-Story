@@ -13,6 +13,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("Audio Catalog")]
     [SerializeField] private ProjectAudioCatalog catalog;
+    [SerializeField] private UiAudioProfile uiAudioProfile;
 
     [Header("Legacy Audio Clip Arrays")]
     [SerializeField] private AudioClip[] musicList;
@@ -30,6 +31,7 @@ public class AudioManager : MonoBehaviour
     private bool hasLoggedMissingCatalog;
     private bool hasLoggedMissingMusicSource;
     private bool hasLoggedMissingSfxSource;
+    private bool hasLoggedMissingUiAudioProfile;
     private readonly HashSet<string> warnedKnownScenesWithoutMusic = new HashSet<string>();
 
     public static AudioManager Instance
@@ -197,118 +199,28 @@ public class AudioManager : MonoBehaviour
         return resolvedCatalog != null ? resolvedCatalog.Waves.announcement : null;
     }
 
-    public AudioClip GetPlayerJumpClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.jump : null;
-    }
-
-    public AudioClip[] GetPlayerFootstepClips()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.footsteps : System.Array.Empty<AudioClip>();
-    }
-
-    public AudioClip GetPlayerWeaponSwitchClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.weaponSwitch : null;
-    }
-
-    public AudioClip GetPlayerCoinPickupClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.coinPickup : null;
-    }
-
-    public AudioClip GetPlayerKillConfirmClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.killConfirm : null;
-    }
-
-    public AudioClip GetPlayerHurtClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Player.hurt : null;
-    }
-
-    public AudioClip GetEnemyAlertClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Enemy.alert : null;
-    }
-
-    public AudioClip GetDefaultWeaponFireClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Weapons.defaultFire : null;
-    }
-
-    public AudioClip GetDefaultWeaponDryFireClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Weapons.defaultDryFire : null;
-    }
-
-    public AudioClip GetDefaultWeaponReloadClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Weapons.defaultReload : null;
-    }
-
     public AudioClip GetUiClickClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Ui.click : null;
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ClickClip : null;
     }
 
     public AudioClip GetUiHoverClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Ui.hover : null;
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.HoverClip : null;
     }
 
     public AudioClip GetUiPanelOpenClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Ui.panelOpen : null;
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelOpenClip : null;
     }
 
     public AudioClip GetUiPanelCloseClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Ui.panelClose : null;
-    }
-
-    public AudioClip GetCreditsIntroWhooshClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Credits.introWhoosh : null;
-    }
-
-    public AudioClip GetCreditsNameHitClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Credits.nameHit : null;
-    }
-
-    public AudioClip GetCreditsNameTickClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Credits.nameTick : null;
-    }
-
-    public AudioClip GetCreditsFinalStingClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Credits.finalSting : null;
-    }
-
-    public AudioClip GetCreditsOutroSwishClip()
-    {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Credits.outroSwish : null;
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelCloseClip : null;
     }
 
     public AudioClip GetSceneMusicClip(string sceneName)
@@ -451,6 +363,25 @@ public class AudioManager : MonoBehaviour
             GameDebug.Advertencia(
                 "Audio",
                 "No hay ProjectAudioCatalog asignado en el inspector. Se usaran los arrays legacy si existen.",
+                this);
+        }
+
+        return null;
+    }
+
+    private UiAudioProfile ResolveUiAudioProfile()
+    {
+        if (uiAudioProfile != null)
+        {
+            return uiAudioProfile;
+        }
+
+        if (!hasLoggedMissingUiAudioProfile)
+        {
+            hasLoggedMissingUiAudioProfile = true;
+            GameDebug.Advertencia(
+                "Audio",
+                "No hay UiAudioProfile asignado en el inspector del AudioManager.",
                 this);
         }
 

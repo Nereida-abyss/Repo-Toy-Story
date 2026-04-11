@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d92bf3db0fb34d7baf176aa1d471c3e5, type: 3}
+  m_Name: LowPoly1323WeaponPresentationProfile
+  m_EditorClassIdentifier: 
+  playerVariant:
+    muzzleFlashPrefab: {fileID: 2054803858064431036, guid: 500c1d6ddd48f2c4092af85e4e941eb2, type: 3}
+    fireSound: {fileID: 8300000, guid: 5aaa2dc018a360b429b647fbf22c70cb, type: 3}
+    dryFireSound: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
+    reloadSound: {fileID: 8300000, guid: 6c7d5e0f4b7f4b7d8e1a2b3c4d5e6f70, type: 3}
+    fireVolume: 0.42
+    dryFireVolume: 0.2
+    reloadVolume: 0.26
+    firePitchRandomness: 0.008
+    dryFirePitchRandomness: 0.005
+    reloadPitchRandomness: 0.01
+  enemyVariant:
+    muzzleFlashPrefab: {fileID: 0}
+    fireSound: {fileID: 0}
+    dryFireSound: {fileID: 0}
+    reloadSound: {fileID: 0}
+    fireVolume: 0.8
+    dryFireVolume: 0.35
+    reloadVolume: 0.5
+    firePitchRandomness: 0.02
+    dryFirePitchRandomness: 0.01
+    reloadPitchRandomness: 0.015

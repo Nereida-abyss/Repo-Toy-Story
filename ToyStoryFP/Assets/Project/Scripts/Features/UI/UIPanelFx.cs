@@ -22,9 +22,6 @@ public class UIPanelFx : MonoBehaviour
     [SerializeField] private bool enableAudio = true;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private bool useSharedAudioSource = true;
-    [SerializeField] private bool useAudioManagerFallback;
-    [SerializeField] private AudioClip openClip;
-    [SerializeField] private AudioClip closeClip;
     [SerializeField] private float openVolume = 0.5f;
     [SerializeField] private float closeVolume = 0.38f;
 
@@ -88,13 +85,11 @@ public class UIPanelFx : MonoBehaviour
         bool themedAudioEnabled,
         float themedOpenVolume,
         float themedCloseVolume,
-        bool themedUseAudioManagerFallback,
         AudioSource themedAudioSource = null)
     {
         enableAudio = themedAudioEnabled;
         openVolume = themedOpenVolume;
         closeVolume = themedCloseVolume;
-        useAudioManagerFallback = themedUseAudioManagerFallback;
 
         if (themedAudioSource != null)
         {
@@ -120,9 +115,6 @@ public class UIPanelFx : MonoBehaviour
         disableRaycastWhileAnimating = panelFxProfile.DisableRaycastWhileAnimating;
         enableAudio = panelFxProfile.EnableAudio;
         useSharedAudioSource = panelFxProfile.UseSharedAudioSource;
-        useAudioManagerFallback = panelFxProfile.UseAudioManagerFallback;
-        openClip = panelFxProfile.OpenClip;
-        closeClip = panelFxProfile.CloseClip;
         openVolume = panelFxProfile.OpenVolume;
         closeVolume = panelFxProfile.CloseVolume;
     }
@@ -151,7 +143,7 @@ public class UIPanelFx : MonoBehaviour
         }
         else
         {
-            PlayPanelSound(openClip != null ? openClip : GetFallbackOpenClip(), openVolume);
+            PlayPanelSound(ResolveOpenClip(), openVolume);
         }
     }
 
@@ -179,7 +171,7 @@ public class UIPanelFx : MonoBehaviour
             return;
         }
 
-        PlayPanelSound(closeClip != null ? closeClip : GetFallbackCloseClip(), closeVolume);
+        PlayPanelSound(ResolveCloseClip(), closeVolume);
         StopActiveRoutine();
         activeRoutine = StartCoroutine(PlayCloseRoutine());
     }
@@ -402,14 +394,8 @@ public class UIPanelFx : MonoBehaviour
         return null;
     }
 
-    // Intenta sacar un clip de apertura de respaldo desde el AudioManager.
-    private AudioClip GetFallbackOpenClip()
+    private AudioClip ResolveOpenClip()
     {
-        if (!useAudioManagerFallback)
-        {
-            return null;
-        }
-
         if (AudioManager.Instance == null)
         {
             return null;
@@ -425,14 +411,8 @@ public class UIPanelFx : MonoBehaviour
         return openFallback != null ? openFallback : AudioManager.Instance.GetUiClickClip();
     }
 
-    // Intenta sacar un clip de cierre de respaldo desde el AudioManager.
-    private AudioClip GetFallbackCloseClip()
+    private AudioClip ResolveCloseClip()
     {
-        if (!useAudioManagerFallback)
-        {
-            return null;
-        }
-
         if (AudioManager.Instance == null)
         {
             return null;

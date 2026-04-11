@@ -68,12 +68,6 @@ public partial class PanelController : MonoBehaviour
 
     [Header("Credits Audio (Optional)")]
     [SerializeField] private AudioSource creditsAudioSource;
-    [SerializeField] private AudioClip nameHitClip;
-    [SerializeField] private AudioClip nameTickClip;
-    [SerializeField] private AudioClip introWhooshClip;
-    [SerializeField] private AudioClip finalStingClip;
-    [SerializeField] private AudioClip outroSwishClip;
-    [SerializeField] private bool useAudioManagerFallback = true;
 
     [Header("Fallback (Lineal)")]
     [SerializeField] private float fallbackCreditsDuration = 3f;
@@ -193,7 +187,7 @@ public partial class PanelController : MonoBehaviour
 
         if (!skipRequested)
         {
-            PlayCreditsAudio(outroSwishClip, "swish");
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.OutroSwishClip : null);
         }
 
         yield return FadeCanvasGroupAlpha(creditsCanvasGroup, fadeDuration);
@@ -263,7 +257,7 @@ public partial class PanelController : MonoBehaviour
             entry.RectTransform.anchoredPosition = entry.OriginalAnchoredPosition;
         }
 
-        PlayCreditsAudio(introWhooshClip, "whoosh");
+        PlayCreditsAudio(creditsProfile != null ? creditsProfile.IntroWhooshClip : null);
         yield return AnimateIntroBeat(
             animatedRoot,
             baseRootScale,
@@ -304,7 +298,7 @@ public partial class PanelController : MonoBehaviour
             currentName.RectTransform.anchoredPosition =
                 currentName.OriginalAnchoredPosition + Vector2.up * Mathf.Max(0f, nameStartYOffset);
 
-            PlayCreditsAudio(nameHitClip, "hit");
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameHitClip : null);
             float elapsed = 0f;
 
             while (elapsed < scaledNameRevealDuration)
@@ -356,7 +350,7 @@ public partial class PanelController : MonoBehaviour
 
             if (scaledNameGap > 0f && i < names.Count - 1)
             {
-                PlayCreditsAudio(nameTickClip, "tick");
+                PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameTickClip : null);
                 yield return HoldDuration(scaledNameGap, allowSkip, skipAllowedAtTime, skipAction);
             }
 
@@ -410,7 +404,7 @@ public partial class PanelController : MonoBehaviour
             finalEntry.RectTransform.anchoredPosition =
                 finalEntry.OriginalAnchoredPosition + Vector2.up * Mathf.Max(nameStartYOffset, sectionStartYOffset * 0.45f);
             SetTextAlpha(finalEntry, 0f);
-            PlayCreditsAudio(finalStingClip, "sting");
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.FinalStingClip : null);
             float elapsed = 0f;
 
             while (elapsed < scaledFinalDuration)

@@ -21,9 +21,6 @@ MonoBehaviour:
   animationSpeed: 17
   enableAudio: 1
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  hoverClip: {fileID: 8300000, guid: e4bb915da96404547b82869feb6987d6, type: 3}
-  clickClip: {fileID: 0}
   hoverVolume: 0.35
   clickVolume: 0.6
   pitchRandomness: 0.04

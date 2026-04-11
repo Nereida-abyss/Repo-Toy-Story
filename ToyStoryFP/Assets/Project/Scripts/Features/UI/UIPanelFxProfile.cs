@@ -17,9 +17,6 @@ public class UIPanelFxProfile : ScriptableObject
     [Header("Audio")]
     [SerializeField] private bool enableAudio = true;
     [SerializeField] private bool useSharedAudioSource = true;
-    [SerializeField] private bool useAudioManagerFallback;
-    [SerializeField] private AudioClip openClip;
-    [SerializeField] private AudioClip closeClip;
     [SerializeField] private float openVolume = 0.5f;
     [SerializeField] private float closeVolume = 0.38f;
 
@@ -32,9 +29,6 @@ public class UIPanelFxProfile : ScriptableObject
     public bool DisableRaycastWhileAnimating => disableRaycastWhileAnimating;
     public bool EnableAudio => enableAudio;
     public bool UseSharedAudioSource => useSharedAudioSource;
-    public bool UseAudioManagerFallback => useAudioManagerFallback;
-    public AudioClip OpenClip => openClip;
-    public AudioClip CloseClip => closeClip;
     public float OpenVolume => openVolume;
     public float CloseVolume => closeVolume;
 }

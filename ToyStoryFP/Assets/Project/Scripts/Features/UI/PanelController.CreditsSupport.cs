@@ -321,65 +321,14 @@ public partial class PanelController
         finalDuration = Mathf.Max(0.01f, finalDuration * scale);
     }
 
-    private void PlayCreditsAudio(AudioClip clip, string fallbackToken)
+    private void PlayCreditsAudio(AudioClip clip)
     {
-        AudioSource source = creditsAudioSource;
-
-        if (clip != null)
-        {
-            if (source != null)
-            {
-                source.PlayOneShot(clip);
-                return;
-            }
-        }
-
-        if (!useAudioManagerFallback || AudioManager.Instance == null)
+        if (creditsAudioSource == null || clip == null)
         {
             return;
         }
 
-        AudioClip fallbackClip = GetCreditsFallbackClip(fallbackToken);
-
-        if (fallbackClip == null && !string.Equals(fallbackToken, "click"))
-        {
-            fallbackClip = GetCreditsFallbackClip("click");
-        }
-
-        if (fallbackClip == null || source == null)
-        {
-            return;
-        }
-
-        source.PlayOneShot(fallbackClip);
-    }
-
-    private AudioClip GetCreditsFallbackClip(string token)
-    {
-        if (AudioManager.Instance == null)
-        {
-            return null;
-        }
-
-        string normalizedToken = token != null ? token.ToLowerInvariant() : string.Empty;
-
-        switch (normalizedToken)
-        {
-            case "whoosh":
-                return AudioManager.Instance.GetCreditsIntroWhooshClip();
-            case "hit":
-                return AudioManager.Instance.GetCreditsNameHitClip();
-            case "tick":
-                return AudioManager.Instance.GetCreditsNameTickClip();
-            case "sting":
-                return AudioManager.Instance.GetCreditsFinalStingClip();
-            case "swish":
-                return AudioManager.Instance.GetCreditsOutroSwishClip();
-            case "click":
-                return AudioManager.Instance.GetCreditsNameTickClip() ?? AudioManager.Instance.GetUiClickClip();
-            default:
-                return AudioManager.Instance.GetUiClickClip();
-        }
+        creditsAudioSource.PlayOneShot(clip);
     }
 
     private bool ShouldSkipCredits(bool allowSkip, float skipAllowedAtTime)

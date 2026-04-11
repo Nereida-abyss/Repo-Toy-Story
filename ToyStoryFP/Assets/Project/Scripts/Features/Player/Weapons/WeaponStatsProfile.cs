@@ -13,18 +13,7 @@ public class WeaponStatsProfile : ScriptableObject
     [SerializeField] private int reserveMagazineCapacity = 2;
     [SerializeField] private float reloadDuration = 1.2f;
     [SerializeField] private float dryFireCooldown = 0.2f;
-
-    [Header("Weapon Effects")]
-    [SerializeField] private GameObject muzzleFlashPrefab;
-    [SerializeField] private AudioClip fireSound;
-    [SerializeField] private AudioClip dryFireSound;
-    [SerializeField] private AudioClip reloadSound;
-    [SerializeField] [Range(0f, 1f)] private float fireVolume = 0.8f;
-    [SerializeField] [Range(0f, 1f)] private float dryFireVolume = 0.35f;
-    [SerializeField] [Range(0f, 1f)] private float reloadVolume = 0.5f;
-    [SerializeField] private float firePitchRandomness = 0.02f;
-    [SerializeField] private float dryFirePitchRandomness = 0.01f;
-    [SerializeField] private float reloadPitchRandomness = 0.015f;
+    [SerializeField] private WeaponPresentationProfile presentationProfile;
 
     [Header("Camera Recoil")]
     [SerializeField] private float cameraRecoilPitch = 1.1f;
@@ -48,16 +37,7 @@ public class WeaponStatsProfile : ScriptableObject
     public int ReserveMagazineCapacity => reserveMagazineCapacity;
     public float ReloadDuration => reloadDuration;
     public float DryFireCooldown => dryFireCooldown;
-    public GameObject MuzzleFlashPrefab => muzzleFlashPrefab;
-    public AudioClip FireSound => fireSound;
-    public AudioClip DryFireSound => dryFireSound;
-    public AudioClip ReloadSound => reloadSound;
-    public float FireVolume => fireVolume;
-    public float DryFireVolume => dryFireVolume;
-    public float ReloadVolume => reloadVolume;
-    public float FirePitchRandomness => firePitchRandomness;
-    public float DryFirePitchRandomness => dryFirePitchRandomness;
-    public float ReloadPitchRandomness => reloadPitchRandomness;
+    public WeaponPresentationProfile PresentationProfile => presentationProfile;
     public float CameraRecoilPitch => cameraRecoilPitch;
     public float CameraRecoilYaw => cameraRecoilYaw;
     public Vector3 WeaponRecoilPosition => weaponRecoilPosition;

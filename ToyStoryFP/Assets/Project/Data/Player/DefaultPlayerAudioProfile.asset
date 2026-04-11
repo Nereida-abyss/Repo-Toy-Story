@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpClip: {fileID: 8300000, guid: 3b671fcfca24e3d4c90cbae5d305bf8e, type: 3}
   jumpVolume: 0.12
-  footstepClips: []
+  footstepClips:
+  - {fileID: 8300000, guid: ab4f8660451a2fe4ba1f55914d924887, type: 3}
+  - {fileID: 8300000, guid: c1d2e3f40516273849a5b6c7d8e9f012, type: 3}
   footstepVolume: 0.06
   footstepMinInterval: 0.3
   footstepMaxInterval: 0.5

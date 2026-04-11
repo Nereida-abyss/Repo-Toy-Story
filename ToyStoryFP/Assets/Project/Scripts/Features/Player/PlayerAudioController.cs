@@ -3,44 +3,11 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PlayerAudioController : MonoBehaviour
 {
-    private static readonly AudioClip[] EmptyAudioClips = System.Array.Empty<AudioClip>();
-
     [Header("Audio Sources")]
     [SerializeField] private AudioSource generalSource;
     [SerializeField] private AudioSource weaponSource;
     [SerializeField] private AudioSource footstepSource;
     [SerializeField] private PlayerAudioProfile audioProfile;
-
-    [Header("Jump")]
-    [SerializeField] private AudioClip jumpClip;
-    [SerializeField] [Range(0f, 1f)] private float jumpVolume = 0.5f;
-
-    [Header("Footsteps")]
-    [SerializeField] private AudioClip[] footstepClips = System.Array.Empty<AudioClip>();
-    [SerializeField] [Range(0f, 1f)] private float footstepVolume = 0.12f;
-    [SerializeField] private float footstepMinInterval = 0.3f;
-    [SerializeField] private float footstepMaxInterval = 0.48f;
-    [SerializeField] private float footstepMinMoveAmount = 0.2f;
-    [SerializeField] private float footstepPitchRandomness = 0.03f;
-
-    [Header("Weapon Switch")]
-    [SerializeField] private AudioClip weaponSwitchClip;
-    [SerializeField] [Range(0f, 1f)] private float weaponSwitchVolume = 0.28f;
-
-    [Header("Coin Pickup")]
-    [SerializeField] private AudioClip coinPickupClip;
-    [SerializeField] [Range(0f, 1f)] private float coinPickupVolume = 0.24f;
-    [SerializeField] private float coinPickupPitchRandomness = 0.04f;
-
-    [Header("Kill Confirm")]
-    [SerializeField] private AudioClip killConfirmClip;
-    [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
-
-    [Header("Damage")]
-    [SerializeField] private AudioClip hurtClip;
-    [SerializeField] [Range(0f, 1f)] private float hurtVolume = 0.2f;
-    [SerializeField] private float hurtPitchRandomness = 0.035f;
-    [SerializeField] private float hurtMinInterval = 0.08f;
 
     private float footstepTimer;
     private float lastHurtPlayTime = -100f;
@@ -50,47 +17,51 @@ public class PlayerAudioController : MonoBehaviour
 
     void Awake()
     {
-        ApplyAudioProfile();
         if (generalSource == null || weaponSource == null || footstepSource == null)
         {
             LogMissingSources();
         }
     }
 
-    void OnEnable()
-    {
-        ApplyAudioProfile();
-    }
-
     // Reproduce salto.
     public void PlayJump()
     {
-        PlayOneShot(generalSource, ResolveJumpClip(), jumpVolume);
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(generalSource, profile != null ? profile.JumpClip : null, profile != null ? profile.JumpVolume : 0f);
     }
 
     // Reproduce arma cambio.
     public void PlayWeaponSwitch()
     {
-        PlayOneShot(generalSource, ResolveWeaponSwitchClip(), weaponSwitchVolume);
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(generalSource, profile != null ? profile.WeaponSwitchClip : null, profile != null ? profile.WeaponSwitchVolume : 0f);
     }
 
     // Reproduce moneda pickup.
     public void PlayCoinPickup()
     {
-        PlayOneShot(generalSource, ResolveCoinPickupClip(), coinPickupVolume, coinPickupPitchRandomness);
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(
+            generalSource,
+            profile != null ? profile.CoinPickupClip : null,
+            profile != null ? profile.CoinPickupVolume : 0f,
+            profile != null ? profile.CoinPickupPitchRandomness : 0f);
     }
 
     // Reproduce kill confirm.
     public void PlayKillConfirm()
     {
-        AudioClip clipToPlay = ResolveKillConfirmClip();
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        AudioClip clipToPlay = profile != null ? profile.KillConfirmClip : null;
         bool hasDedicatedKillConfirm = clipToPlay != null;
 
         if (!hasDedicatedKillConfirm)
         {
-            clipToPlay = ResolveWeaponSwitchClip();
+            clipToPlay = profile != null ? profile.WeaponSwitchClip : null;
         }
 
+        float killConfirmVolume = profile != null ? profile.KillConfirmVolume : 0f;
+        float weaponSwitchVolume = profile != null ? profile.WeaponSwitchVolume : 0f;
         float volumeToPlay = hasDedicatedKillConfirm ? killConfirmVolume : Mathf.Max(weaponSwitchVolume, killConfirmVolume);
         PlayOneShot(generalSource, clipToPlay, volumeToPlay);
     }
@@ -98,26 +69,33 @@ public class PlayerAudioController : MonoBehaviour
     // Reproduce hurt.
     public void PlayHurt()
     {
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        float hurtMinInterval = profile != null ? profile.HurtMinInterval : 0f;
+
         if (Time.time < lastHurtPlayTime + Mathf.Max(0f, hurtMinInterval))
         {
             return;
         }
 
-        AudioClip resolvedHurtClip = ResolveHurtClip();
+        AudioClip resolvedHurtClip = profile != null ? profile.HurtClip : null;
 
         if (resolvedHurtClip == null)
         {
             if (!hasLoggedMissingHurtClip)
             {
                 hasLoggedMissingHurtClip = true;
-                GameDebug.Advertencia("AudioJugador", "No hay hurtClip asignado en PlayerAudioController.", this);
+                GameDebug.Advertencia("AudioJugador", "No hay HurtClip configurado en PlayerAudioProfile.", this);
             }
 
             return;
         }
 
         lastHurtPlayTime = Time.time;
-        PlayOneShot(generalSource, resolvedHurtClip, hurtVolume, hurtPitchRandomness);
+        PlayOneShot(
+            generalSource,
+            resolvedHurtClip,
+            profile != null ? profile.HurtVolume : 0f,
+            profile != null ? profile.HurtPitchRandomness : 0f);
     }
 
     // Reproduce arma disparo.
@@ -141,17 +119,23 @@ public class PlayerAudioController : MonoBehaviour
     // Actualiza footsteps.
     public void UpdateFootsteps(bool grounded, float moveInputAmount, float speedNormalized)
     {
-        float movementIntensity = speedNormalized;
+        PlayerAudioProfile profile = ResolveAudioProfile();
 
-        if (!grounded || moveInputAmount < footstepMinMoveAmount || speedNormalized < 0.05f)
+        if (profile == null)
         {
             footstepTimer = 0f;
             return;
         }
 
-        AudioClip[] resolvedFootstepClips = ResolveFootstepClips();
+        if (!grounded || moveInputAmount < profile.FootstepMinMoveAmount || speedNormalized < 0.05f)
+        {
+            footstepTimer = 0f;
+            return;
+        }
 
-        if (resolvedFootstepClips.Length == 0 || footstepSource == null)
+        AudioClip[] footstepClips = profile.FootstepClips ?? System.Array.Empty<AudioClip>();
+
+        if (footstepClips.Length == 0 || footstepSource == null)
         {
             return;
         }
@@ -165,14 +149,14 @@ public class PlayerAudioController : MonoBehaviour
 
         PlayOneShot(
             footstepSource,
-            GetRandomFootstepClip(resolvedFootstepClips),
-            footstepVolume,
-            footstepPitchRandomness);
+            GetRandomFootstepClip(footstepClips),
+            profile.FootstepVolume,
+            profile.FootstepPitchRandomness);
 
         footstepTimer = Mathf.Lerp(
-            Mathf.Max(0.01f, footstepMaxInterval),
-            Mathf.Max(0.01f, footstepMinInterval),
-            Mathf.Clamp01(movementIntensity));
+            Mathf.Max(0.01f, profile.FootstepMaxInterval),
+            Mathf.Max(0.01f, profile.FootstepMinInterval),
+            Mathf.Clamp01(speedNormalized));
     }
 
     // Obtiene aleatorio footstep clip.
@@ -211,70 +195,16 @@ public class PlayerAudioController : MonoBehaviour
         GameDebug.Advertencia("AudioJugador", "Faltan una o mas referencias de AudioSource hijas en PlayerAudioController.", this);
     }
 
-    private AudioClip ResolveJumpClip()
+    private PlayerAudioProfile ResolveAudioProfile()
     {
-        return jumpClip != null ? jumpClip : AudioManager.Instance?.GetPlayerJumpClip();
-    }
-
-    private AudioClip[] ResolveFootstepClips()
-    {
-        if (footstepClips != null && footstepClips.Length > 0)
+        if (audioProfile != null)
         {
-            return footstepClips;
+            hasLoggedMissingAudioProfile = false;
+            return audioProfile;
         }
 
-        AudioClip[] catalogClips = AudioManager.Instance != null ? AudioManager.Instance.GetPlayerFootstepClips() : null;
-        return catalogClips != null && catalogClips.Length > 0 ? catalogClips : EmptyAudioClips;
-    }
-
-    private AudioClip ResolveWeaponSwitchClip()
-    {
-        return weaponSwitchClip != null ? weaponSwitchClip : AudioManager.Instance?.GetPlayerWeaponSwitchClip();
-    }
-
-    private AudioClip ResolveCoinPickupClip()
-    {
-        return coinPickupClip != null ? coinPickupClip : AudioManager.Instance?.GetPlayerCoinPickupClip();
-    }
-
-    private AudioClip ResolveKillConfirmClip()
-    {
-        return killConfirmClip != null ? killConfirmClip : AudioManager.Instance?.GetPlayerKillConfirmClip();
-    }
-
-    private AudioClip ResolveHurtClip()
-    {
-        return hurtClip != null ? hurtClip : AudioManager.Instance?.GetPlayerHurtClip();
-    }
-
-    private void ApplyAudioProfile()
-    {
-        if (audioProfile == null)
-        {
-            WarnIfMissingAudioProfile();
-            return;
-        }
-
-        hasLoggedMissingAudioProfile = false;
-        jumpClip = audioProfile.JumpClip;
-        jumpVolume = audioProfile.JumpVolume;
-        footstepClips = audioProfile.FootstepClips;
-        footstepVolume = audioProfile.FootstepVolume;
-        footstepMinInterval = audioProfile.FootstepMinInterval;
-        footstepMaxInterval = audioProfile.FootstepMaxInterval;
-        footstepMinMoveAmount = audioProfile.FootstepMinMoveAmount;
-        footstepPitchRandomness = audioProfile.FootstepPitchRandomness;
-        weaponSwitchClip = audioProfile.WeaponSwitchClip;
-        weaponSwitchVolume = audioProfile.WeaponSwitchVolume;
-        coinPickupClip = audioProfile.CoinPickupClip;
-        coinPickupVolume = audioProfile.CoinPickupVolume;
-        coinPickupPitchRandomness = audioProfile.CoinPickupPitchRandomness;
-        killConfirmClip = audioProfile.KillConfirmClip;
-        killConfirmVolume = audioProfile.KillConfirmVolume;
-        hurtClip = audioProfile.HurtClip;
-        hurtVolume = audioProfile.HurtVolume;
-        hurtPitchRandomness = audioProfile.HurtPitchRandomness;
-        hurtMinInterval = audioProfile.HurtMinInterval;
+        WarnIfMissingAudioProfile();
+        return null;
     }
 
     private void WarnIfMissingAudioProfile()
@@ -285,6 +215,6 @@ public class PlayerAudioController : MonoBehaviour
         }
 
         hasLoggedMissingAudioProfile = true;
-        GameDebug.Advertencia("AudioJugador", "PlayerAudioController no tiene PlayerAudioProfile asignado. Se usaran los valores locales del componente.", this);
+        GameDebug.Advertencia("AudioJugador", "PlayerAudioController necesita PlayerAudioProfile asignado.", this);
     }
 }

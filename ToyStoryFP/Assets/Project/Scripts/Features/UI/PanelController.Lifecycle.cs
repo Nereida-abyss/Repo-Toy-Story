@@ -82,12 +82,6 @@ public partial class PanelController
         previousNameAlpha = creditsProfile.PreviousNameAlpha;
         microShakeAmount = creditsProfile.MicroShakeAmount;
         microShakeDuration = creditsProfile.MicroShakeDuration;
-        nameHitClip = creditsProfile.NameHitClip;
-        nameTickClip = creditsProfile.NameTickClip;
-        introWhooshClip = creditsProfile.IntroWhooshClip;
-        finalStingClip = creditsProfile.FinalStingClip;
-        outroSwishClip = creditsProfile.OutroSwishClip;
-        useAudioManagerFallback = creditsProfile.UseAudioManagerFallback;
         fallbackCreditsDuration = creditsProfile.FallbackCreditsDuration;
         textStagger = creditsProfile.TextStagger;
         textFadeInDuration = creditsProfile.TextFadeInDuration;

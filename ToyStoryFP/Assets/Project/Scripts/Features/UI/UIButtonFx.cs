@@ -23,9 +23,6 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [SerializeField] private bool enableAudio = true;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private bool useSharedAudioSource = true;
-    [SerializeField] private bool useAudioManagerFallback;
-    [SerializeField] private AudioClip hoverClip;
-    [SerializeField] private AudioClip clickClip;
     [SerializeField] private float hoverVolume = 0.35f;
     [SerializeField] private float clickVolume = 0.6f;
     [SerializeField] private float pitchRandomness = 0.04f;
@@ -103,26 +100,17 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         float themedClickVolume,
         float themedPitchRandomness,
         float themedHoverMinInterval,
-        bool themedUseAudioManagerFallback,
         AudioSource themedAudioSource = null)
     {
         hoverVolume = themedHoverVolume;
         clickVolume = themedClickVolume;
         pitchRandomness = themedPitchRandomness;
         hoverMinInterval = themedHoverMinInterval;
-        useAudioManagerFallback = themedUseAudioManagerFallback;
 
         if (themedAudioSource != null)
         {
             audioSource = themedAudioSource;
         }
-    }
-
-    // Completa clips vacíos con opciones de respaldo para no dejar botones mudos.
-    public void SetAudioClips(AudioClip hover, AudioClip click)
-    {
-        hoverClip = hover;
-        clickClip = click;
     }
 
     private void ApplyProfile()
@@ -143,9 +131,6 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         animationSpeed = buttonFxProfile.AnimationSpeed;
         enableAudio = buttonFxProfile.EnableAudio;
         useSharedAudioSource = buttonFxProfile.UseSharedAudioSource;
-        useAudioManagerFallback = buttonFxProfile.UseAudioManagerFallback;
-        hoverClip = buttonFxProfile.HoverClip;
-        clickClip = buttonFxProfile.ClickClip;
         hoverVolume = buttonFxProfile.HoverVolume;
         clickVolume = buttonFxProfile.ClickVolume;
         pitchRandomness = buttonFxProfile.PitchRandomness;
@@ -232,8 +217,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return;
         }
 
-        AudioClip clip = clickClip != null ? clickClip : GetFallbackClickClip();
-        PlayOneShot(clip, clickVolume);
+        PlayOneShot(ResolveClickClip(), clickVolume);
     }
 
     // Interpola escala y color para que el botón no cambie de estado a saltos.
@@ -313,8 +297,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         lastHoverSfxTime = Time.unscaledTime;
 
-        AudioClip clip = hoverClip != null ? hoverClip : GetFallbackHoverClip();
-        PlayOneShot(clip, hoverVolume);
+        PlayOneShot(ResolveHoverClip(), hoverVolume);
     }
 
     // Acepta solo clic izquierdo como pulsación válida de ratón.
@@ -377,25 +360,13 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return null;
     }
 
-    // Intenta encontrar un clip de click de respaldo en el AudioManager.
-    private AudioClip GetFallbackClickClip()
+    private AudioClip ResolveClickClip()
     {
-        if (!useAudioManagerFallback)
-        {
-            return null;
-        }
-
         return AudioManager.Instance != null ? AudioManager.Instance.GetUiClickClip() : null;
     }
 
-    // Intenta encontrar un clip de hover de respaldo en el AudioManager.
-    private AudioClip GetFallbackHoverClip()
+    private AudioClip ResolveHoverClip()
     {
-        if (!useAudioManagerFallback)
-        {
-            return null;
-        }
-
         if (AudioManager.Instance == null)
         {
             return null;

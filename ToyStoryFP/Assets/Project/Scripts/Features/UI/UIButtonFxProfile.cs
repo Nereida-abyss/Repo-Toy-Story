@@ -15,9 +15,6 @@ public class UIButtonFxProfile : ScriptableObject
     [Header("Audio")]
     [SerializeField] private bool enableAudio = true;
     [SerializeField] private bool useSharedAudioSource = true;
-    [SerializeField] private bool useAudioManagerFallback;
-    [SerializeField] private AudioClip hoverClip;
-    [SerializeField] private AudioClip clickClip;
     [SerializeField] private float hoverVolume = 0.35f;
     [SerializeField] private float clickVolume = 0.6f;
     [SerializeField] private float pitchRandomness = 0.04f;
@@ -32,9 +29,6 @@ public class UIButtonFxProfile : ScriptableObject
     public float AnimationSpeed => animationSpeed;
     public bool EnableAudio => enableAudio;
     public bool UseSharedAudioSource => useSharedAudioSource;
-    public bool UseAudioManagerFallback => useAudioManagerFallback;
-    public AudioClip HoverClip => hoverClip;
-    public AudioClip ClickClip => clickClip;
     public float HoverVolume => hoverVolume;
     public float ClickVolume => clickVolume;
     public float PitchRandomness => pitchRandomness;

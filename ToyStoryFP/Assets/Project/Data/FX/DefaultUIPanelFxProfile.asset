@@ -21,8 +21,5 @@ MonoBehaviour:
   disableRaycastWhileAnimating: 1
   enableAudio: 1
   useSharedAudioSource: 1
-  useAudioManagerFallback: 0
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38

@@ -61,7 +61,6 @@ public class CreditsPresentationProfile : ScriptableObject
     [SerializeField] private AudioClip introWhooshClip;
     [SerializeField] private AudioClip finalStingClip;
     [SerializeField] private AudioClip outroSwishClip;
-    [SerializeField] private bool useAudioManagerFallback = true;
 
     [Header("Fallback")]
     [SerializeField] private float fallbackCreditsDuration = 3f;
@@ -112,7 +111,6 @@ public class CreditsPresentationProfile : ScriptableObject
     public AudioClip IntroWhooshClip => introWhooshClip;
     public AudioClip FinalStingClip => finalStingClip;
     public AudioClip OutroSwishClip => outroSwishClip;
-    public bool UseAudioManagerFallback => useAudioManagerFallback;
     public float FallbackCreditsDuration => fallbackCreditsDuration;
     public float TextStagger => textStagger;
     public float TextFadeInDuration => textFadeInDuration;

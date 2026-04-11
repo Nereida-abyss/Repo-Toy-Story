@@ -54,7 +54,6 @@ MonoBehaviour:
   introWhooshClip: {fileID: 8300000, guid: 2c79d1b9b54f81c4484f2258bc7feaec, type: 3}
   finalStingClip: {fileID: 8300000, guid: 75774560d1847934fa275b3ca797a58f, type: 3}
   outroSwishClip: {fileID: 8300000, guid: 0d3a50b612f8a0f4298075b4b358733f, type: 3}
-  useAudioManagerFallback: 1
   fallbackCreditsDuration: 3
   textStagger: 0.18
   textFadeInDuration: 0.45

@@ -10,27 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f60ca6120404470bf6d2954ea07d4f7, type: 3}
-  m_Name: AssaultRiflePlayerWeaponStatsProfile
+  m_Name: AssaultRifleBaseWeaponStatsProfile
   m_EditorClassIdentifier: 
   maxRange: 100
-  fireRate: 8
-  damagePerShot: 30
+  fireRate: 10
+  damagePerShot: 20
   magazineSize: 30
-  reserveAmmo: 120
+  reserveAmmo: 60
   infiniteReserve: 0
   reserveMagazineCapacity: 2
   reloadDuration: 1.2
   dryFireCooldown: 0.2
-  muzzleFlashPrefab: {fileID: 8782009059513614302, guid: 171dda363e9efd94ca9bc63e38ca9658, type: 3}
-  fireSound: {fileID: 8300000, guid: 7e17d033d35296646b994a96fa3e6135, type: 3}
-  dryFireSound: {fileID: 8300000, guid: a1cf04bda5cf5d34b9cf5bd496099a4c, type: 3}
-  reloadSound: {fileID: 8300000, guid: 87beb0fd3dff8bc47a149cbf4e59bc99, type: 3}
-  fireVolume: 0.42
-  dryFireVolume: 0.2
-  reloadVolume: 0.26
-  firePitchRandomness: 0.008
-  dryFirePitchRandomness: 0.005
-  reloadPitchRandomness: 0.01
   cameraRecoilPitch: 1.1
   cameraRecoilYaw: 0.2
   weaponRecoilPosition: {x: 0, y: 0.01, z: -0.05}

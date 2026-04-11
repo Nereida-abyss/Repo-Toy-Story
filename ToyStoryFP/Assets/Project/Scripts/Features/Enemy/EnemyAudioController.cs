@@ -4,12 +4,10 @@ using UnityEngine;
 public class EnemyAudioController : MonoBehaviour
 {
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip alertClip;
-    [SerializeField] [Range(0f, 1f)] private float alertVolume = 0.08f;
-    [SerializeField] private float minDistance = 1.2f;
-    [SerializeField] private float maxDistance = 16f;
-    [SerializeField] private float firePitchRandomness = 0.02f;
+    [SerializeField] private EnemyAudioProfile audioProfile;
+
     private bool hasLoggedMissingAudioSource;
+    private bool hasLoggedMissingAudioProfile;
 
     void Awake()
     {
@@ -26,14 +24,19 @@ public class EnemyAudioController : MonoBehaviour
     // Reproduce alerta.
     public void PlayAlert()
     {
-        AudioClip clipToPlay = alertClip != null ? alertClip : AudioManager.Instance?.GetEnemyAlertClip();
-        PlayOneShot(clipToPlay, alertVolume, 0.01f);
+        EnemyAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(
+            profile != null ? profile.AlertClip : null,
+            profile != null ? profile.AlertVolume : 0f,
+            0.01f);
     }
 
     // Reproduce arma disparo.
     public void PlayWeaponFire(AudioClip clip, float volume, float pitchRandomness)
     {
-        PlayOneShot(clip, volume, pitchRandomness > 0f ? pitchRandomness : firePitchRandomness);
+        EnemyAudioProfile profile = ResolveAudioProfile();
+        float resolvedPitchRandomness = profile != null ? profile.FirePitchRandomness : 0f;
+        PlayOneShot(clip, volume, pitchRandomness > 0f ? pitchRandomness : resolvedPitchRandomness);
     }
 
     // Resuelve audio origen.
@@ -59,6 +62,10 @@ public class EnemyAudioController : MonoBehaviour
             return;
         }
 
+        EnemyAudioProfile profile = ResolveAudioProfile();
+        float minDistance = profile != null ? profile.MinDistance : 1.2f;
+        float maxDistance = profile != null ? profile.MaxDistance : 16f;
+
         audioSource.playOnAwake = false;
         audioSource.loop = false;
         audioSource.spatialBlend = 1f;
@@ -77,5 +84,22 @@ public class EnemyAudioController : MonoBehaviour
 
         audioSource.pitch = 1f + Random.Range(-pitchRandomness, pitchRandomness);
         audioSource.PlayOneShot(clip, volume);
+    }
+
+    private EnemyAudioProfile ResolveAudioProfile()
+    {
+        if (audioProfile != null)
+        {
+            hasLoggedMissingAudioProfile = false;
+            return audioProfile;
+        }
+
+        if (!hasLoggedMissingAudioProfile)
+        {
+            hasLoggedMissingAudioProfile = true;
+            GameDebug.Advertencia("Audio", "EnemyAudioController necesita EnemyAudioProfile asignado en el prefab enemigo.", this);
+        }
+
+        return null;
     }
 }

@@ -22,18 +22,6 @@ public class WeaponScript : MonoBehaviour
     [SerializeField] private float reloadDuration = 1.2f;
     [SerializeField] private float dryFireCooldown = 0.2f;
 
-    [Header("Weapon Effects")]
-    public GameObject muzzleFlashPrefab;
-    public AudioClip fireSound;
-    [SerializeField] private AudioClip dryFireSound;
-    [SerializeField] private AudioClip reloadSound;
-    [SerializeField] [Range(0f, 1f)] private float fireVolume = 0.8f;
-    [SerializeField] [Range(0f, 1f)] private float dryFireVolume = 0.35f;
-    [SerializeField] [Range(0f, 1f)] private float reloadVolume = 0.5f;
-    [SerializeField] private float firePitchRandomness = 0.02f;
-    [SerializeField] private float dryFirePitchRandomness = 0.01f;
-    [SerializeField] private float reloadPitchRandomness = 0.015f;
-
     [Header("Camera Recoil")]
     [SerializeField] private float cameraRecoilPitch = 1.1f;
     [SerializeField] private float cameraRecoilYaw = 0.2f;
@@ -59,6 +47,7 @@ public class WeaponScript : MonoBehaviour
     private bool hasWarnedMissingStatsProfile;
     private bool hasWarnedMissingPlayerAudio;
     private bool hasWarnedMissingEnemyAudio;
+    private bool hasWarnedMissingPresentationProfile;
     private Vector3 baseLocalPosition;
     private Vector3 baseLocalEulerAngles;
     private Vector3 recoilPositionOffset;
@@ -67,6 +56,7 @@ public class WeaponScript : MonoBehaviour
     private Vector3 recoilRotationVelocity;
     private Vector3 equipPositionOffset;
     private Vector3 equipRotationOffset;
+    private WeaponPresentationProfile presentationProfile;
 
     public event Action<WeaponScript> StateChanged;
 
@@ -195,16 +185,8 @@ public class WeaponScript : MonoBehaviour
         reserveMagazineCapacity = Mathf.Max(0, statsProfile.ReserveMagazineCapacity);
         reloadDuration = Mathf.Max(0f, statsProfile.ReloadDuration);
         dryFireCooldown = Mathf.Max(0f, statsProfile.DryFireCooldown);
-        muzzleFlashPrefab = statsProfile.MuzzleFlashPrefab;
-        fireSound = statsProfile.FireSound;
-        dryFireSound = statsProfile.DryFireSound;
-        reloadSound = statsProfile.ReloadSound;
-        fireVolume = Mathf.Clamp01(statsProfile.FireVolume);
-        dryFireVolume = Mathf.Clamp01(statsProfile.DryFireVolume);
-        reloadVolume = Mathf.Clamp01(statsProfile.ReloadVolume);
-        firePitchRandomness = Mathf.Max(0f, statsProfile.FirePitchRandomness);
-        dryFirePitchRandomness = Mathf.Max(0f, statsProfile.DryFirePitchRandomness);
-        reloadPitchRandomness = Mathf.Max(0f, statsProfile.ReloadPitchRandomness);
+        presentationProfile = statsProfile.PresentationProfile;
+        hasWarnedMissingPresentationProfile = false;
         cameraRecoilPitch = statsProfile.CameraRecoilPitch;
         cameraRecoilYaw = statsProfile.CameraRecoilYaw;
         weaponRecoilPosition = statsProfile.WeaponRecoilPosition;
@@ -384,9 +366,11 @@ public class WeaponScript : MonoBehaviour
             Physics.DefaultRaycastLayers,
             QueryTriggerInteraction.Ignore))
         {
-            if (muzzleFlashPrefab != null)
+            GameObject muzzleFlashToSpawn = ResolveMuzzleFlashPrefab();
+
+            if (muzzleFlashToSpawn != null)
             {
-                Instantiate(muzzleFlashPrefab, hit.point, Quaternion.identity);
+                Instantiate(muzzleFlashToSpawn, hit.point, Quaternion.identity);
             }
 
             IDamageable damageable = hit.transform.GetComponentInParent<IDamageable>();
@@ -575,7 +559,8 @@ public class WeaponScript : MonoBehaviour
 
     private void PlayFireAudio()
     {
-        AudioClip clipToPlay = fireSound != null ? fireSound : AudioManager.Instance?.GetDefaultWeaponFireClip();
+        WeaponPresentationProfile.PresentationVariant variant = ResolvePresentationVariant();
+        AudioClip clipToPlay = variant != null ? variant.FireSound : null;
 
         if (clipToPlay == null)
         {
@@ -585,17 +570,24 @@ public class WeaponScript : MonoBehaviour
         if (playerOwnedWeapon)
         {
             WarnIfMissingPlayerAudio();
-            playerAudio?.PlayWeaponFire(clipToPlay, fireVolume, firePitchRandomness);
+            playerAudio?.PlayWeaponFire(
+                clipToPlay,
+                variant != null ? variant.FireVolume : 1f,
+                variant != null ? variant.FirePitchRandomness : 0f);
             return;
         }
 
         WarnIfMissingEnemyAudio();
-        enemyAudio?.PlayWeaponFire(clipToPlay, fireVolume, firePitchRandomness);
+        enemyAudio?.PlayWeaponFire(
+            clipToPlay,
+            variant != null ? variant.FireVolume : 1f,
+            variant != null ? variant.FirePitchRandomness : 0f);
     }
 
     private void PlayDryFireAudio()
     {
-        AudioClip clipToPlay = dryFireSound != null ? dryFireSound : AudioManager.Instance?.GetDefaultWeaponDryFireClip();
+        WeaponPresentationProfile.PresentationVariant variant = ResolvePresentationVariant();
+        AudioClip clipToPlay = variant != null ? variant.DryFireSound : null;
 
         if (!playerOwnedWeapon || clipToPlay == null)
         {
@@ -603,12 +595,16 @@ public class WeaponScript : MonoBehaviour
         }
 
         WarnIfMissingPlayerAudio();
-        playerAudio?.PlayDryFire(clipToPlay, dryFireVolume, dryFirePitchRandomness);
+        playerAudio?.PlayDryFire(
+            clipToPlay,
+            variant != null ? variant.DryFireVolume : 1f,
+            variant != null ? variant.DryFirePitchRandomness : 0f);
     }
 
     private void PlayReloadAudio()
     {
-        AudioClip clipToPlay = reloadSound != null ? reloadSound : AudioManager.Instance?.GetDefaultWeaponReloadClip();
+        WeaponPresentationProfile.PresentationVariant variant = ResolvePresentationVariant();
+        AudioClip clipToPlay = variant != null ? variant.ReloadSound : null;
 
         if (!playerOwnedWeapon || clipToPlay == null)
         {
@@ -616,7 +612,35 @@ public class WeaponScript : MonoBehaviour
         }
 
         WarnIfMissingPlayerAudio();
-        playerAudio?.PlayReload(clipToPlay, reloadVolume, reloadPitchRandomness);
+        playerAudio?.PlayReload(
+            clipToPlay,
+            variant != null ? variant.ReloadVolume : 1f,
+            variant != null ? variant.ReloadPitchRandomness : 0f);
+    }
+
+    private WeaponPresentationProfile.PresentationVariant ResolvePresentationVariant()
+    {
+        WeaponPresentationProfile resolvedProfile = presentationProfile;
+
+        if (resolvedProfile == null && statsProfile != null)
+        {
+            resolvedProfile = statsProfile.PresentationProfile;
+            presentationProfile = resolvedProfile;
+        }
+
+        if (resolvedProfile == null)
+        {
+            WarnIfMissingPresentationProfile();
+            return null;
+        }
+
+        return resolvedProfile.ResolveVariant(playerOwnedWeapon);
+    }
+
+    private GameObject ResolveMuzzleFlashPrefab()
+    {
+        WeaponPresentationProfile.PresentationVariant variant = ResolvePresentationVariant();
+        return variant != null ? variant.MuzzleFlashPrefab : null;
     }
 
     private void HandleDamageFeedback(DamageResult damageResult)
@@ -692,6 +716,17 @@ public class WeaponScript : MonoBehaviour
         }
 
         hasWarnedMissingStatsProfile = true;
-        GameDebug.Advertencia("Armas", $"El arma '{name}' no tiene WeaponStatsProfile asignado. Se usan valores locales de fallback.", this);
+        GameDebug.Advertencia("Armas", $"El arma '{name}' no tiene WeaponStatsProfile asignado.", this);
+    }
+
+    private void WarnIfMissingPresentationProfile()
+    {
+        if (hasWarnedMissingPresentationProfile)
+        {
+            return;
+        }
+
+        hasWarnedMissingPresentationProfile = true;
+        GameDebug.Advertencia("Armas", $"El arma '{name}' no tiene WeaponPresentationProfile asignado desde su WeaponStatsProfile.", this);
     }
 }
