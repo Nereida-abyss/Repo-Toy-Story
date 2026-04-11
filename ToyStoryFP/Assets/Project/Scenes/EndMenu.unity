@@ -4970,8 +4970,8 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  openClip: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
-  closeClip: {fileID: 8300000, guid: 28abffd6836ef6745ade07903864dfe8, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &566725200
@@ -15539,8 +15539,8 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  openClip: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
-  closeClip: {fileID: 8300000, guid: 28abffd6836ef6745ade07903864dfe8, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &1836136596
@@ -16404,6 +16404,97 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1923296818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923296815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd41c425a9ff8cf4ab92ed39a754f87a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  panelGameOver: {fileID: 372974926}
+  panelCredits: {fileID: 522448090}
+  panelButtons: {fileID: 1826629845}
+  panelSetting: {fileID: 697042446}
+  panelScore: {fileID: 2146100001}
+  creditsButton: {fileID: 1142174812}
+  creditsTextRoot: {fileID: 426714582}
+  scorePanelController: {fileID: 1923296819}
+  creditsProfile: {fileID: 11400000, guid: c9c70b0b4385431a96b5b65b34f40e85, type: 2}
+  gameOverDuration: 3
+  introSkipGracePeriod: 1.5
+  skipInputGracePeriod: 0.15
+  creditsFadeOutDuration: 0.6
+  skippedFadeOutDuration: 0.2
+  titleInDuration: 2.2
+  sectionInDuration: 1.2
+  sectionHoldDuration: 5.5
+  sectionOutDuration: 0.9
+  finalHoldDuration: 6
+  globalFadeOutDuration: 1.2
+  sectionGap: 0.6
+  titleStartScale: 0.88
+  titleStartYOffset: 45
+  sectionStartYOffset: 95
+  sequentialNameReveal: 1
+  nameRevealDuration: 0.26
+  nameRevealGap: 0.08
+  nameStartYOffset: 28
+  sectionDimAlpha: 0.3
+  sectionFocusAlpha: 1
+  lineStagger: 0.2
+  easeType: 0
+  targetCreditsDurationMin: 7
+  targetCreditsDurationMax: 9
+  introBeatDuration: 0.75
+  perNameRevealDuration: 0.55
+  perNameGap: 0.14
+  comboHoldDuration: 0.65
+  finalStingerDuration: 1.45
+  outroFadeDuration: 0.65
+  introStartScale: 0.92
+  namePunchScale: 0.1
+  panelPulseAmount: 0.03
+  previousNameAlpha: 0.78
+  microShakeAmount: 4
+  microShakeDuration: 0.08
+  creditsAudioSource: {fileID: 1923296820}
+  nameHitClip: {fileID: 0}
+  nameTickClip: {fileID: 0}
+  introWhooshClip: {fileID: 0}
+  finalStingClip: {fileID: 0}
+  outroSwishClip: {fileID: 0}
+  useAudioManagerFallback: 1
+  fallbackCreditsDuration: 3
+  textStagger: 0.18
+  textFadeInDuration: 0.45
+  textMoveDuration: 0.7
+  textStartYOffset: 70
+--- !u!114 &1923296819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923296815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b689ce5af39495eb85afb55e6e54f4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScorePanelController
+  endMenuCanvasRoot: {fileID: 0}
+  previousPanelToHide: {fileID: 1826629845}
+  panelScoreRoot: {fileID: 2146100001}
+  scoreButton: {fileID: 1796683308}
+  closeButton: {fileID: 2146100053}
+  bestCoinsText: {fileID: 2146100023}
+  bestWaveText: {fileID: 2146100033}
+  bestBotsText: {fileID: 2146100043}
+  closeKey: 27
 --- !u!82 &1923296820
 AudioSource:
   m_ObjectHideFlags: 0
@@ -16501,98 +16592,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  mute: 0
---- !u!114 &1923296818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1923296815}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd41c425a9ff8cf4ab92ed39a754f87a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  creditsProfile: {fileID: 11400000, guid: c9c70b0b4385431a96b5b65b34f40e85, type: 2}
-  panelGameOver: {fileID: 372974926}
-  panelCredits: {fileID: 522448090}
-  panelButtons: {fileID: 1826629845}
-  panelSetting: {fileID: 697042446}
-  panelScore: {fileID: 2146100001}
-  creditsButton: {fileID: 1142174812}
-  creditsTextRoot: {fileID: 426714582}
-  scorePanelController: {fileID: 1923296819}
-  gameOverDuration: 3
-  introSkipGracePeriod: 1.5
-  skipInputGracePeriod: 0.15
-  creditsFadeOutDuration: 0.6
-  skippedFadeOutDuration: 0.2
-  titleInDuration: 2.2
-  sectionInDuration: 1.2
-  sectionHoldDuration: 5.5
-  sectionOutDuration: 0.9
-  finalHoldDuration: 6
-  globalFadeOutDuration: 1.2
-  sectionGap: 0.6
-  titleStartScale: 0.88
-  titleStartYOffset: 45
-  sectionStartYOffset: 95
-  sequentialNameReveal: 1
-  nameRevealDuration: 0.26
-  nameRevealGap: 0.08
-  nameStartYOffset: 28
-  sectionDimAlpha: 0.3
-  sectionFocusAlpha: 1
-  lineStagger: 0.2
-  easeType: 0
-  targetCreditsDurationMin: 7
-  targetCreditsDurationMax: 9
-  introBeatDuration: 0.75
-  perNameRevealDuration: 0.55
-  perNameGap: 0.14
-  comboHoldDuration: 0.65
-  finalStingerDuration: 1.45
-  outroFadeDuration: 0.65
-  introStartScale: 0.92
-  namePunchScale: 0.1
-  panelPulseAmount: 0.03
-  previousNameAlpha: 0.78
-  microShakeAmount: 4
-  microShakeDuration: 0.08
-  creditsAudioSource: {fileID: 1923296820}
-  nameHitClip: {fileID: 0}
-  nameTickClip: {fileID: 0}
-  introWhooshClip: {fileID: 0}
-  finalStingClip: {fileID: 0}
-  outroSwishClip: {fileID: 0}
-  useAudioManagerFallback: 1
-  fallbackCreditsDuration: 3
-  textStagger: 0.18
-  textFadeInDuration: 0.45
-  textMoveDuration: 0.7
-  textStartYOffset: 70
---- !u!114 &1923296819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1923296815}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b689ce5af39495eb85afb55e6e54f4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScorePanelController
-  endMenuCanvasRoot: {fileID: 0}
-  previousPanelToHide: {fileID: 1826629845}
-  panelScoreRoot: {fileID: 2146100001}
-  scoreButton: {fileID: 1796683308}
-  closeButton: {fileID: 2146100053}
-  bestCoinsText: {fileID: 2146100023}
-  bestWaveText: {fileID: 2146100033}
-  bestBotsText: {fileID: 2146100043}
-  closeKey: 27
 --- !u!1 &1943347887
 GameObject:
   m_ObjectHideFlags: 0
@@ -18328,8 +18327,8 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   useSharedAudioSource: 1
   useAudioManagerFallback: 0
-  openClip: {fileID: 8300000, guid: 7682225552769a84eaa27d3c5ccb73d5, type: 3}
-  closeClip: {fileID: 8300000, guid: 28abffd6836ef6745ade07903864dfe8, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
   openVolume: 0.5
   closeVolume: 0.38
 --- !u!1 &2146100011

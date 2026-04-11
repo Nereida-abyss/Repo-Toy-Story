@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b8647118a5b4134bfec4ff4a5fefe65, type: 3}
   m_Name: DefaultPlayerAudioProfile
   m_EditorClassIdentifier: 
-  jumpClip: {fileID: 0}
+  jumpClip: {fileID: 8300000, guid: 3b671fcfca24e3d4c90cbae5d305bf8e, type: 3}
   jumpVolume: 0.12
   footstepClips: []
   footstepVolume: 0.06
@@ -20,14 +20,14 @@ MonoBehaviour:
   footstepMaxInterval: 0.5
   footstepMinMoveAmount: 0.2
   footstepPitchRandomness: 0.03
-  weaponSwitchClip: {fileID: 0}
+  weaponSwitchClip: {fileID: 8300000, guid: 53d1af525c81dd64b888d66b4c892419, type: 3}
   weaponSwitchVolume: 0.12
-  coinPickupClip: {fileID: 0}
+  coinPickupClip: {fileID: 8300000, guid: b29b1159a0cad1f4ea9e7bc44bc013be, type: 3}
   coinPickupVolume: 0.24
   coinPickupPitchRandomness: 0.04
-  killConfirmClip: {fileID: 0}
+  killConfirmClip: {fileID: 8300000, guid: 40fc46528fc5a344fa900d91087f192c, type: 3}
   killConfirmVolume: 0.3
-  hurtClip: {fileID: 0}
+  hurtClip: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
   hurtVolume: 0.2
   hurtPitchRandomness: 0.035
   hurtMinInterval: 0.08
