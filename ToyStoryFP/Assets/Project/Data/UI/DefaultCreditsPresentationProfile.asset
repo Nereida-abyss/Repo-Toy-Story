@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65df05482f404c5e8a842e7aa2acf8cd, type: 3}
   m_Name: DefaultCreditsPresentationProfile
   m_EditorClassIdentifier: 
-  gameOverDuration: 3
+  gameOverDuration: 5
   introSkipGracePeriod: 1.5
   skipInputGracePeriod: 0.15
   creditsFadeOutDuration: 0.6
