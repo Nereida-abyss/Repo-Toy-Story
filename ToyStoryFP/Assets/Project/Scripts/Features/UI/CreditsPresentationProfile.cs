@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum CreditsEaseType
 {
@@ -8,7 +9,7 @@ public enum CreditsEaseType
 }
 
 [CreateAssetMenu(fileName = "DefaultCreditsPresentationProfile", menuName = "UI/Credits Presentation Profile")]
-public class CreditsPresentationProfile : ScriptableObject
+public class CreditsPresentationProfile : ScriptableObject, ISerializationCallbackReceiver
 {
     [Header("Sequence Timing")]
     [SerializeField] private float gameOverDuration = 3f;
@@ -56,11 +57,17 @@ public class CreditsPresentationProfile : ScriptableObject
     [SerializeField] private float microShakeDuration = 0.08f;
 
     [Header("Credits Audio")]
-    [SerializeField] private AudioClip nameHitClip;
-    [SerializeField] private AudioClip nameTickClip;
-    [SerializeField] private AudioClip introWhooshClip;
-    [SerializeField] private AudioClip finalStingClip;
-    [SerializeField] private AudioClip outroSwishClip;
+    [SerializeField] private ConfigurableAudioClip nameHitAudio = new ConfigurableAudioClip();
+    [SerializeField] private ConfigurableAudioClip nameTickAudio = new ConfigurableAudioClip();
+    [SerializeField] private ConfigurableAudioClip introWhooshAudio = new ConfigurableAudioClip();
+    [SerializeField] private ConfigurableAudioClip finalStingAudio = new ConfigurableAudioClip();
+    [SerializeField] private ConfigurableAudioClip outroSwishAudio = new ConfigurableAudioClip();
+
+    [FormerlySerializedAs("nameHitClip")] [SerializeField, HideInInspector] private AudioClip legacyNameHitClip;
+    [FormerlySerializedAs("nameTickClip")] [SerializeField, HideInInspector] private AudioClip legacyNameTickClip;
+    [FormerlySerializedAs("introWhooshClip")] [SerializeField, HideInInspector] private AudioClip legacyIntroWhooshClip;
+    [FormerlySerializedAs("finalStingClip")] [SerializeField, HideInInspector] private AudioClip legacyFinalStingClip;
+    [FormerlySerializedAs("outroSwishClip")] [SerializeField, HideInInspector] private AudioClip legacyOutroSwishClip;
 
     [Header("Fallback")]
     [SerializeField] private float fallbackCreditsDuration = 3f;
@@ -106,14 +113,49 @@ public class CreditsPresentationProfile : ScriptableObject
     public float PreviousNameAlpha => previousNameAlpha;
     public float MicroShakeAmount => microShakeAmount;
     public float MicroShakeDuration => microShakeDuration;
-    public AudioClip NameHitClip => nameHitClip;
-    public AudioClip NameTickClip => nameTickClip;
-    public AudioClip IntroWhooshClip => introWhooshClip;
-    public AudioClip FinalStingClip => finalStingClip;
-    public AudioClip OutroSwishClip => outroSwishClip;
+    public AudioClip NameHitClip => nameHitAudio != null ? nameHitAudio.Clip : null;
+    public float NameHitVolume => nameHitAudio != null ? nameHitAudio.Volume : 1f;
+    public AudioClip NameTickClip => nameTickAudio != null ? nameTickAudio.Clip : null;
+    public float NameTickVolume => nameTickAudio != null ? nameTickAudio.Volume : 1f;
+    public AudioClip IntroWhooshClip => introWhooshAudio != null ? introWhooshAudio.Clip : null;
+    public float IntroWhooshVolume => introWhooshAudio != null ? introWhooshAudio.Volume : 1f;
+    public AudioClip FinalStingClip => finalStingAudio != null ? finalStingAudio.Clip : null;
+    public float FinalStingVolume => finalStingAudio != null ? finalStingAudio.Volume : 1f;
+    public AudioClip OutroSwishClip => outroSwishAudio != null ? outroSwishAudio.Clip : null;
+    public float OutroSwishVolume => outroSwishAudio != null ? outroSwishAudio.Volume : 1f;
     public float FallbackCreditsDuration => fallbackCreditsDuration;
     public float TextStagger => textStagger;
     public float TextFadeInDuration => textFadeInDuration;
     public float TextMoveDuration => textMoveDuration;
     public float TextStartYOffset => textStartYOffset;
+
+    public void OnAfterDeserialize()
+    {
+        MigrateLegacyData();
+    }
+
+    public void OnBeforeSerialize()
+    {
+        MigrateLegacyData();
+    }
+
+    private void OnValidate()
+    {
+        MigrateLegacyData();
+    }
+
+    private void MigrateLegacyData()
+    {
+        nameHitAudio ??= new ConfigurableAudioClip();
+        nameTickAudio ??= new ConfigurableAudioClip();
+        introWhooshAudio ??= new ConfigurableAudioClip();
+        finalStingAudio ??= new ConfigurableAudioClip();
+        outroSwishAudio ??= new ConfigurableAudioClip();
+
+        nameHitAudio.ApplyLegacyClip(legacyNameHitClip);
+        nameTickAudio.ApplyLegacyClip(legacyNameTickClip);
+        introWhooshAudio.ApplyLegacyClip(legacyIntroWhooshClip);
+        finalStingAudio.ApplyLegacyClip(legacyFinalStingClip);
+        outroSwishAudio.ApplyLegacyClip(legacyOutroSwishClip);
+    }
 }

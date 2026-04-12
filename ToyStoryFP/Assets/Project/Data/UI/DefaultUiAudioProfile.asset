@@ -12,7 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94f5d8f9c5e24cbb9ecf6a5ae4977c11, type: 3}
   m_Name: DefaultUiAudioProfile
   m_EditorClassIdentifier: 
-  clickClip: {fileID: 8300000, guid: c4ade59720ca758408ccdcbeb9cb5098, type: 3}
-  hoverClip: {fileID: 8300000, guid: 1c68a3829e5c02041b0c5257e6226707, type: 3}
-  panelOpenClip: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
-  panelCloseClip: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+  clickAudio:
+    clip: {fileID: 8300000, guid: c4ade59720ca758408ccdcbeb9cb5098, type: 3}
+    volume: 1
+  hoverAudio:
+    clip: {fileID: 8300000, guid: 1c68a3829e5c02041b0c5257e6226707, type: 3}
+    volume: 1
+  panelOpenAudio:
+    clip: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
+    volume: 1
+  panelCloseAudio:
+    clip: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
+    volume: 1

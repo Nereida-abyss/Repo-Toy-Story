@@ -83,7 +83,7 @@ public partial class PanelController
 
         if (!skipRequested)
         {
-            PlayCreditsAudio(creditsProfile != null ? creditsProfile.OutroSwishClip : null);
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.OutroSwishClip : null, creditsProfile != null ? creditsProfile.OutroSwishVolume : 1f);
         }
 
         yield return FadeCanvasGroupAlpha(creditsCanvasGroup, fadeDuration);

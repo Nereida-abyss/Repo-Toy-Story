@@ -103,9 +103,13 @@ public class ProjectDataValidationTests
         UiAudioProfile profile = AssetDatabase.LoadAssetAtPath<UiAudioProfile>(UiAudioProfileAssetPath);
         Assert.That(profile, Is.Not.Null);
         Assert.That(profile.ClickClip, Is.Not.Null);
+        Assert.That(profile.ClickVolume, Is.InRange(0f, 1f));
         Assert.That(profile.HoverClip, Is.Not.Null);
+        Assert.That(profile.HoverVolume, Is.InRange(0f, 1f));
         Assert.That(profile.PanelOpenClip, Is.Not.Null);
+        Assert.That(profile.PanelOpenVolume, Is.InRange(0f, 1f));
         Assert.That(profile.PanelCloseClip, Is.Not.Null);
+        Assert.That(profile.PanelCloseVolume, Is.InRange(0f, 1f));
     }
 
     [Test]
@@ -122,13 +126,35 @@ public class ProjectDataValidationTests
         CreditsPresentationProfile profile = AssetDatabase.LoadAssetAtPath<CreditsPresentationProfile>(CreditsProfileAssetPath);
         Assert.That(profile, Is.Not.Null);
         Assert.That(profile.IntroWhooshClip, Is.Not.Null);
+        Assert.That(profile.IntroWhooshVolume, Is.InRange(0f, 1f));
         Assert.That(profile.NameHitClip, Is.Not.Null);
+        Assert.That(profile.NameHitVolume, Is.InRange(0f, 1f));
         Assert.That(profile.NameTickClip, Is.Not.Null);
+        Assert.That(profile.NameTickVolume, Is.InRange(0f, 1f));
         Assert.That(profile.FinalStingClip, Is.Not.Null);
+        Assert.That(profile.FinalStingVolume, Is.InRange(0f, 1f));
         Assert.That(profile.OutroSwishClip, Is.Not.Null);
+        Assert.That(profile.OutroSwishVolume, Is.InRange(0f, 1f));
 
         string assetText = ReadAssetText(CreditsProfileAssetPath);
         Assert.That(assetText, Does.Not.Contain("useAudioManagerFallback:"));
+    }
+
+    [Test]
+    public void ProjectAudioCatalog_HasRequiredClips_AndVolumes()
+    {
+        ProjectAudioCatalog catalog = AssetDatabase.LoadAssetAtPath<ProjectAudioCatalog>(ProjectAudioCatalogAssetPath);
+        Assert.That(catalog, Is.Not.Null);
+        Assert.That(catalog.Music.MainMenuAudio.Clip, Is.Not.Null);
+        Assert.That(catalog.Music.MainMenuAudio.Volume, Is.InRange(0f, 1f));
+        Assert.That(catalog.Music.GameplayAudio.Clip, Is.Not.Null);
+        Assert.That(catalog.Music.GameplayAudio.Volume, Is.InRange(0f, 1f));
+        Assert.That(catalog.Music.ShopAudio.Clip, Is.Not.Null);
+        Assert.That(catalog.Music.ShopAudio.Volume, Is.InRange(0f, 1f));
+        Assert.That(catalog.Music.EndMenuAudio.Clip, Is.Not.Null);
+        Assert.That(catalog.Music.EndMenuAudio.Volume, Is.InRange(0f, 1f));
+        Assert.That(catalog.Waves.AnnouncementAudio.Clip, Is.Not.Null);
+        Assert.That(catalog.Waves.AnnouncementAudio.Volume, Is.InRange(0f, 1f));
     }
 
     [Test]

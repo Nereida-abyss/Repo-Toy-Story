@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: ProjectAudioCatalog
   m_EditorClassIdentifier: 
   music:
-    mainMenu: {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
-    gameplay: {fileID: 8300000, guid: cd3a806230632c043a19e317c52b2e53, type: 3}
-    shop: {fileID: 8300000, guid: 887f145f9d6cd2543a062cda4e7f64f6, type: 3}
-    endMenu: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
+    mainMenuAudio:
+      clip: {fileID: 8300000, guid: 54344250593eb4b40980364b98dfc8c5, type: 3}
+      volume: 1
+    gameplayAudio:
+      clip: {fileID: 8300000, guid: cd3a806230632c043a19e317c52b2e53, type: 3}
+      volume: 1
+    shopAudio:
+      clip: {fileID: 8300000, guid: 887f145f9d6cd2543a062cda4e7f64f6, type: 3}
+      volume: 1
+    endMenuAudio:
+      clip: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
+      volume: 1
   waves:
-    announcement: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
+    announcementAudio:
+      clip: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
+      volume: 1

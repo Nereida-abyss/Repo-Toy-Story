@@ -321,14 +321,14 @@ public partial class PanelController
         finalDuration = Mathf.Max(0.01f, finalDuration * scale);
     }
 
-    private void PlayCreditsAudio(AudioClip clip)
+    private void PlayCreditsAudio(AudioClip clip, float volume = 1f)
     {
         if (creditsAudioSource == null || clip == null)
         {
             return;
         }
 
-        creditsAudioSource.PlayOneShot(clip);
+        creditsAudioSource.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 
     private bool ShouldSkipCredits(bool allowSkip, float skipAllowedAtTime)

@@ -62,6 +62,7 @@ public class WaveAnnouncementUI : MonoBehaviour
         }
 
         AudioClip clip = audioManager.GetWaveAnnouncementClip();
+        float volume = audioManager.GetWaveAnnouncementVolume();
         AudioSource source = audioManager.SharedSfxSource;
 
         if (clip == null || source == null)
@@ -70,7 +71,7 @@ public class WaveAnnouncementUI : MonoBehaviour
             return;
         }
 
-        source.PlayOneShot(clip);
+        source.PlayOneShot(clip, volume);
     }
 
     // Gestiona registro faltante referencias.

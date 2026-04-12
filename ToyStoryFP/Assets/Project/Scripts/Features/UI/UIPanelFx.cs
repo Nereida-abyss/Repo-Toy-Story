@@ -143,7 +143,7 @@ public class UIPanelFx : MonoBehaviour
         }
         else
         {
-            PlayPanelSound(ResolveOpenClip(), openVolume);
+        PlayPanelSound(ResolveOpenClip(), openVolume * ResolveOpenAssetVolume());
         }
     }
 
@@ -171,7 +171,7 @@ public class UIPanelFx : MonoBehaviour
             return;
         }
 
-        PlayPanelSound(ResolveCloseClip(), closeVolume);
+        PlayPanelSound(ResolveCloseClip(), closeVolume * ResolveCloseAssetVolume());
         StopActiveRoutine();
         activeRoutine = StartCoroutine(PlayCloseRoutine());
     }
@@ -420,5 +420,34 @@ public class UIPanelFx : MonoBehaviour
 
         AudioClip closeFallback = AudioManager.Instance.GetUiPanelCloseClip();
         return closeFallback != null ? closeFallback : AudioManager.Instance.GetUiClickClip();
+    }
+
+    private float ResolveOpenAssetVolume()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return 1f;
+        }
+
+        AudioClip openFallback = AudioManager.Instance.GetUiPanelOpenClip();
+
+        if (openFallback != null)
+        {
+            return AudioManager.Instance.GetUiPanelOpenVolume();
+        }
+
+        openFallback = AudioManager.Instance.GetUiHoverClip();
+        return openFallback != null ? AudioManager.Instance.GetUiHoverVolume() : AudioManager.Instance.GetUiClickVolume();
+    }
+
+    private float ResolveCloseAssetVolume()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return 1f;
+        }
+
+        AudioClip closeFallback = AudioManager.Instance.GetUiPanelCloseClip();
+        return closeFallback != null ? AudioManager.Instance.GetUiPanelCloseVolume() : AudioManager.Instance.GetUiClickVolume();
     }
 }

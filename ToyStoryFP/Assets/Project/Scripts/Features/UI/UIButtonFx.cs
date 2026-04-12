@@ -217,7 +217,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return;
         }
 
-        PlayOneShot(ResolveClickClip(), clickVolume);
+        PlayOneShot(ResolveClickClip(), clickVolume * ResolveClickAssetVolume());
     }
 
     // Interpola escala y color para que el botón no cambie de estado a saltos.
@@ -297,7 +297,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         lastHoverSfxTime = Time.unscaledTime;
 
-        PlayOneShot(ResolveHoverClip(), hoverVolume);
+        PlayOneShot(ResolveHoverClip(), hoverVolume * ResolveHoverAssetVolume());
     }
 
     // Acepta solo clic izquierdo como pulsación válida de ratón.
@@ -374,5 +374,21 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         AudioClip hoverFallback = AudioManager.Instance.GetUiHoverClip();
         return hoverFallback != null ? hoverFallback : AudioManager.Instance.GetUiClickClip();
+    }
+
+    private float ResolveClickAssetVolume()
+    {
+        return AudioManager.Instance != null ? AudioManager.Instance.GetUiClickVolume() : 1f;
+    }
+
+    private float ResolveHoverAssetVolume()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return 1f;
+        }
+
+        AudioClip hoverFallback = AudioManager.Instance.GetUiHoverClip();
+        return hoverFallback != null ? AudioManager.Instance.GetUiHoverVolume() : AudioManager.Instance.GetUiClickVolume();
     }
 }

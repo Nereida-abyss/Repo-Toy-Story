@@ -46,7 +46,7 @@ public partial class PanelController
             entry.RectTransform.anchoredPosition = entry.OriginalAnchoredPosition;
         }
 
-        PlayCreditsAudio(creditsProfile != null ? creditsProfile.IntroWhooshClip : null);
+        PlayCreditsAudio(creditsProfile != null ? creditsProfile.IntroWhooshClip : null, creditsProfile != null ? creditsProfile.IntroWhooshVolume : 1f);
         yield return AnimateIntroBeat(animatedRoot, baseRootScale, Mathf.Max(0.01f, introBeatDuration), Mathf.Max(0.01f, introStartScale), clampedPulseAmount, allowSkip, skipAllowedAtTime, skipAction);
 
         if (localSkipRequested)
@@ -73,7 +73,7 @@ public partial class PanelController
             currentName.RectTransform.localScale = Vector3.one;
             currentName.RectTransform.anchoredPosition = currentName.OriginalAnchoredPosition + Vector2.up * Mathf.Max(0f, nameStartYOffset);
 
-            PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameHitClip : null);
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameHitClip : null, creditsProfile != null ? creditsProfile.NameHitVolume : 1f);
             float elapsed = 0f;
 
             while (elapsed < scaledNameRevealDuration)
@@ -124,7 +124,7 @@ public partial class PanelController
 
             if (scaledNameGap > 0f && i < names.Count - 1)
             {
-                PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameTickClip : null);
+                PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameTickClip : null, creditsProfile != null ? creditsProfile.NameTickVolume : 1f);
                 yield return HoldDuration(scaledNameGap, allowSkip, skipAllowedAtTime, skipAction);
             }
 
@@ -177,7 +177,7 @@ public partial class PanelController
             finalEntry.RectTransform.localScale = Vector3.one;
             finalEntry.RectTransform.anchoredPosition = finalEntry.OriginalAnchoredPosition + Vector2.up * Mathf.Max(nameStartYOffset, sectionStartYOffset * 0.45f);
             SetTextAlpha(finalEntry, 0f);
-            PlayCreditsAudio(creditsProfile != null ? creditsProfile.FinalStingClip : null);
+            PlayCreditsAudio(creditsProfile != null ? creditsProfile.FinalStingClip : null, creditsProfile != null ? creditsProfile.FinalStingVolume : 1f);
             float elapsed = 0f;
 
             while (elapsed < scaledFinalDuration)

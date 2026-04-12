@@ -107,10 +107,11 @@ public class AudioManager : MonoBehaviour
     public void PlayMusic(int musicIndex)
     {
         AudioClip clipFromCatalog = GetMusicClipFromLegacyIndex(musicIndex);
+        float volumeFromCatalog = GetMusicVolumeFromLegacyIndex(musicIndex);
 
         if (clipFromCatalog != null)
         {
-            PlayMusicClip(clipFromCatalog);
+            PlayMusicClip(clipFromCatalog, volumeFromCatalog);
             return;
         }
 
@@ -131,7 +132,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        PlayMusicClip(musicList[musicIndex]);
+        PlayMusicClip(musicList[musicIndex], 1f);
     }
 
     // Reproduce SFX.
@@ -154,6 +155,11 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMusicClip(AudioClip clip, bool loop = true)
     {
+        PlayMusicClip(clip, 1f, loop);
+    }
+
+    public void PlayMusicClip(AudioClip clip, float clipVolume, bool loop = true)
+    {
         AudioSource resolvedMusicSource = ResolveMusicSource();
 
         if (resolvedMusicSource == null || clip == null)
@@ -163,40 +169,70 @@ public class AudioManager : MonoBehaviour
 
         resolvedMusicSource.clip = clip;
         resolvedMusicSource.loop = loop;
-        resolvedMusicSource.volume = musicVolume;
+        resolvedMusicSource.volume = Mathf.Clamp01(musicVolume * Mathf.Clamp01(clipVolume));
         resolvedMusicSource.Play();
     }
 
     public AudioClip GetMainMenuMusicClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.mainMenu : null;
+        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.MainMenuAudio.Clip : null;
         return clip != null ? clip : GetLegacyMusicClip(mainMenuMusicIndex);
+    }
+
+    public float GetMainMenuMusicVolume()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.MainMenuAudio.Volume : 1f;
     }
 
     public AudioClip GetGameplayMusicClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.gameplay : null;
+        return resolvedCatalog != null ? resolvedCatalog.Music.GameplayAudio.Clip : null;
+    }
+
+    public float GetGameplayMusicVolume()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.GameplayAudio.Volume : 1f;
     }
 
     public AudioClip GetShopMusicClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.shop : null;
+        return resolvedCatalog != null ? resolvedCatalog.Music.ShopAudio.Clip : null;
+    }
+
+    public float GetShopMusicVolume()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.ShopAudio.Volume : 1f;
     }
 
     public AudioClip GetEndMenuMusicClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.endMenu : null;
+        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.EndMenuAudio.Clip : null;
         return clip != null ? clip : GetLegacyMusicClip(EndMenuMusicLegacyIndex);
+    }
+
+    public float GetEndMenuMusicVolume()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.EndMenuAudio.Volume : 1f;
     }
 
     public AudioClip GetWaveAnnouncementClip()
     {
         ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Waves.announcement : null;
+        return resolvedCatalog != null ? resolvedCatalog.Waves.AnnouncementAudio.Clip : null;
+    }
+
+    public float GetWaveAnnouncementVolume()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Waves.AnnouncementAudio.Volume : 1f;
     }
 
     public AudioClip GetUiClickClip()
@@ -205,10 +241,22 @@ public class AudioManager : MonoBehaviour
         return profile != null ? profile.ClickClip : null;
     }
 
+    public float GetUiClickVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ClickVolume : 1f;
+    }
+
     public AudioClip GetUiHoverClip()
     {
         UiAudioProfile profile = ResolveUiAudioProfile();
         return profile != null ? profile.HoverClip : null;
+    }
+
+    public float GetUiHoverVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.HoverVolume : 1f;
     }
 
     public AudioClip GetUiPanelOpenClip()
@@ -217,10 +265,22 @@ public class AudioManager : MonoBehaviour
         return profile != null ? profile.PanelOpenClip : null;
     }
 
+    public float GetUiPanelOpenVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelOpenVolume : 1f;
+    }
+
     public AudioClip GetUiPanelCloseClip()
     {
         UiAudioProfile profile = ResolveUiAudioProfile();
         return profile != null ? profile.PanelCloseClip : null;
+    }
+
+    public float GetUiPanelCloseVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelCloseVolume : 1f;
     }
 
     public AudioClip GetSceneMusicClip(string sceneName)
@@ -231,6 +291,16 @@ public class AudioManager : MonoBehaviour
         }
 
         return GetMusicClipForScene(sceneName.Trim());
+    }
+
+    public float GetSceneMusicVolume(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName))
+        {
+            return 1f;
+        }
+
+        return GetMusicVolumeForScene(sceneName.Trim());
     }
 
     // Sincroniza la musica segun la escena activa sin pisar escenas no configuradas.
@@ -255,7 +325,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        resolvedMusicSource.volume = musicVolume;
+        resolvedMusicSource.volume = Mathf.Clamp01(musicVolume * GetMusicVolumeForScene(sceneName));
         resolvedMusicSource.loop = true;
 
         bool wrongClip = resolvedMusicSource.clip != targetClip;
@@ -313,6 +383,21 @@ public class AudioManager : MonoBehaviour
                 return GetEndMenuMusicClip();
             default:
                 return null;
+        }
+    }
+
+    private float GetMusicVolumeForScene(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case MainMenuSceneName:
+                return GetMainMenuMusicVolume();
+            case GamePlaySceneName:
+                return GetGameplayMusicVolume();
+            case EndMenuSceneName:
+                return GetEndMenuMusicVolume();
+            default:
+                return 1f;
         }
     }
 
@@ -402,6 +487,23 @@ public class AudioManager : MonoBehaviour
                 return GetEndMenuMusicClip();
             default:
                 return null;
+        }
+    }
+
+    private float GetMusicVolumeFromLegacyIndex(int musicIndex)
+    {
+        switch (musicIndex)
+        {
+            case 0:
+                return GetMainMenuMusicVolume();
+            case 1:
+                return GetGameplayMusicVolume();
+            case 2:
+                return GetShopMusicVolume();
+            case 3:
+                return GetEndMenuMusicVolume();
+            default:
+                return 1f;
         }
     }
 
