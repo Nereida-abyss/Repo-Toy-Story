@@ -26,4 +26,15 @@ public class ArchitectureCompatibilityTests
         Assert.That(typeof(EnemyController).GetMethod("NotifyAllyAlert", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
         Assert.That(typeof(EnemyController).GetMethod("SetAvoidancePriority", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
     }
+
+    [Test]
+    public void AudioEntryPoints_ExposeNewFeedbackSounds()
+    {
+        Assert.That(typeof(PlayerAudioController).GetMethod("PlayHitmarker", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(PlayerAudioController).GetMethod("PlayDeath", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseSuccessClip", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseSuccessVolume", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseFailedClip", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseFailedVolume", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+    }
 }

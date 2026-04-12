@@ -283,6 +283,30 @@ public class AudioManager : MonoBehaviour
         return profile != null ? profile.PanelCloseVolume : 1f;
     }
 
+    public AudioClip GetUiShopPurchaseSuccessClip()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseSuccessClip : null;
+    }
+
+    public float GetUiShopPurchaseSuccessVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseSuccessVolume : 1f;
+    }
+
+    public AudioClip GetUiShopPurchaseFailedClip()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseFailedClip : null;
+    }
+
+    public float GetUiShopPurchaseFailedVolume()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseFailedVolume : 1f;
+    }
+
     public AudioClip GetSceneMusicClip(string sceneName)
     {
         if (string.IsNullOrWhiteSpace(sceneName))

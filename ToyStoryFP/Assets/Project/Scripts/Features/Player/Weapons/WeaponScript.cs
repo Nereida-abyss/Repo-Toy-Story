@@ -660,6 +660,8 @@ public class WeaponScript : MonoBehaviour
         }
 
         CrosshairFeedbackController.Instance?.PlayHitMarker();
+        WarnIfMissingPlayerAudio();
+        playerAudio?.PlayHitmarker();
     }
 
     private void NotifyEnemyAggro(Transform hitTransform, Vector3 hitPoint, DamageResult damageResult)

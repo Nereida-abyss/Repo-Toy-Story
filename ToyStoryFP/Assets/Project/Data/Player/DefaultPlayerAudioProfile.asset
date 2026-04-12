@@ -29,7 +29,11 @@ MonoBehaviour:
   coinPickupPitchRandomness: 0.04
   killConfirmClip: {fileID: 8300000, guid: 40fc46528fc5a344fa900d91087f192c, type: 3}
   killConfirmVolume: 0.3
+  hitmarkerClip: {fileID: 8300000, guid: be334634bc0f581408343532b9925cee, type: 3}
+  hitmarkerVolume: 0.2
   hurtClip: {fileID: 8300000, guid: 7dd096013a5f129419b9c0456b5aba13, type: 3}
   hurtVolume: 0.2
   hurtPitchRandomness: 0.035
   hurtMinInterval: 0.08
+  deathClip: {fileID: 8300000, guid: 928a4c751c887c743adfdd2c26cf43b4, type: 3}
+  deathVolume: 0.24

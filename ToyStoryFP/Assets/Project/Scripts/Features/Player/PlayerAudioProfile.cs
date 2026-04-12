@@ -28,11 +28,19 @@ public class PlayerAudioProfile : ScriptableObject
     [SerializeField] private AudioClip killConfirmClip;
     [SerializeField] [Range(0f, 1f)] private float killConfirmVolume = 0.22f;
 
+    [Header("Hitmarker")]
+    [SerializeField] private AudioClip hitmarkerClip;
+    [SerializeField] [Range(0f, 1f)] private float hitmarkerVolume = 0.2f;
+
     [Header("Damage")]
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] [Range(0f, 1f)] private float hurtVolume = 0.2f;
     [SerializeField] private float hurtPitchRandomness = 0.035f;
     [SerializeField] private float hurtMinInterval = 0.08f;
+
+    [Header("Death")]
+    [SerializeField] private AudioClip deathClip;
+    [SerializeField] [Range(0f, 1f)] private float deathVolume = 0.24f;
 
     public AudioClip JumpClip => jumpClip;
     public float JumpVolume => jumpVolume;
@@ -49,8 +57,12 @@ public class PlayerAudioProfile : ScriptableObject
     public float CoinPickupPitchRandomness => coinPickupPitchRandomness;
     public AudioClip KillConfirmClip => killConfirmClip;
     public float KillConfirmVolume => killConfirmVolume;
+    public AudioClip HitmarkerClip => hitmarkerClip;
+    public float HitmarkerVolume => hitmarkerVolume;
     public AudioClip HurtClip => hurtClip;
     public float HurtVolume => hurtVolume;
     public float HurtPitchRandomness => hurtPitchRandomness;
     public float HurtMinInterval => hurtMinInterval;
+    public AudioClip DeathClip => deathClip;
+    public float DeathVolume => deathVolume;
 }

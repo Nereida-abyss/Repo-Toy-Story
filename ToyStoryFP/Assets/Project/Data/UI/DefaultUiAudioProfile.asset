@@ -24,3 +24,9 @@ MonoBehaviour:
   panelCloseAudio:
     clip: {fileID: 8300000, guid: 7d8e1f0a5b6c4d3e9f1029384756abcd, type: 3}
     volume: 1
+  shopPurchaseSuccessAudio:
+    clip: {fileID: 8300000, guid: e33c6ed4496541448a76e89a54a048f7, type: 3}
+    volume: 1
+  shopPurchaseFailedAudio:
+    clip: {fileID: 8300000, guid: d2d450fe8523080459c6cbb6d9d83c76, type: 3}
+    volume: 1

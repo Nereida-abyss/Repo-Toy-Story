@@ -5,7 +5,9 @@ using UnityEngine;
 public class PlayerDeathFlow : MonoBehaviour
 {
     [SerializeField] private PlayerHealthScript playerHealth;
+    [SerializeField] private PlayerAudioController playerAudio;
     [SerializeField] private float destroyDelay = 2f;
+    [SerializeField] private float endMenuLoadDelay = 0.2f;
 
     private bool hasHandledDeath;
     private bool hasLoggedMissingHealth;
@@ -43,8 +45,8 @@ public class PlayerDeathFlow : MonoBehaviour
         RunStatsStore.CommitLastRun();
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        SceneFlow.LoadEndMenu();
         Destroy(gameObject, Mathf.Max(0f, destroyDelay));
+        StartCoroutine(LoadEndMenuAfterDeathAudio());
     }
 
     private void LogMissingHealth()
@@ -56,5 +58,23 @@ public class PlayerDeathFlow : MonoBehaviour
 
         hasLoggedMissingHealth = true;
         GameDebug.Error("Jugador", "PlayerDeathFlow necesita PlayerHealthScript asignado en inspector.", this);
+    }
+
+    private System.Collections.IEnumerator LoadEndMenuAfterDeathAudio()
+    {
+        ResolveAudioController();
+        playerAudio?.PlayDeath();
+
+        if (endMenuLoadDelay > 0f)
+        {
+            yield return new WaitForSecondsRealtime(endMenuLoadDelay);
+        }
+
+        SceneFlow.LoadEndMenu();
+    }
+
+    private void ResolveAudioController()
+    {
+        playerAudio ??= GetComponent<PlayerAudioController>();
     }
 }

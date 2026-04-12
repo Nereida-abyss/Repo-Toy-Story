@@ -10,6 +10,7 @@ public class PlayerShopController : MonoBehaviour
     private const int LegacyAmmoPurchaseMagazineCount = 1;
     private const float LegacyUpgradeStepMultiplier = 0.1f;
     private const float LegacyHealFraction = 0.5f;
+    private const string NotEnoughCoinsFailReason = "Not enough coins.";
     private const string M16WeaponId = "TacticalRifle";
     private const string AkWeaponId = "AssaultRifle";
 
@@ -214,11 +215,13 @@ public class PlayerShopController : MonoBehaviour
 
         if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
         {
+            PlayShopPurchaseFailedAudio();
             return;
         }
 
         if (weaponLoadout.AddAmmoToCurrentWeaponByMagazines(GetAmmoPurchaseMagazineCount()))
         {
+            PlayShopPurchaseSuccessAudio();
             RefreshUi();
         }
     }
@@ -239,11 +242,13 @@ public class PlayerShopController : MonoBehaviour
 
         if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
         {
+            PlayShopPurchaseFailedAudio();
             return;
         }
 
         int healAmount = Mathf.CeilToInt(playerHealth.MaxHealth * GetHealFraction());
         playerHealth.Heal(healAmount);
+        PlayShopPurchaseSuccessAudio();
         RefreshUi();
     }
 
@@ -258,11 +263,13 @@ public class PlayerShopController : MonoBehaviour
 
         if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
         {
+            PlayShopPurchaseFailedAudio();
             return;
         }
 
         speedLevel++;
         ApplyMovementUpgradeLevels();
+        PlayShopPurchaseSuccessAudio();
         RefreshUi();
     }
 
@@ -277,11 +284,13 @@ public class PlayerShopController : MonoBehaviour
 
         if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
         {
+            PlayShopPurchaseFailedAudio();
             return;
         }
 
         jumpLevel++;
         ApplyMovementUpgradeLevels();
+        PlayShopPurchaseSuccessAudio();
         RefreshUi();
     }
 
@@ -304,7 +313,25 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        weaponLoadout.TryPurchaseWeapon(weaponId, currencyController, true, out _);
+        bool wasUnlocked = weaponLoadout.IsWeaponUnlocked(weaponId);
+        bool purchaseSucceeded = weaponLoadout.TryPurchaseWeapon(weaponId, currencyController, true, out string failReason);
+
+        if (!purchaseSucceeded)
+        {
+            if (failReason == NotEnoughCoinsFailReason)
+            {
+                PlayShopPurchaseFailedAudio();
+            }
+
+            RefreshUi();
+            return;
+        }
+
+        if (!wasUnlocked)
+        {
+            PlayShopPurchaseSuccessAudio();
+        }
+
         RefreshUi();
     }
 
@@ -594,5 +621,27 @@ public class PlayerShopController : MonoBehaviour
         hasLoggedMissingReferences = true;
         missing = missing.TrimEnd(' ', ',');
         GameDebug.Advertencia("Shop", $"PlayerShopController tiene referencias sin asignar: {missing}", this);
+    }
+
+    private void PlayShopPurchaseSuccessAudio()
+    {
+        PlayUiAudio(AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseSuccessClip() : null, AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseSuccessVolume() : 0f);
+    }
+
+    private void PlayShopPurchaseFailedAudio()
+    {
+        PlayUiAudio(AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseFailedClip() : null, AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseFailedVolume() : 0f);
+    }
+
+    private void PlayUiAudio(AudioClip clip, float volume)
+    {
+        AudioSource sharedSfxSource = AudioManager.Instance != null ? AudioManager.Instance.SharedSfxSource : null;
+
+        if (sharedSfxSource == null || clip == null || volume <= 0f)
+        {
+            return;
+        }
+
+        sharedSfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 }

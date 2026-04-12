@@ -94,7 +94,12 @@ public class ProjectDataValidationTests
         Assert.That(profile.WeaponSwitchClip, Is.Not.Null);
         Assert.That(profile.CoinPickupClip, Is.Not.Null);
         Assert.That(profile.KillConfirmClip, Is.Not.Null);
+        Assert.That(profile.HitmarkerClip, Is.Not.Null);
+        Assert.That(profile.HitmarkerVolume, Is.InRange(0f, 1f));
         Assert.That(profile.HurtClip, Is.Not.Null);
+        Assert.That(profile.HurtVolume, Is.InRange(0f, 1f));
+        Assert.That(profile.DeathClip, Is.Not.Null);
+        Assert.That(profile.DeathVolume, Is.InRange(0f, 1f));
     }
 
     [Test]
@@ -110,6 +115,10 @@ public class ProjectDataValidationTests
         Assert.That(profile.PanelOpenVolume, Is.InRange(0f, 1f));
         Assert.That(profile.PanelCloseClip, Is.Not.Null);
         Assert.That(profile.PanelCloseVolume, Is.InRange(0f, 1f));
+        Assert.That(profile.ShopPurchaseSuccessClip, Is.Not.Null);
+        Assert.That(profile.ShopPurchaseSuccessVolume, Is.InRange(0f, 1f));
+        Assert.That(profile.ShopPurchaseFailedClip, Is.Not.Null);
+        Assert.That(profile.ShopPurchaseFailedVolume, Is.InRange(0f, 1f));
     }
 
     [Test]

@@ -66,6 +66,12 @@ public class PlayerAudioController : MonoBehaviour
         PlayOneShot(generalSource, clipToPlay, volumeToPlay);
     }
 
+    public void PlayHitmarker()
+    {
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(generalSource, profile != null ? profile.HitmarkerClip : null, profile != null ? profile.HitmarkerVolume : 0f);
+    }
+
     // Reproduce hurt.
     public void PlayHurt()
     {
@@ -96,6 +102,12 @@ public class PlayerAudioController : MonoBehaviour
             resolvedHurtClip,
             profile != null ? profile.HurtVolume : 0f,
             profile != null ? profile.HurtPitchRandomness : 0f);
+    }
+
+    public void PlayDeath()
+    {
+        PlayerAudioProfile profile = ResolveAudioProfile();
+        PlayOneShot(generalSource, profile != null ? profile.DeathClip : null, profile != null ? profile.DeathVolume : 0f);
     }
 
     // Reproduce arma disparo.
