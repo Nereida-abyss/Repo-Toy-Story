@@ -25,7 +25,12 @@ MonoBehaviour:
     endMenuAudio:
       clip: {fileID: 8300000, guid: e0a6bc7bf53f4e04db1356e088269bbb, type: 3}
       volume: 1
+    legacyMainMenu: {fileID: 0}
+    legacyGameplay: {fileID: 0}
+    legacyShop: {fileID: 0}
+    legacyEndMenu: {fileID: 0}
   waves:
     announcementAudio:
       clip: {fileID: 8300000, guid: 81471dcee7163ab4da7f5462a78a25f8, type: 3}
-      volume: 1
+      volume: 0.3
+    legacyAnnouncement: {fileID: 0}
