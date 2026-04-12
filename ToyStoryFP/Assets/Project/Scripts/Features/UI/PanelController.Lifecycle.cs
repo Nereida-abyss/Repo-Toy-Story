@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -104,46 +103,6 @@ public partial class PanelController
     private void Start()
     {
         StartSequence(PlayIntroSequence());
-    }
-
-    // Abre creditos desde el boton.
-    public void OpenCreditsFromButton()
-    {
-        if (isSequenceRunning)
-        {
-            return;
-        }
-
-        StartSequence(PlayCreditsSequence(allowSkip: true));
-    }
-
-    // Arranca la secuencia solo si el menu esta listo.
-    private void StartSequence(IEnumerator routine)
-    {
-        if (routine == null || isSequenceRunning)
-        {
-            return;
-        }
-
-        if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
-        {
-            GameDebug.Advertencia(
-                "EndMenu",
-                "No se pudo iniciar la secuencia porque el objeto Controlador esta inactivo o deshabilitado.",
-                this);
-            return;
-        }
-
-        activeSequence = StartCoroutine(RunManagedSequence(routine));
-    }
-
-    // Envuelve cualquier secuencia larga para marcar cuando esta ocupada.
-    private IEnumerator RunManagedSequence(IEnumerator routine)
-    {
-        isSequenceRunning = true;
-        yield return routine;
-        isSequenceRunning = false;
-        activeSequence = null;
     }
 
     // Activa o desactiva un panel solo si la referencia existe.

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-[Obsolete("Use PanelController as the single EndMenu flow authority.")]
+[Obsolete("Use PanelController as the single EndMenu flow authority. Keep this only while old scenes still depend on it.")]
 public class EndMenuUI : MonoBehaviour
 {
     [Header("Paneles (solo compatibilidad)")]
