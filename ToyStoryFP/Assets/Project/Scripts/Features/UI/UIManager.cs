@@ -4,6 +4,8 @@ using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
 {
+    private const string PauseInputGateOwner = "UIManager.Pause";
+
     public static UIManager Instance { get; private set; }
     public static event Action<bool> PauseStateChanged;
     public static bool IsGamePaused => Instance != null && Instance.IsPaused;
@@ -54,7 +56,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (PlayerShopController.IsInputBlocked)
+        if (GameplayInputGate.IsBlocked && !IsPaused)
         {
             return;
         }
@@ -73,6 +75,7 @@ public class UIManager : MonoBehaviour
         }
 
         Instance = null;
+        GameplayInputGate.Release(PauseInputGateOwner);
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -107,8 +110,7 @@ public class UIManager : MonoBehaviour
         }
 
         Time.timeScale = paused ? 0f : 1f;
-        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = paused;
+        SyncPauseInputGate(paused);
 
         bool currentPauseState = IsPaused;
 
@@ -125,6 +127,17 @@ public class UIManager : MonoBehaviour
     }
 
     // Comprueba que la escena tenga un EventSystem explÃ­cito para que la UI reciba input.
+    private static void SyncPauseInputGate(bool paused)
+    {
+        if (paused)
+        {
+            GameplayInputGate.Acquire(PauseInputGateOwner);
+            return;
+        }
+
+        GameplayInputGate.Release(PauseInputGateOwner);
+    }
+
     private void ValidateEventSystem()
     {
         if (EventSystem.current != null)

@@ -180,11 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d0d00480d4bfba46b443138b1c6f65b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Project.Features::RoundDialogueManager
-  dialogueCatalog: {fileID: 0}
-  customDialogues: []
-  npcName: Buzz Lightyear
-  useRandomSentences: 1
-  repeatSentences: 0
+  dialogueCatalog: {fileID: 11400000, guid: f15a2e01bc1b457fb0e8745d8983093a, type: 2}
 --- !u!4 &178004228
 Transform:
   m_ObjectHideFlags: 0
@@ -545,6 +541,7 @@ MonoBehaviour:
   typingSpeed: 0.05
   timeBetweenSentences: 1.5
   pauseGameDuringDialogue: 1
+  dialogueManager: {fileID: 178004227}
 --- !u!114 &276302039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1799,7 +1796,6 @@ MonoBehaviour:
   shopMusicSource: {fileID: 880000006}
   sfxSource: {fileID: 880000005}
   keepMainMenuMusicInAllScenes: 1
-  mainMenuMusicIndex: 0
   musicVolume: 0.05
 --- !u!82 &880000004
 AudioSource:
@@ -1956,6 +1952,36 @@ AudioSource:
     - serializedVersion: 3
       time: 0
       value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -3145,6 +3171,10 @@ PrefabInstance:
     - target: {fileID: 6691849661239857904, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7838957973645535348, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_Sprite
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7864455122527516035, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: fireSound
@@ -5160,6 +5190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   dialogueController: {fileID: 276302038}
+  dialogueManager: {fileID: 178004227}
   waveSpawner: {fileID: 920100000000000007}
   balanceProfile: {fileID: 11400000, guid: 8ab875e8db03440aa1afc9f855dadc40, type: 2}
   initialWaveDelay: 2

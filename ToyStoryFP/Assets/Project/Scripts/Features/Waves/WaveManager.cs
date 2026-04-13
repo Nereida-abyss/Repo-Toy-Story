@@ -8,6 +8,7 @@ public class WaveManager : MonoBehaviour
 {
     [Header("Dialogue")]
     [SerializeField] private RoundDialogueController dialogueController;
+    [SerializeField] private RoundDialogueManager dialogueManager;
 
     private readonly struct EnemyRoundScalingSnapshot
     {
@@ -66,9 +67,7 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        ResetRuntimeState();
-        ValidateConfiguration();
-        StartCoroutine(WaveLoop());
+        InitializeWaveManager();
     }
 
     void Update()
@@ -78,35 +77,13 @@ public class WaveManager : MonoBehaviour
 
         if (currentState == WaveRuntimeState.WaveInProgress)
         {
-            if (!isPaused)
-            {
-                roundElapsedTime += Time.deltaTime;
-            }
-
-            if (HasWaveFinished())
-            {
-                BeginIntermission();
-            }
-
+            UpdateWaveProgress(isPaused);
             return;
         }
 
-        if (currentState != WaveRuntimeState.Intermission || isPaused)
+        if (currentState == WaveRuntimeState.Intermission)
         {
-            return;
-        }
-
-        if (!PlayerShopController.IsInputBlocked && ProjectInput.WasNextWavePressed())
-        {
-            StartNextWave();
-            return;
-        }
-
-        remainingIntermissionTime -= Time.deltaTime;
-
-        if (remainingIntermissionTime <= 0f)
-        {
-            StartNextWave();
+            UpdateIntermissionProgress(isPaused);
         }
     }
 
@@ -125,11 +102,62 @@ public class WaveManager : MonoBehaviour
         aliveEnemies.Clear();
     }
 
+    private void InitializeWaveManager()
+    {
+        ResetRuntimeState();
+        ValidateConfiguration();
+        StartCoroutine(WaveLoop());
+    }
+
     private IEnumerator WaveLoop()
     {
         currentState = WaveRuntimeState.InitialDelay;
         yield return new WaitForSeconds(Mathf.Max(0f, GetInitialWaveDelay()));
         StartNextWave();
+    }
+
+    private void UpdateWaveProgress(bool isPaused)
+    {
+        if (!isPaused)
+        {
+            roundElapsedTime += Time.deltaTime;
+        }
+
+        if (HasWaveFinished())
+        {
+            BeginIntermission();
+        }
+    }
+
+    private void UpdateIntermissionProgress(bool isPaused)
+    {
+        if (isPaused)
+        {
+            return;
+        }
+
+        if (ShouldStartNextWaveFromInput())
+        {
+            StartNextWave();
+            return;
+        }
+
+        TickIntermissionTimer();
+    }
+
+    private bool ShouldStartNextWaveFromInput()
+    {
+        return !GameplayInputGate.IsBlocked && ProjectInput.WasNextWavePressed();
+    }
+
+    private void TickIntermissionTimer()
+    {
+        remainingIntermissionTime -= Time.deltaTime;
+
+        if (remainingIntermissionTime <= 0f)
+        {
+            StartNextWave();
+        }
     }
 
     private void StartNextWave()
@@ -139,20 +167,8 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        if (currentWaveIndex > 0)
-        {
-            StartCoroutine(ShowDialogueBeforeWave());
-        }
-
-        PruneDeadEnemies();
-        currentWaveIndex++;
-        RunStatsStore.UpdateWave(currentWaveIndex);
-        currentState = WaveRuntimeState.WaveInProgress;
-        roundElapsedTime = 0f;
-        remainingIntermissionTime = 0f;
-        enemiesToSpawnThisWave = GetEnemyCountForWave(currentWaveIndex);
-        spawnAttemptsCompletedThisWave = 0;
-        isSpawningCurrentWave = true;
+        ShowPreWaveDialogueIfNeeded();
+        PrepareNextWaveState();
         WaveStarted?.Invoke(currentWaveIndex);
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
@@ -237,6 +253,27 @@ public class WaveManager : MonoBehaviour
         return Mathf.Max(1, GetBaseEnemyCount() + ((waveIndex - 1) * GetAdditionalEnemiesPerWave()));
     }
 
+    private void ShowPreWaveDialogueIfNeeded()
+    {
+        if (currentWaveIndex > 0)
+        {
+            StartCoroutine(ShowDialogueBeforeWave());
+        }
+    }
+
+    private void PrepareNextWaveState()
+    {
+        PruneDeadEnemies();
+        currentWaveIndex++;
+        RunStatsStore.UpdateWave(currentWaveIndex);
+        currentState = WaveRuntimeState.WaveInProgress;
+        roundElapsedTime = 0f;
+        remainingIntermissionTime = 0f;
+        enemiesToSpawnThisWave = GetEnemyCountForWave(currentWaveIndex);
+        spawnAttemptsCompletedThisWave = 0;
+        isSpawningCurrentWave = true;
+    }
+
     private void ApplyRoundScalingToEnemy(GameObject spawnedEnemy, int waveIndex)
     {
         if (spawnedEnemy == null)
@@ -296,8 +333,7 @@ public class WaveManager : MonoBehaviour
         currentState = WaveRuntimeState.Intermission;
         remainingIntermissionTime = Mathf.Max(0f, GetIntermissionDuration());
         IntermissionStarted?.Invoke();
-
-        RoundDialogueManager.Instance.AdvanceToNextRound();
+        AdvanceDialogueRound();
     }
 
     private void ResetRuntimeState()
@@ -377,6 +413,11 @@ public class WaveManager : MonoBehaviour
         }
 
         isSpawningCurrentWave = true;
+    }
+
+    private void AdvanceDialogueRound()
+    {
+        dialogueManager?.AdvanceToNextRound();
     }
 
     private float GetInitialWaveDelay() => balanceProfile != null ? balanceProfile.InitialWaveDelay : initialWaveDelay;

@@ -8,6 +8,7 @@ public class ProjectDataValidationTests
 {
     private const string WeaponCatalogAssetPath = "Assets/Project/Data/Player/DefaultWeaponCatalog.asset";
     private const string ProjectAudioCatalogAssetPath = "Assets/Project/Data/Audio/ProjectAudioCatalog.asset";
+    private const string WaveDialogueCatalogAssetPath = "Assets/Project/Data/Dialogue/WaveDialogueCatalog.asset";
     private const string PlayerAudioProfileAssetPath = "Assets/Project/Data/Player/DefaultPlayerAudioProfile.asset";
     private const string UiAudioProfileAssetPath = "Assets/Project/Data/UI/DefaultUiAudioProfile.asset";
     private const string CreditsProfileAssetPath = "Assets/Project/Data/UI/DefaultCreditsPresentationProfile.asset";
@@ -164,6 +165,13 @@ public class ProjectDataValidationTests
         Assert.That(catalog.Music.EndMenuAudio.Volume, Is.InRange(0f, 1f));
         Assert.That(catalog.Waves.AnnouncementAudio.Clip, Is.Not.Null);
         Assert.That(catalog.Waves.AnnouncementAudio.Volume, Is.InRange(0f, 1f));
+    }
+
+    [Test]
+    public void WaveDialogueCatalog_Exists_AsCentralDialogueSource()
+    {
+        WaveDialogueCatalog catalog = AssetDatabase.LoadAssetAtPath<WaveDialogueCatalog>(WaveDialogueCatalogAssetPath);
+        Assert.That(catalog, Is.Not.Null, "WaveDialogueCatalog.asset debe existir como fuente central de dialogos.");
     }
 
     [Test]

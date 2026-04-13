@@ -8,7 +8,6 @@ public class AudioManager : MonoBehaviour
     private const string MainMenuSceneName = "MainMenu";
     private const string GamePlaySceneName = "GamePlay";
     private const string EndMenuSceneName = "EndMenu";
-    private const int EndMenuMusicLegacyIndex = 3;
     private const float ShopMusicCrossfadeDuration = 0.6f;
 
     private static AudioManager instance;
@@ -28,7 +27,6 @@ public class AudioManager : MonoBehaviour
 
     [Header("Music Settings")]
     [SerializeField] private bool keepMainMenuMusicInAllScenes = true;
-    [SerializeField] private int mainMenuMusicIndex = 0;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.05f;
 
     private bool hasLoggedMissingCatalog;
@@ -113,8 +111,9 @@ public class AudioManager : MonoBehaviour
     // Reproduce music.
     public void PlayMusic(int musicIndex)
     {
-        AudioClip clipFromCatalog = GetMusicClipFromLegacyIndex(musicIndex);
-        float volumeFromCatalog = GetMusicVolumeFromLegacyIndex(musicIndex);
+        ConfigurableAudioClip configuredAudio = GetMusicEntryFromLegacyIndex(musicIndex);
+        AudioClip clipFromCatalog = GetAudioClip(configuredAudio);
+        float volumeFromCatalog = GetAudioVolume(configuredAudio);
 
         if (clipFromCatalog != null)
         {
@@ -122,24 +121,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        if (musicList == null || musicList.Length == 0)
-        {
-            GameDebug.Advertencia("Audio", "No hay pistas en musicList para reproducir.", this);
-            return;
-        }
-
-        if (musicIndex < 0 || musicIndex >= musicList.Length)
-        {
-            GameDebug.Advertencia("Audio", $"Indice de musica fuera de rango: {musicIndex}", this);
-            return;
-        }
-
-        if (ResolveMusicSource() == null)
-        {
-            return;
-        }
-
-        PlayMusicClip(musicList[musicIndex], 1f);
+        GameDebug.Advertencia("Audio", $"No hay pista de catalogo configurada para el indice de musica {musicIndex}.", this);
     }
 
     // Reproduce SFX.
@@ -197,136 +179,112 @@ public class AudioManager : MonoBehaviour
 
     public AudioClip GetMainMenuMusicClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.MainMenuAudio.Clip : null;
-        return clip != null ? clip : GetLegacyMusicClip(mainMenuMusicIndex);
+        return GetAudioClip(GetMainMenuMusicEntry());
     }
 
     public float GetMainMenuMusicVolume()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.MainMenuAudio.Volume : 1f;
+        return GetAudioVolume(GetMainMenuMusicEntry());
     }
 
     public AudioClip GetGameplayMusicClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.GameplayAudio.Clip : null;
+        return GetAudioClip(GetGameplayMusicEntry());
     }
 
     public float GetGameplayMusicVolume()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.GameplayAudio.Volume : 1f;
+        return GetAudioVolume(GetGameplayMusicEntry());
     }
 
     public AudioClip GetShopMusicClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.ShopAudio.Clip : null;
+        return GetAudioClip(GetShopMusicEntry());
     }
 
     public float GetShopMusicVolume()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.ShopAudio.Volume : 1f;
+        return GetAudioVolume(GetShopMusicEntry());
     }
 
     public AudioClip GetEndMenuMusicClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        AudioClip clip = resolvedCatalog != null ? resolvedCatalog.Music.EndMenuAudio.Clip : null;
-        return clip != null ? clip : GetLegacyMusicClip(EndMenuMusicLegacyIndex);
+        return GetAudioClip(GetEndMenuMusicEntry());
     }
 
     public float GetEndMenuMusicVolume()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Music.EndMenuAudio.Volume : 1f;
+        return GetAudioVolume(GetEndMenuMusicEntry());
     }
 
     public AudioClip GetWaveAnnouncementClip()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Waves.AnnouncementAudio.Clip : null;
+        return GetAudioClip(GetWaveAnnouncementEntry());
     }
 
     public float GetWaveAnnouncementVolume()
     {
-        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
-        return resolvedCatalog != null ? resolvedCatalog.Waves.AnnouncementAudio.Volume : 1f;
+        return GetAudioVolume(GetWaveAnnouncementEntry());
     }
 
     public AudioClip GetUiClickClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ClickClip : null;
+        return GetAudioClip(GetUiClickEntry());
     }
 
     public float GetUiClickVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ClickVolume : 1f;
+        return GetAudioVolume(GetUiClickEntry());
     }
 
     public AudioClip GetUiHoverClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.HoverClip : null;
+        return GetAudioClip(GetUiHoverEntry());
     }
 
     public float GetUiHoverVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.HoverVolume : 1f;
+        return GetAudioVolume(GetUiHoverEntry());
     }
 
     public AudioClip GetUiPanelOpenClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.PanelOpenClip : null;
+        return GetAudioClip(GetUiPanelOpenEntry());
     }
 
     public float GetUiPanelOpenVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.PanelOpenVolume : 1f;
+        return GetAudioVolume(GetUiPanelOpenEntry());
     }
 
     public AudioClip GetUiPanelCloseClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.PanelCloseClip : null;
+        return GetAudioClip(GetUiPanelCloseEntry());
     }
 
     public float GetUiPanelCloseVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.PanelCloseVolume : 1f;
+        return GetAudioVolume(GetUiPanelCloseEntry());
     }
 
     public AudioClip GetUiShopPurchaseSuccessClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ShopPurchaseSuccessClip : null;
+        return GetAudioClip(GetUiShopPurchaseSuccessEntry());
     }
 
     public float GetUiShopPurchaseSuccessVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ShopPurchaseSuccessVolume : 1f;
+        return GetAudioVolume(GetUiShopPurchaseSuccessEntry());
     }
 
     public AudioClip GetUiShopPurchaseFailedClip()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ShopPurchaseFailedClip : null;
+        return GetAudioClip(GetUiShopPurchaseFailedEntry());
     }
 
     public float GetUiShopPurchaseFailedVolume()
     {
-        UiAudioProfile profile = ResolveUiAudioProfile();
-        return profile != null ? profile.ShopPurchaseFailedVolume : 1f;
+        return GetAudioVolume(GetUiShopPurchaseFailedEntry());
     }
 
     public AudioClip GetSceneMusicClip(string sceneName)
@@ -504,11 +462,13 @@ public class AudioManager : MonoBehaviour
 
     private void StartShopMusicBlend(bool enteringShop)
     {
-        if (SceneManager.GetActiveScene().name != GamePlaySceneName)
+        string activeSceneName = GetActiveSceneName();
+
+        if (activeSceneName != GamePlaySceneName)
         {
             if (!enteringShop)
             {
-                PrepareBaseMusicClip(GetSceneMusicClip(SceneManager.GetActiveScene().name), GetSceneMusicVolume(SceneManager.GetActiveScene().name), true);
+                PrepareBaseMusicClip(GetSceneMusicClip(activeSceneName), GetSceneMusicVolume(activeSceneName), true);
             }
 
             return;
@@ -683,7 +643,7 @@ public class AudioManager : MonoBehaviour
             hasLoggedMissingCatalog = true;
             GameDebug.Advertencia(
                 "Audio",
-                "No hay ProjectAudioCatalog asignado en el inspector. Se usaran los arrays legacy si existen.",
+                "No hay ProjectAudioCatalog asignado en el inspector. El AudioManager necesita catalogo para resolver musica y anuncios.",
                 this);
         }
 
@@ -709,53 +669,101 @@ public class AudioManager : MonoBehaviour
         return null;
     }
 
-    private AudioClip GetMusicClipFromLegacyIndex(int musicIndex)
+    private string GetActiveSceneName()
+    {
+        return SceneManager.GetActiveScene().name;
+    }
+
+    private ConfigurableAudioClip GetMainMenuMusicEntry()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.MainMenuAudio : null;
+    }
+
+    private ConfigurableAudioClip GetGameplayMusicEntry()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.GameplayAudio : null;
+    }
+
+    private ConfigurableAudioClip GetShopMusicEntry()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.ShopAudio : null;
+    }
+
+    private ConfigurableAudioClip GetEndMenuMusicEntry()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Music.EndMenuAudio : null;
+    }
+
+    private ConfigurableAudioClip GetWaveAnnouncementEntry()
+    {
+        ProjectAudioCatalog resolvedCatalog = ResolveCatalog();
+        return resolvedCatalog != null ? resolvedCatalog.Waves.AnnouncementAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiClickEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ClickAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiHoverEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.HoverAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiPanelOpenEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelOpenAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiPanelCloseEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.PanelCloseAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiShopPurchaseSuccessEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseSuccessAudio : null;
+    }
+
+    private ConfigurableAudioClip GetUiShopPurchaseFailedEntry()
+    {
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        return profile != null ? profile.ShopPurchaseFailedAudio : null;
+    }
+
+    private ConfigurableAudioClip GetMusicEntryFromLegacyIndex(int musicIndex)
     {
         switch (musicIndex)
         {
             case 0:
-                return GetMainMenuMusicClip();
+                return GetMainMenuMusicEntry();
             case 1:
-                return GetGameplayMusicClip();
+                return GetGameplayMusicEntry();
             case 2:
-                return GetShopMusicClip();
+                return GetShopMusicEntry();
             case 3:
-                return GetEndMenuMusicClip();
+                return GetEndMenuMusicEntry();
             default:
                 return null;
         }
     }
 
-    private float GetMusicVolumeFromLegacyIndex(int musicIndex)
+    private static AudioClip GetAudioClip(ConfigurableAudioClip audio)
     {
-        switch (musicIndex)
-        {
-            case 0:
-                return GetMainMenuMusicVolume();
-            case 1:
-                return GetGameplayMusicVolume();
-            case 2:
-                return GetShopMusicVolume();
-            case 3:
-                return GetEndMenuMusicVolume();
-            default:
-                return 1f;
-        }
+        return audio != null ? audio.Clip : null;
     }
 
-    private AudioClip GetLegacyMusicClip(int musicIndex)
+    private static float GetAudioVolume(ConfigurableAudioClip audio)
     {
-        if (musicList == null || musicList.Length == 0)
-        {
-            return null;
-        }
-
-        if (musicIndex < 0 || musicIndex >= musicList.Length)
-        {
-            GameDebug.Advertencia("Audio", $"Indice de musica fuera de rango: {musicIndex}", this);
-            return null;
-        }
-
-        return musicList[musicIndex];
+        return audio != null ? audio.Volume : 1f;
     }
 }

@@ -20,6 +20,8 @@ public class UIPanelFx : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private bool enableAudio = true;
+    [SerializeField] private UiAudioProfile uiAudioProfile;
+    [SerializeField] private AudioManager audioManager;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private bool useSharedAudioSource = true;
     [SerializeField] private float openVolume = 0.5f;
@@ -143,7 +145,7 @@ public class UIPanelFx : MonoBehaviour
         }
         else
         {
-        PlayPanelSound(ResolveOpenClip(), openVolume * ResolveOpenAssetVolume());
+            PlayConfiguredPanelSound(true);
         }
     }
 
@@ -171,7 +173,7 @@ public class UIPanelFx : MonoBehaviour
             return;
         }
 
-        PlayPanelSound(ResolveCloseClip(), closeVolume * ResolveCloseAssetVolume());
+        PlayConfiguredPanelSound(false);
         StopActiveRoutine();
         activeRoutine = StartCoroutine(PlayCloseRoutine());
     }
@@ -375,11 +377,11 @@ public class UIPanelFx : MonoBehaviour
             return null;
         }
 
-        AudioManager audioManager = AudioManager.Instance;
+        AudioManager resolvedAudioManager = ResolveAudioManager();
 
-        if (audioManager != null && audioManager.SharedSfxSource != null)
+        if (resolvedAudioManager != null && resolvedAudioManager.SharedSfxSource != null)
         {
-            return audioManager.SharedSfxSource;
+            return resolvedAudioManager.SharedSfxSource;
         }
 
         if (!missingSharedAudioWarningShown)
@@ -396,58 +398,156 @@ public class UIPanelFx : MonoBehaviour
 
     private AudioClip ResolveOpenClip()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileOpenClip();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return null;
         }
 
-        AudioClip openFallback = AudioManager.Instance.GetUiPanelOpenClip();
-
-        if (openFallback == null)
-        {
-            openFallback = AudioManager.Instance.GetUiHoverClip();
-        }
-
-        return openFallback != null ? openFallback : AudioManager.Instance.GetUiClickClip();
+        return ResolveManagerOpenClip(resolvedAudioManager);
     }
 
     private AudioClip ResolveCloseClip()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileCloseClip();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return null;
         }
 
-        AudioClip closeFallback = AudioManager.Instance.GetUiPanelCloseClip();
-        return closeFallback != null ? closeFallback : AudioManager.Instance.GetUiClickClip();
+        return ResolveManagerCloseClip(resolvedAudioManager);
     }
 
     private float ResolveOpenAssetVolume()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileOpenVolume();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return 1f;
         }
 
-        AudioClip openFallback = AudioManager.Instance.GetUiPanelOpenClip();
-
-        if (openFallback != null)
-        {
-            return AudioManager.Instance.GetUiPanelOpenVolume();
-        }
-
-        openFallback = AudioManager.Instance.GetUiHoverClip();
-        return openFallback != null ? AudioManager.Instance.GetUiHoverVolume() : AudioManager.Instance.GetUiClickVolume();
+        return ResolveManagerOpenVolume(resolvedAudioManager);
     }
 
     private float ResolveCloseAssetVolume()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileCloseVolume();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return 1f;
         }
 
-        AudioClip closeFallback = AudioManager.Instance.GetUiPanelCloseClip();
-        return closeFallback != null ? AudioManager.Instance.GetUiPanelCloseVolume() : AudioManager.Instance.GetUiClickVolume();
+        return ResolveManagerCloseVolume(resolvedAudioManager);
+    }
+
+    private void PlayConfiguredPanelSound(bool isOpenSound)
+    {
+        AudioClip clip = isOpenSound ? ResolveOpenClip() : ResolveCloseClip();
+        float baseVolume = isOpenSound ? openVolume : closeVolume;
+        float assetVolume = isOpenSound ? ResolveOpenAssetVolume() : ResolveCloseAssetVolume();
+        PlayPanelSound(clip, baseVolume * assetVolume);
+    }
+
+    private AudioClip ResolveProfileOpenClip()
+    {
+        if (uiAudioProfile.PanelOpenClip != null)
+        {
+            return uiAudioProfile.PanelOpenClip;
+        }
+
+        if (uiAudioProfile.HoverClip != null)
+        {
+            return uiAudioProfile.HoverClip;
+        }
+
+        return uiAudioProfile.ClickClip;
+    }
+
+    private AudioClip ResolveProfileCloseClip()
+    {
+        return uiAudioProfile.PanelCloseClip != null ? uiAudioProfile.PanelCloseClip : uiAudioProfile.ClickClip;
+    }
+
+    private float ResolveProfileOpenVolume()
+    {
+        if (uiAudioProfile.PanelOpenClip != null)
+        {
+            return uiAudioProfile.PanelOpenVolume;
+        }
+
+        return uiAudioProfile.HoverClip != null ? uiAudioProfile.HoverVolume : uiAudioProfile.ClickVolume;
+    }
+
+    private float ResolveProfileCloseVolume()
+    {
+        return uiAudioProfile.PanelCloseClip != null ? uiAudioProfile.PanelCloseVolume : uiAudioProfile.ClickVolume;
+    }
+
+    private static AudioClip ResolveManagerOpenClip(AudioManager resolvedAudioManager)
+    {
+        AudioClip openFallback = resolvedAudioManager.GetUiPanelOpenClip();
+
+        if (openFallback == null)
+        {
+            openFallback = resolvedAudioManager.GetUiHoverClip();
+        }
+
+        return openFallback != null ? openFallback : resolvedAudioManager.GetUiClickClip();
+    }
+
+    private static AudioClip ResolveManagerCloseClip(AudioManager resolvedAudioManager)
+    {
+        AudioClip closeFallback = resolvedAudioManager.GetUiPanelCloseClip();
+        return closeFallback != null ? closeFallback : resolvedAudioManager.GetUiClickClip();
+    }
+
+    private static float ResolveManagerOpenVolume(AudioManager resolvedAudioManager)
+    {
+        AudioClip openFallback = resolvedAudioManager.GetUiPanelOpenClip();
+
+        if (openFallback != null)
+        {
+            return resolvedAudioManager.GetUiPanelOpenVolume();
+        }
+
+        openFallback = resolvedAudioManager.GetUiHoverClip();
+        return openFallback != null ? resolvedAudioManager.GetUiHoverVolume() : resolvedAudioManager.GetUiClickVolume();
+    }
+
+    private static float ResolveManagerCloseVolume(AudioManager resolvedAudioManager)
+    {
+        AudioClip closeFallback = resolvedAudioManager.GetUiPanelCloseClip();
+        return closeFallback != null ? resolvedAudioManager.GetUiPanelCloseVolume() : resolvedAudioManager.GetUiClickVolume();
+    }
+
+    private AudioManager ResolveAudioManager()
+    {
+        if (audioManager != null)
+        {
+            return audioManager;
+        }
+
+        audioManager = AudioManager.Instance;
+        return audioManager;
     }
 }

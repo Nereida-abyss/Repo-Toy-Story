@@ -17,6 +17,7 @@ public class MouseLookScript : MonoBehaviour
     }
 
     public static MouseLookScript instance;
+    public static MouseLookScript Instance => instance;
 
     [SerializeField] private MouseLookTuningProfile tuningProfile;
     [Header("Mouse Look Settings")]
@@ -106,6 +107,7 @@ public class MouseLookScript : MonoBehaviour
 
     void Awake()
     {
+        instance = this;
         ApplyTuningProfile();
     }
 
@@ -122,7 +124,6 @@ public class MouseLookScript : MonoBehaviour
 
     void Start()
     {
-        instance = this;
         SubscribePauseStateEvents();
         InitializePauseStateTracking();
         float savedLookSensitivity = PlayerPrefs.GetFloat(LookSensitivityKey, DefaultLookSensitivity);
@@ -139,6 +140,14 @@ public class MouseLookScript : MonoBehaviour
         if (lockCursor)
         {
             LockCursor();
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
         }
     }
 
@@ -191,13 +200,19 @@ public class MouseLookScript : MonoBehaviour
     // Encierra el cursor para que la cámara no pierda el control al mover el ratón.
     public void LockCursor()
     {
+        if (GameplayInputGate.IsBlocked)
+        {
+            GameplayInputGate.ApplyGameplayCursorState();
+            return;
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        bool pausedNow = UIManager.IsGamePaused || PlayerShopController.IsInputBlocked;
+        bool pausedNow = GameplayInputGate.IsBlocked;
 
         if (!pauseStateInitialized || pausedNow != lastKnownPauseState)
         {
@@ -277,7 +292,7 @@ public class MouseLookScript : MonoBehaviour
             return;
         }
 
-        UIManager.PauseStateChanged += HandlePauseStateChanged;
+        GameplayInputGate.BlockStateChanged += HandlePauseStateChanged;
         pauseEventSubscribed = true;
     }
 
@@ -289,14 +304,14 @@ public class MouseLookScript : MonoBehaviour
             return;
         }
 
-        UIManager.PauseStateChanged -= HandlePauseStateChanged;
+        GameplayInputGate.BlockStateChanged -= HandlePauseStateChanged;
         pauseEventSubscribed = false;
     }
 
     // Toma una foto inicial del estado de pausa y limpia temporizadores de protección.
     private void InitializePauseStateTracking()
     {
-        bool pausedNow = UIManager.IsGamePaused;
+        bool pausedNow = GameplayInputGate.IsBlocked;
         pauseStateInitialized = true;
         lastKnownPauseState = pausedNow;
         postUnpauseLookBlockTimer = 0f;

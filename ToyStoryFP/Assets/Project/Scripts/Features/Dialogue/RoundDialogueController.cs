@@ -15,35 +15,29 @@ public class RoundDialogueController : MonoBehaviour
     public float timeBetweenSentences = 1.5f;
     public bool pauseGameDuringDialogue = true;
 
-    private RoundDialogueManager dialogueManager;
+    [Header("Dependencies")]
+    [SerializeField] private RoundDialogueManager dialogueManager;
+    private bool hasLoggedMissingManager;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        dialogueManager = RoundDialogueManager.Instance;
+        ResolveDialogueManager();
 
-        if (dialogueManager == null)
-        {
-            Debug.LogError("RoundDialogueManager instance not found in the scene.");
-            return;
-        }
-
-        if (dialoguePanel != null)
-        {
-            dialoguePanel.SetActive(false);
-        }
+        SetDialoguePanelVisible(false);
     }
 
     public IEnumerator ShowDialogueAndWait()
     {
-        if (dialogueManager == null)
+        if (!ResolveDialogueManager())
         {
-            dialogueManager = RoundDialogueManager.Instance;
-            if (dialogueManager == null)
-            {
-                Debug.LogError("Cannot show dialogue: RoundDialogueManager not found in the scene.");
-                yield break;
-            }
+            yield break;
+        }
+
+        if (!HasRequiredUiReferences())
+        {
+            GameDebug.Error("Dialogo", "RoundDialogueController necesita panel y textos asignados para mostrar dialogos.", this);
+            yield break;
         }
 
         Dialogue dialogue = dialogueManager.GetDialogueForCurrentRound();
@@ -53,12 +47,9 @@ public class RoundDialogueController : MonoBehaviour
             yield break;
         }
 
-        if (pauseGameDuringDialogue)
-        {
-            Time.timeScale = 0f;
-        }
+        PauseDialogueFlow();
 
-        dialoguePanel.SetActive(true);
+        SetDialoguePanelVisible(true);
         npcNameText.text = dialogue.npcName;
 
         for (int i = 0; i < dialogue.sentences.Length; i++)
@@ -71,11 +62,8 @@ public class RoundDialogueController : MonoBehaviour
             }
         }
 
-        dialoguePanel.SetActive(false);
-        if (pauseGameDuringDialogue)
-        {
-            Time.timeScale = 1f;
-        }
+        SetDialoguePanelVisible(false);
+        ResumeDialogueFlow();
     }
 
     private IEnumerator TypeSentence(string sentence)
@@ -87,12 +75,57 @@ public class RoundDialogueController : MonoBehaviour
             yield return new WaitForSecondsRealtime(typingSpeed);
         }
     }
-
-
-
-    // Update is called once per frame
-    void Update()
+    private bool HasRequiredUiReferences()
     {
+        return npcNameText != null && sentenceText != null && dialoguePanel != null;
+    }
 
+    private bool ResolveDialogueManager()
+    {
+        if (dialogueManager != null)
+        {
+            hasLoggedMissingManager = false;
+            return true;
+        }
+
+        dialogueManager = RoundDialogueManager.Instance;
+
+        if (dialogueManager != null)
+        {
+            hasLoggedMissingManager = false;
+            return true;
+        }
+
+        if (!hasLoggedMissingManager)
+        {
+            hasLoggedMissingManager = true;
+            GameDebug.Error("Dialogo", "RoundDialogueController necesita una referencia a RoundDialogueManager.", this);
+        }
+
+        return false;
+    }
+
+    private void SetDialoguePanelVisible(bool isVisible)
+    {
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(isVisible);
+        }
+    }
+
+    private void PauseDialogueFlow()
+    {
+        if (pauseGameDuringDialogue)
+        {
+            Time.timeScale = 0f;
+        }
+    }
+
+    private void ResumeDialogueFlow()
+    {
+        if (pauseGameDuringDialogue)
+        {
+            Time.timeScale = 1f;
+        }
     }
 }

@@ -21,6 +21,8 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     [Header("Audio")]
     [SerializeField] private bool enableAudio = true;
+    [SerializeField] private UiAudioProfile uiAudioProfile;
+    [SerializeField] private AudioManager audioManager;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private bool useSharedAudioSource = true;
     [SerializeField] private float hoverVolume = 0.35f;
@@ -217,7 +219,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return;
         }
 
-        PlayOneShot(ResolveClickClip(), clickVolume * ResolveClickAssetVolume());
+        PlayConfiguredSound(false);
     }
 
     // Interpola escala y color para que el botón no cambie de estado a saltos.
@@ -297,7 +299,7 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         lastHoverSfxTime = Time.unscaledTime;
 
-        PlayOneShot(ResolveHoverClip(), hoverVolume * ResolveHoverAssetVolume());
+        PlayConfiguredSound(true);
     }
 
     // Acepta solo clic izquierdo como pulsación válida de ratón.
@@ -341,11 +343,11 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return null;
         }
 
-        AudioManager audioManager = AudioManager.Instance;
+        AudioManager resolvedAudioManager = ResolveAudioManager();
 
-        if (audioManager != null && audioManager.SharedSfxSource != null)
+        if (resolvedAudioManager != null && resolvedAudioManager.SharedSfxSource != null)
         {
-            return audioManager.SharedSfxSource;
+            return resolvedAudioManager.SharedSfxSource;
         }
 
         if (!missingSharedAudioWarningShown)
@@ -362,33 +364,90 @@ public class UIButtonFx : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private AudioClip ResolveClickClip()
     {
-        return AudioManager.Instance != null ? AudioManager.Instance.GetUiClickClip() : null;
+        if (uiAudioProfile != null)
+        {
+            return uiAudioProfile.ClickClip;
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        return resolvedAudioManager != null ? resolvedAudioManager.GetUiClickClip() : null;
     }
 
     private AudioClip ResolveHoverClip()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileHoverClip();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return null;
         }
 
-        AudioClip hoverFallback = AudioManager.Instance.GetUiHoverClip();
-        return hoverFallback != null ? hoverFallback : AudioManager.Instance.GetUiClickClip();
+        return ResolveManagerHoverClip(resolvedAudioManager);
     }
 
     private float ResolveClickAssetVolume()
     {
-        return AudioManager.Instance != null ? AudioManager.Instance.GetUiClickVolume() : 1f;
+        return uiAudioProfile != null ? uiAudioProfile.ClickVolume : (ResolveAudioManager() != null ? ResolveAudioManager().GetUiClickVolume() : 1f);
     }
 
     private float ResolveHoverAssetVolume()
     {
-        if (AudioManager.Instance == null)
+        if (uiAudioProfile != null)
+        {
+            return ResolveProfileHoverVolume();
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        if (resolvedAudioManager == null)
         {
             return 1f;
         }
 
-        AudioClip hoverFallback = AudioManager.Instance.GetUiHoverClip();
-        return hoverFallback != null ? AudioManager.Instance.GetUiHoverVolume() : AudioManager.Instance.GetUiClickVolume();
+        return ResolveManagerHoverVolume(resolvedAudioManager);
+    }
+
+    private void PlayConfiguredSound(bool isHoverSound)
+    {
+        AudioClip clip = isHoverSound ? ResolveHoverClip() : ResolveClickClip();
+        float baseVolume = isHoverSound ? hoverVolume : clickVolume;
+        float assetVolume = isHoverSound ? ResolveHoverAssetVolume() : ResolveClickAssetVolume();
+        PlayOneShot(clip, baseVolume * assetVolume);
+    }
+
+    private AudioClip ResolveProfileHoverClip()
+    {
+        return uiAudioProfile.HoverClip != null ? uiAudioProfile.HoverClip : uiAudioProfile.ClickClip;
+    }
+
+    private float ResolveProfileHoverVolume()
+    {
+        return uiAudioProfile.HoverClip != null ? uiAudioProfile.HoverVolume : uiAudioProfile.ClickVolume;
+    }
+
+    private static AudioClip ResolveManagerHoverClip(AudioManager resolvedAudioManager)
+    {
+        AudioClip hoverFallback = resolvedAudioManager.GetUiHoverClip();
+        return hoverFallback != null ? hoverFallback : resolvedAudioManager.GetUiClickClip();
+    }
+
+    private static float ResolveManagerHoverVolume(AudioManager resolvedAudioManager)
+    {
+        AudioClip hoverFallback = resolvedAudioManager.GetUiHoverClip();
+        return hoverFallback != null ? resolvedAudioManager.GetUiHoverVolume() : resolvedAudioManager.GetUiClickVolume();
+    }
+
+    private AudioManager ResolveAudioManager()
+    {
+        if (audioManager != null)
+        {
+            return audioManager;
+        }
+
+        audioManager = AudioManager.Instance;
+        return audioManager;
     }
 }

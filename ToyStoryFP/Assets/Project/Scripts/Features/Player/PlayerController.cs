@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerHealthScript healthScript;
     [SerializeField] private PlayerCurrencyController currencyController;
     [SerializeField] private PlayerAudioController audioController;
+    [SerializeField] private MouseLookScript mouseLook;
     [SerializeField] private WeaponLoadoutScript weaponLoadout;
     [SerializeField] private PlayerShopController shopController;
 
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public PlayerHealthScript Health => healthScript;
     public PlayerCurrencyController Currency => currencyController;
     public PlayerAudioController Audio => audioController;
+    public MouseLookScript MouseLook => mouseLook;
     public WeaponLoadoutScript WeaponLoadout => weaponLoadout;
     public PlayerShopController Shop => shopController;
 
@@ -35,6 +37,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Instance = this;
+        ResolveDependencies();
         ValidateDependencies();
         RunStatsStore.BeginRun();
         weaponLoadout?.BeginRunLoadout();
@@ -52,11 +55,12 @@ public class PlayerController : MonoBehaviour
     {
         if (movementScript == null)
         {
+            ResolveDependencies();
             ValidateDependencies();
             return;
         }
 
-        if (UIManager.IsGamePaused || PlayerShopController.IsInputBlocked)
+        if (GameplayInputGate.IsBlocked)
         {
             movementScript.SetMoveInput(Vector2.zero);
             return;
@@ -77,6 +81,7 @@ public class PlayerController : MonoBehaviour
     {
         if (weaponLoadout == null)
         {
+            ResolveDependencies();
             ValidateDependencies();
             return;
         }
@@ -108,12 +113,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void ResolveDependencies()
+    {
+        movementScript ??= GetComponent<MovementScript>();
+        healthScript ??= GetComponent<PlayerHealthScript>();
+        currencyController ??= GetComponent<PlayerCurrencyController>();
+        audioController ??= GetComponent<PlayerAudioController>();
+        mouseLook ??= GetComponentInChildren<MouseLookScript>(true);
+        weaponLoadout ??= GetComponentInChildren<WeaponLoadoutScript>(true);
+        shopController ??= GetComponent<PlayerShopController>();
+    }
+
     private void ValidateDependencies()
     {
+        ResolveDependencies();
+
         if (movementScript != null
             && healthScript != null
             && currencyController != null
             && audioController != null
+            && mouseLook != null
             && weaponLoadout != null
             && shopController != null)
         {
@@ -126,9 +145,47 @@ public class PlayerController : MonoBehaviour
         }
 
         hasLoggedMissingDependencies = true;
+        string missingDependencies = string.Empty;
+
+        if (movementScript == null)
+        {
+            missingDependencies += "MovementScript, ";
+        }
+
+        if (healthScript == null)
+        {
+            missingDependencies += "PlayerHealthScript, ";
+        }
+
+        if (currencyController == null)
+        {
+            missingDependencies += "PlayerCurrencyController, ";
+        }
+
+        if (audioController == null)
+        {
+            missingDependencies += "PlayerAudioController, ";
+        }
+
+        if (mouseLook == null)
+        {
+            missingDependencies += "MouseLookScript, ";
+        }
+
+        if (weaponLoadout == null)
+        {
+            missingDependencies += "WeaponLoadoutScript, ";
+        }
+
+        if (shopController == null)
+        {
+            missingDependencies += "PlayerShopController, ";
+        }
+
+        missingDependencies = missingDependencies.TrimEnd(' ', ',');
         GameDebug.Advertencia(
             "Jugador",
-            "PlayerController necesita referencias serializadas a Movement, Health, Currency, Audio, WeaponLoadout y Shop.",
+            $"PlayerController no pudo resolver estas dependencias: {missingDependencies}.",
             this);
     }
 }

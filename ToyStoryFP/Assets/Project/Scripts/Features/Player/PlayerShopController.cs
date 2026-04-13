@@ -7,10 +7,7 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class PlayerShopController : MonoBehaviour
 {
-    private const int LegacySharedUpgradePrice = 10;
-    private const int LegacyAmmoPurchaseMagazineCount = 1;
-    private const float LegacyUpgradeStepMultiplier = 0.1f;
-    private const float LegacyHealFraction = 0.5f;
+    private const string ShopInputGateOwner = "PlayerShopController.Shop";
     private const float AvailableButtonAlpha = 1f;
     private const float UnaffordableButtonAlpha = 0.6f;
     private const float DisabledButtonAlpha = 0.4f;
@@ -18,11 +15,14 @@ public class PlayerShopController : MonoBehaviour
     private const string M16WeaponId = "TacticalRifle";
     private const string AkWeaponId = "AssaultRifle";
 
-    public static bool IsInputBlocked { get; private set; }
+    public static bool IsInputBlocked => GameplayInputGate.IsBlocked;
 
     [Header("Scene References")]
     [SerializeField] private WaveManager waveManager;
     [SerializeField] private ShopBalanceProfile shopBalanceProfile;
+    [SerializeField] private AudioManager audioManager;
+    [SerializeField] private UiAudioProfile uiAudioProfile;
+    [SerializeField] private AudioSource uiAudioSource;
 
     [Header("Shop UI")]
     [SerializeField] private GameObject panelShop;
@@ -47,81 +47,39 @@ public class PlayerShopController : MonoBehaviour
     private bool buttonListenersBound;
     private bool hasLoggedMissingReferences;
     private bool hasLoggedMissingShopBalanceProfile;
+    private bool hasAcquiredInputGate;
+    private static ShopBalanceProfile runtimeFallbackShopBalanceProfile;
     private readonly Dictionary<Button, CanvasGroup> buttonCanvasGroups = new Dictionary<Button, CanvasGroup>();
 
     private bool IsShopOpen => panelShop != null && panelShop.activeSelf;
 
     private void Awake()
     {
-        WarnIfMissingShopBalanceProfile();
-        ResolveGameplayReferences();
-        BindButtonListeners();
-        ApplyMovementUpgradeLevels();
-        CloseShopImmediate();
-        RefreshUi();
-        WarnIfReferencesAreMissing();
+        InitializeShopController();
     }
 
     private void OnEnable()
     {
-        WarnIfMissingShopBalanceProfile();
-        ResolveGameplayReferences();
-        BindButtonListeners();
-        RefreshUi();
-        WarnIfReferencesAreMissing();
+        RefreshShopSetup();
     }
 
     private void Update()
     {
-        if (IsShopOpen)
-        {
-            RefreshUi();
-        }
+        RefreshOpenShopUi();
 
-        if (UIManager.IsGamePaused)
+        if (ShouldForceShopClosed())
         {
-            if (IsShopOpen)
-            {
-                CloseShop();
-            }
-
+            CloseShopIfNeeded();
             return;
         }
 
-        if (!IsIntermissionActive())
-        {
-            if (IsShopOpen)
-            {
-                CloseShop();
-            }
-
-            return;
-        }
-
-        if (IsShopOpen)
-        {
-            if (ProjectInput.WasUiBackPressed() || ProjectInput.WasShopTogglePressed())
-            {
-                CloseShop();
-            }
-
-            return;
-        }
-
-        if (ProjectInput.WasShopTogglePressed())
-        {
-            ToggleShop();
-        }
+        HandleShopToggleInput();
     }
 
     private void OnDestroy()
     {
         UnbindButtonListeners();
-
-        if (IsInputBlocked)
-        {
-            IsInputBlocked = false;
-        }
+        ReleaseShopInputGateIfNeeded();
     }
 
     private void ToggleShop()
@@ -133,6 +91,22 @@ public class PlayerShopController : MonoBehaviour
         }
 
         OpenShop();
+    }
+
+    private void InitializeShopController()
+    {
+        RefreshShopSetup();
+        ApplyMovementUpgradeLevels();
+        CloseShopImmediate();
+    }
+
+    private void RefreshShopSetup()
+    {
+        WarnIfMissingShopBalanceProfile();
+        ResolveGameplayReferences();
+        BindButtonListeners();
+        RefreshUi();
+        WarnIfReferencesAreMissing();
     }
 
     public void CloseShopFromButton()
@@ -151,10 +125,7 @@ public class PlayerShopController : MonoBehaviour
         }
 
         UIFxUtility.SetPanelActive(panelShop, true);
-        PlayShopMusic();
-        IsInputBlocked = true;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        BeginShopSession();
         RefreshUi();
 
         if (EventSystem.current != null)
@@ -175,15 +146,10 @@ public class PlayerShopController : MonoBehaviour
         if (wasShopOpen)
         {
             ProjectInput.ConsumePauseToggleForCurrentFrame();
-            RestoreGameplayMusic();
+            EndShopAudioSession();
         }
 
-        IsInputBlocked = false;
-
-        if (!UIManager.IsGamePaused)
-        {
-            RestoreGameplayCursor();
-        }
+        EndShopInputSession();
 
         if (EventSystem.current != null)
         {
@@ -198,19 +164,66 @@ public class PlayerShopController : MonoBehaviour
             panelShop.SetActive(false);
         }
 
-        IsInputBlocked = false;
+        ReleaseShopInputGateIfNeeded();
     }
 
-    private void RestoreGameplayCursor()
+    private void RefreshOpenShopUi()
     {
-        if (MouseLookScript.instance != null)
+        if (IsShopOpen)
         {
-            MouseLookScript.instance.LockCursor();
+            RefreshUi();
+        }
+    }
+
+    private bool ShouldForceShopClosed()
+    {
+        return UIManager.IsGamePaused || !IsIntermissionActive();
+    }
+
+    private void CloseShopIfNeeded()
+    {
+        if (IsShopOpen)
+        {
+            CloseShop();
+        }
+    }
+
+    private void HandleShopToggleInput()
+    {
+        if (IsShopOpen)
+        {
+            HandleOpenShopInput();
             return;
         }
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (ProjectInput.WasShopTogglePressed())
+        {
+            ToggleShop();
+        }
+    }
+
+    private void HandleOpenShopInput()
+    {
+        if (ProjectInput.WasUiBackPressed() || ProjectInput.WasShopTogglePressed())
+        {
+            CloseShop();
+        }
+    }
+
+    private void BeginShopSession()
+    {
+        PlayShopMusic();
+        AcquireShopInputGateIfNeeded();
+    }
+
+    private void EndShopAudioSession()
+    {
+        RestoreGameplayMusic();
+    }
+
+    private void EndShopInputSession()
+    {
+        ReleaseShopInputGateIfNeeded();
     }
 
     private bool IsIntermissionActive()
@@ -232,9 +245,8 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
+        if (!TrySpendSharedUpgradePrice())
         {
-            PlayShopPurchaseFailedAudio();
             return;
         }
 
@@ -259,9 +271,8 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
+        if (!TrySpendSharedUpgradePrice())
         {
-            PlayShopPurchaseFailedAudio();
             return;
         }
 
@@ -280,9 +291,8 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
+        if (!TrySpendSharedUpgradePrice())
         {
-            PlayShopPurchaseFailedAudio();
             return;
         }
 
@@ -301,9 +311,8 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
-        if (!currencyController.TrySpendCoins(GetSharedUpgradePrice()))
+        if (!TrySpendSharedUpgradePrice())
         {
-            PlayShopPurchaseFailedAudio();
             return;
         }
 
@@ -311,6 +320,22 @@ public class PlayerShopController : MonoBehaviour
         ApplyMovementUpgradeLevels();
         PlayShopPurchaseSuccessAudio();
         RefreshUi();
+    }
+
+    private bool TrySpendSharedUpgradePrice()
+    {
+        if (currencyController == null)
+        {
+            return false;
+        }
+
+        if (currencyController.TrySpendCoins(GetSharedUpgradePrice()))
+        {
+            return true;
+        }
+
+        PlayShopPurchaseFailedAudio();
+        return false;
     }
 
     private void HandleM16Purchase()
@@ -404,22 +429,22 @@ public class PlayerShopController : MonoBehaviour
 
     private int GetSharedUpgradePrice()
     {
-        return Mathf.Max(0, shopBalanceProfile != null ? shopBalanceProfile.SharedUpgradePrice : LegacySharedUpgradePrice);
+        return Mathf.Max(0, ResolveShopBalanceProfile().SharedUpgradePrice);
     }
 
     private int GetAmmoPurchaseMagazineCount()
     {
-        return Mathf.Max(1, shopBalanceProfile != null ? shopBalanceProfile.AmmoPurchaseMagazineCount : LegacyAmmoPurchaseMagazineCount);
+        return Mathf.Max(1, ResolveShopBalanceProfile().AmmoPurchaseMagazineCount);
     }
 
     private float GetUpgradeStepMultiplier()
     {
-        return Mathf.Max(0f, shopBalanceProfile != null ? shopBalanceProfile.UpgradeStepMultiplier : LegacyUpgradeStepMultiplier);
+        return Mathf.Max(0f, ResolveShopBalanceProfile().UpgradeStepMultiplier);
     }
 
     private float GetHealFraction()
     {
-        return Mathf.Max(0f, shopBalanceProfile != null ? shopBalanceProfile.HealFraction : LegacyHealFraction);
+        return Mathf.Max(0f, ResolveShopBalanceProfile().HealFraction);
     }
 
     private void WarnIfMissingShopBalanceProfile()
@@ -436,7 +461,7 @@ public class PlayerShopController : MonoBehaviour
         }
 
         hasLoggedMissingShopBalanceProfile = true;
-        GameDebug.Advertencia("Shop", "PlayerShopController no tiene ShopBalanceProfile asignado. Se usaran los valores locales legacy.", this);
+        GameDebug.Advertencia("Shop", "PlayerShopController no tiene ShopBalanceProfile asignado. Se usara un perfil temporal de seguridad hasta asignar uno en escena.", this);
     }
 
     private bool CanPurchaseAmmo()
@@ -548,21 +573,21 @@ public class PlayerShopController : MonoBehaviour
 
     private void PlayShopMusic()
     {
-        AudioManager.Instance?.PlayShopMusic();
+        ResolveAudioManager()?.PlayShopMusic();
     }
 
     private void RestoreGameplayMusic()
     {
-        AudioManager.Instance?.RestoreGameplayMusic();
+        ResolveAudioManager()?.RestoreGameplayMusic();
     }
 
     private void ResolveGameplayReferences()
     {
         playerController ??= GetComponent<PlayerController>();
-        playerHealth = GetComponent<PlayerHealthScript>();
-        currencyController = GetComponent<PlayerCurrencyController>();
-        movementScript = GetComponent<MovementScript>();
-        weaponLoadout = GetComponentInChildren<WeaponLoadoutScript>(true);
+        playerHealth ??= GetComponent<PlayerHealthScript>();
+        currencyController ??= GetComponent<PlayerCurrencyController>();
+        movementScript ??= GetComponent<MovementScript>();
+        weaponLoadout ??= GetComponentInChildren<WeaponLoadoutScript>(true);
 
         if (playerHealth == null && playerController != null)
         {
@@ -719,17 +744,23 @@ public class PlayerShopController : MonoBehaviour
 
     private void PlayShopPurchaseSuccessAudio()
     {
-        PlayUiAudio(AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseSuccessClip() : null, AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseSuccessVolume() : 0f);
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        AudioClip clip = profile != null ? profile.ShopPurchaseSuccessClip : ResolveAudioManager()?.GetUiShopPurchaseSuccessClip();
+        float volume = profile != null ? profile.ShopPurchaseSuccessVolume : (ResolveAudioManager() != null ? ResolveAudioManager().GetUiShopPurchaseSuccessVolume() : 0f);
+        PlayUiAudio(clip, volume);
     }
 
     private void PlayShopPurchaseFailedAudio()
     {
-        PlayUiAudio(AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseFailedClip() : null, AudioManager.Instance != null ? AudioManager.Instance.GetUiShopPurchaseFailedVolume() : 0f);
+        UiAudioProfile profile = ResolveUiAudioProfile();
+        AudioClip clip = profile != null ? profile.ShopPurchaseFailedClip : ResolveAudioManager()?.GetUiShopPurchaseFailedClip();
+        float volume = profile != null ? profile.ShopPurchaseFailedVolume : (ResolveAudioManager() != null ? ResolveAudioManager().GetUiShopPurchaseFailedVolume() : 0f);
+        PlayUiAudio(clip, volume);
     }
 
     private void PlayUiAudio(AudioClip clip, float volume)
     {
-        AudioSource sharedSfxSource = AudioManager.Instance != null ? AudioManager.Instance.SharedSfxSource : null;
+        AudioSource sharedSfxSource = ResolveUiAudioSource();
 
         if (sharedSfxSource == null || clip == null || volume <= 0f)
         {
@@ -737,5 +768,65 @@ public class PlayerShopController : MonoBehaviour
         }
 
         sharedSfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
+    }
+
+    private AudioManager ResolveAudioManager()
+    {
+        if (audioManager != null)
+        {
+            return audioManager;
+        }
+
+        audioManager = AudioManager.Instance;
+        return audioManager;
+    }
+
+    private UiAudioProfile ResolveUiAudioProfile()
+    {
+        return uiAudioProfile;
+    }
+
+    private ShopBalanceProfile ResolveShopBalanceProfile()
+    {
+        if (shopBalanceProfile != null)
+        {
+            return shopBalanceProfile;
+        }
+
+        runtimeFallbackShopBalanceProfile ??= ScriptableObject.CreateInstance<ShopBalanceProfile>();
+        return runtimeFallbackShopBalanceProfile;
+    }
+
+    private AudioSource ResolveUiAudioSource()
+    {
+        if (uiAudioSource != null)
+        {
+            return uiAudioSource;
+        }
+
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        return resolvedAudioManager != null ? resolvedAudioManager.SharedSfxSource : null;
+    }
+
+    private void AcquireShopInputGateIfNeeded()
+    {
+        if (hasAcquiredInputGate)
+        {
+            return;
+        }
+
+        GameplayInputGate.Acquire(ShopInputGateOwner);
+        hasAcquiredInputGate = true;
+    }
+
+    private void ReleaseShopInputGateIfNeeded()
+    {
+        if (!hasAcquiredInputGate)
+        {
+            return;
+        }
+
+        GameplayInputGate.Release(ShopInputGateOwner);
+        hasAcquiredInputGate = false;
     }
 }

@@ -2823,6 +2823,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultsProfile: {fileID: 11400000, guid: 8efb086037eb4ff5ba1f122ab3f1b39a, type: 2}
+  playerController: {fileID: 0}
+  mouseLook: {fileID: 0}
   closeButton: {fileID: 1065}
   fullscreenButton: {fileID: 1085}
   fullscreenStateText: {fileID: 1034}

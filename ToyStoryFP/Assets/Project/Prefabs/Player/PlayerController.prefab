@@ -1161,6 +1161,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveAnnouncementUI
   panelRoot: {fileID: 919900000000001001}
   announcementText: {fileID: 919900000000001009}
+  audioManager: {fileID: 0}
+  audioCatalog: {fileID: 11400000, guid: 5f7b2d6a3c9e49a8b3d2e1f0a4c6b8d1, type: 2}
+  audioSource: {fileID: 0}
 --- !u!114 &3356648396315797443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4675,6 +4678,7 @@ MonoBehaviour:
   healthScript: {fileID: 8524817490402705243}
   currencyController: {fileID: 6571116937149603781}
   audioController: {fileID: 8763889996309575755}
+  mouseLook: {fileID: 1017103518327394351}
   weaponLoadout: {fileID: 3505556120907137829}
   shopController: {fileID: 1142213344556677889}
 --- !u!114 &1142213344556677889
@@ -4691,6 +4695,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShopController
   shopBalanceProfile: {fileID: 11400000, guid: 4058c69a7cac43ebbb2f0583427a5d34, type: 2}
   waveManager: {fileID: 0}
+  audioManager: {fileID: 0}
+  uiAudioProfile: {fileID: 11400000, guid: e8f9736d16dd40d2b8ee34bd0c4fc1ea, type: 2}
+  uiAudioSource: {fileID: 0}
   panelShop: {fileID: 6938587728798845622}
   moneyText: {fileID: 7939850641683457737}
   speedStatText: {fileID: 7181790239608446941}
