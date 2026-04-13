@@ -31,6 +31,40 @@ public class AudioManagerSceneMusicTests
         }
     }
 
+    [Test]
+    public void PlayShopMusic_And_RestoreGameplayMusic_UpdateSharedMusicSource()
+    {
+        ProjectAudioCatalog catalog = AssetDatabase.LoadAssetAtPath<ProjectAudioCatalog>(CatalogAssetPath);
+        Assert.That(catalog, Is.Not.Null, "ProjectAudioCatalog.asset debe existir para validar la musica contextual.");
+
+        GameObject audioManagerObject = new GameObject("AudioManagerRuntimeMusicTest");
+        AudioManager audioManager = audioManagerObject.AddComponent<AudioManager>();
+        AudioSource gameplayMusicSource = audioManagerObject.AddComponent<AudioSource>();
+        AudioSource shopMusicSource = audioManagerObject.AddComponent<AudioSource>();
+
+        try
+        {
+            SetPrivateField(audioManager, "catalog", catalog);
+            SetPrivateField(audioManager, "musicSource", gameplayMusicSource);
+            SetPrivateField(audioManager, "shopMusicSource", shopMusicSource);
+
+            audioManager.PlayShopMusic();
+            Assert.That(gameplayMusicSource.clip, Is.SameAs(catalog.Music.GameplayAudio.Clip));
+            Assert.That(gameplayMusicSource.isPlaying, Is.True);
+            Assert.That(shopMusicSource.clip, Is.SameAs(catalog.Music.ShopAudio.Clip));
+            Assert.That(shopMusicSource.isPlaying, Is.True);
+
+            audioManager.RestoreGameplayMusic();
+            Assert.That(gameplayMusicSource.clip, Is.SameAs(catalog.Music.GameplayAudio.Clip));
+            Assert.That(gameplayMusicSource.isPlaying, Is.True);
+            Assert.That(shopMusicSource.clip, Is.SameAs(catalog.Music.ShopAudio.Clip));
+        }
+        finally
+        {
+            Object.DestroyImmediate(audioManagerObject);
+        }
+    }
+
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         FieldInfo field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);

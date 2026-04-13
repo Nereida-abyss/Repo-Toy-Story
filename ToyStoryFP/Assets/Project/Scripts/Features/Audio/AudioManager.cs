@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,6 +9,7 @@ public class AudioManager : MonoBehaviour
     private const string GamePlaySceneName = "GamePlay";
     private const string EndMenuSceneName = "EndMenu";
     private const int EndMenuMusicLegacyIndex = 3;
+    private const float ShopMusicCrossfadeDuration = 0.6f;
 
     private static AudioManager instance;
 
@@ -21,6 +23,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("Audio Source References")]
     [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioSource shopMusicSource;
     [SerializeField] private AudioSource sfxSource;
 
     [Header("Music Settings")]
@@ -30,9 +33,12 @@ public class AudioManager : MonoBehaviour
 
     private bool hasLoggedMissingCatalog;
     private bool hasLoggedMissingMusicSource;
+    private bool hasLoggedMissingShopMusicSource;
     private bool hasLoggedMissingSfxSource;
     private bool hasLoggedMissingUiAudioProfile;
     private readonly HashSet<string> warnedKnownScenesWithoutMusic = new HashSet<string>();
+    private Coroutine shopMusicBlendCoroutine;
+    private bool isShopMusicActive;
 
     public static AudioManager Instance
     {
@@ -65,6 +71,7 @@ public class AudioManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         ResolveCatalog();
         ResolveMusicSource();
+        ResolveShopMusicSource(false);
         ResolveSfxSource();
 
         // Campo legacy conservado por compatibilidad de inspector; ya no gobierna el cambio de musica.
@@ -156,6 +163,21 @@ public class AudioManager : MonoBehaviour
     public void PlayMusicClip(AudioClip clip, bool loop = true)
     {
         PlayMusicClip(clip, 1f, loop);
+    }
+
+    public void PlayGameplayMusic()
+    {
+        PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+    }
+
+    public void PlayShopMusic()
+    {
+        StartShopMusicBlend(true);
+    }
+
+    public void RestoreGameplayMusic()
+    {
+        StartShopMusicBlend(false);
     }
 
     public void PlayMusicClip(AudioClip clip, float clipVolume, bool loop = true)
@@ -345,21 +367,26 @@ public class AudioManager : MonoBehaviour
         AudioClip targetClip = GetMusicClipForScene(sceneName);
         if (targetClip == null)
         {
+            StopShopMusicImmediate();
             StopMusicForKnownSceneWithoutClip(sceneName, resolvedMusicSource);
             return;
         }
 
-        resolvedMusicSource.volume = Mathf.Clamp01(musicVolume * GetMusicVolumeForScene(sceneName));
-        resolvedMusicSource.loop = true;
-
-        bool wrongClip = resolvedMusicSource.clip != targetClip;
-        bool stopped = !resolvedMusicSource.isPlaying;
-
-        if (wrongClip || stopped)
+        if (sceneName == GamePlaySceneName)
         {
-            resolvedMusicSource.clip = targetClip;
-            resolvedMusicSource.Play();
+            PrepareBaseMusicClip(targetClip, GetMusicVolumeForScene(sceneName), true);
+
+            if (!isShopMusicActive)
+            {
+                StopShopMusicImmediate();
+            }
+
+            return;
         }
+
+        isShopMusicActive = false;
+        StopShopMusicImmediate();
+        PrepareBaseMusicClip(targetClip, GetMusicVolumeForScene(sceneName), true);
     }
 
     private AudioSource ResolveMusicSource()
@@ -373,6 +400,22 @@ public class AudioManager : MonoBehaviour
         {
             hasLoggedMissingMusicSource = true;
             GameDebug.Advertencia("Audio", "No hay AudioSource de musica asignado en el inspector.", this);
+        }
+
+        return null;
+    }
+
+    private AudioSource ResolveShopMusicSource(bool logIfMissing = true)
+    {
+        if (shopMusicSource != null)
+        {
+            return shopMusicSource;
+        }
+
+        if (logIfMissing && !hasLoggedMissingShopMusicSource)
+        {
+            hasLoggedMissingShopMusicSource = true;
+            GameDebug.Advertencia("Audio", "No hay AudioSource de musica de tienda asignado en el inspector.", this);
         }
 
         return null;
@@ -457,6 +500,175 @@ public class AudioManager : MonoBehaviour
             "Audio",
             $"La escena musical conocida '{sceneName}' no tiene clip configurado. Se detiene la musica actual para evitar arrastrar la pista anterior.",
             this);
+    }
+
+    private void StartShopMusicBlend(bool enteringShop)
+    {
+        if (SceneManager.GetActiveScene().name != GamePlaySceneName)
+        {
+            if (!enteringShop)
+            {
+                PrepareBaseMusicClip(GetSceneMusicClip(SceneManager.GetActiveScene().name), GetSceneMusicVolume(SceneManager.GetActiveScene().name), true);
+            }
+
+            return;
+        }
+
+        AudioSource resolvedBaseSource = ResolveMusicSource();
+        AudioSource resolvedShopSource = ResolveShopMusicSource(enteringShop);
+
+        if (resolvedBaseSource == null)
+        {
+            return;
+        }
+
+        if (resolvedShopSource == null)
+        {
+            if (enteringShop)
+            {
+                PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+            }
+
+            return;
+        }
+
+        PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+        PrepareShopMusicClip(resolvedShopSource, enteringShop);
+        isShopMusicActive = enteringShop;
+
+        if (shopMusicBlendCoroutine != null)
+        {
+            StopCoroutine(shopMusicBlendCoroutine);
+        }
+
+        shopMusicBlendCoroutine = StartCoroutine(BlendShopMusicCoroutine(
+            resolvedBaseSource,
+            resolvedShopSource,
+            enteringShop,
+            Mathf.Clamp01(musicVolume * GetGameplayMusicVolume()),
+            Mathf.Clamp01(musicVolume * GetShopMusicVolume())));
+    }
+
+    private void PrepareBaseMusicClip(AudioClip clip, float clipVolume, bool playIfStopped)
+    {
+        AudioSource resolvedMusicSource = ResolveMusicSource();
+
+        if (resolvedMusicSource == null || clip == null)
+        {
+            return;
+        }
+
+        float targetVolume = Mathf.Clamp01(musicVolume * Mathf.Clamp01(clipVolume));
+        bool wrongClip = resolvedMusicSource.clip != clip;
+
+        if (wrongClip)
+        {
+            resolvedMusicSource.clip = clip;
+        }
+
+        resolvedMusicSource.loop = true;
+        resolvedMusicSource.volume = isShopMusicActive ? 0f : targetVolume;
+
+        if ((wrongClip || playIfStopped) && !resolvedMusicSource.isPlaying)
+        {
+            resolvedMusicSource.Play();
+        }
+    }
+
+    private void PrepareShopMusicClip(AudioSource resolvedShopSource, bool enteringShop)
+    {
+        AudioClip shopClip = GetShopMusicClip();
+
+        if (shopClip == null)
+        {
+            StopShopMusicImmediate();
+            return;
+        }
+
+        bool wrongClip = resolvedShopSource.clip != shopClip;
+
+        if (wrongClip)
+        {
+            resolvedShopSource.clip = shopClip;
+        }
+
+        resolvedShopSource.loop = true;
+
+        if (!resolvedShopSource.isPlaying && enteringShop)
+        {
+            resolvedShopSource.volume = 0f;
+            resolvedShopSource.Play();
+        }
+    }
+
+    private IEnumerator BlendShopMusicCoroutine(AudioSource baseSource, AudioSource shopSource, bool enteringShop, float gameplayTargetVolume, float shopTargetVolume)
+    {
+        float duration = Mathf.Max(0.01f, ShopMusicCrossfadeDuration);
+        float elapsed = 0f;
+        float startBaseVolume = baseSource != null ? baseSource.volume : 0f;
+        float startShopVolume = shopSource != null ? shopSource.volume : 0f;
+        float endBaseVolume = enteringShop ? 0f : gameplayTargetVolume;
+        float endShopVolume = enteringShop ? shopTargetVolume : 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            if (baseSource != null)
+            {
+                baseSource.volume = Mathf.Lerp(startBaseVolume, endBaseVolume, t);
+            }
+
+            if (shopSource != null)
+            {
+                shopSource.volume = Mathf.Lerp(startShopVolume, endShopVolume, t);
+            }
+
+            yield return null;
+        }
+
+        if (baseSource != null)
+        {
+            baseSource.volume = endBaseVolume;
+        }
+
+        if (shopSource != null)
+        {
+            shopSource.volume = endShopVolume;
+
+            if (!enteringShop)
+            {
+                shopSource.Stop();
+            }
+        }
+
+        shopMusicBlendCoroutine = null;
+    }
+
+    private void StopShopMusicImmediate()
+    {
+        AudioSource resolvedShopSource = ResolveShopMusicSource(false);
+
+        if (shopMusicBlendCoroutine != null)
+        {
+            StopCoroutine(shopMusicBlendCoroutine);
+            shopMusicBlendCoroutine = null;
+        }
+
+        if (resolvedShopSource == null)
+        {
+            return;
+        }
+
+        resolvedShopSource.volume = 0f;
+        resolvedShopSource.clip = GetShopMusicClip();
+        resolvedShopSource.loop = true;
+
+        if (resolvedShopSource.isPlaying)
+        {
+            resolvedShopSource.Stop();
+        }
     }
 
     private ProjectAudioCatalog ResolveCatalog()

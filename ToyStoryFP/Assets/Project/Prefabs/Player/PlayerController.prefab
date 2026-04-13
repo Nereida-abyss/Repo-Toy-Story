@@ -2302,9 +2302,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1521112854382354753}
-        m_TargetAssemblyTypeName: SettingsPanelController, Assembly-CSharp
-        m_MethodName: ClosePanel
+      - m_Target: {fileID: 1142213344556677889}
+        m_TargetAssemblyTypeName: PlayerShopController, Assembly-CSharp
+        m_MethodName: CloseShopFromButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

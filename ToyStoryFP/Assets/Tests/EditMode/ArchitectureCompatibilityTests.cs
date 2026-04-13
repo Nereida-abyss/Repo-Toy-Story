@@ -32,6 +32,9 @@ public class ArchitectureCompatibilityTests
     {
         Assert.That(typeof(PlayerAudioController).GetMethod("PlayHitmarker", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
         Assert.That(typeof(PlayerAudioController).GetMethod("PlayDeath", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("PlayGameplayMusic", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("PlayShopMusic", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+        Assert.That(typeof(AudioManager).GetMethod("RestoreGameplayMusic", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
         Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseSuccessClip", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
         Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseSuccessVolume", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
         Assert.That(typeof(AudioManager).GetMethod("GetUiShopPurchaseFailedClip", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);

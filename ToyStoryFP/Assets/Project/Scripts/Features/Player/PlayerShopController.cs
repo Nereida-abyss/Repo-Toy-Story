@@ -1,4 +1,5 @@
 using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,6 +11,9 @@ public class PlayerShopController : MonoBehaviour
     private const int LegacyAmmoPurchaseMagazineCount = 1;
     private const float LegacyUpgradeStepMultiplier = 0.1f;
     private const float LegacyHealFraction = 0.5f;
+    private const float AvailableButtonAlpha = 1f;
+    private const float UnaffordableButtonAlpha = 0.6f;
+    private const float DisabledButtonAlpha = 0.4f;
     private const string NotEnoughCoinsFailReason = "Not enough coins.";
     private const string M16WeaponId = "TacticalRifle";
     private const string AkWeaponId = "AssaultRifle";
@@ -43,6 +47,7 @@ public class PlayerShopController : MonoBehaviour
     private bool buttonListenersBound;
     private bool hasLoggedMissingReferences;
     private bool hasLoggedMissingShopBalanceProfile;
+    private readonly Dictionary<Button, CanvasGroup> buttonCanvasGroups = new Dictionary<Button, CanvasGroup>();
 
     private bool IsShopOpen => panelShop != null && panelShop.activeSelf;
 
@@ -130,6 +135,11 @@ public class PlayerShopController : MonoBehaviour
         OpenShop();
     }
 
+    public void CloseShopFromButton()
+    {
+        CloseShop();
+    }
+
     private void OpenShop()
     {
         ResolveGameplayReferences();
@@ -141,6 +151,7 @@ public class PlayerShopController : MonoBehaviour
         }
 
         UIFxUtility.SetPanelActive(panelShop, true);
+        PlayShopMusic();
         IsInputBlocked = true;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -154,9 +165,17 @@ public class PlayerShopController : MonoBehaviour
 
     private void CloseShop()
     {
+        bool wasShopOpen = IsShopOpen;
+
         if (panelShop != null)
         {
             UIFxUtility.SetPanelActive(panelShop, false);
+        }
+
+        if (wasShopOpen)
+        {
+            ProjectInput.ConsumePauseToggleForCurrentFrame();
+            RestoreGameplayMusic();
         }
 
         IsInputBlocked = false;
@@ -371,14 +390,16 @@ public class PlayerShopController : MonoBehaviour
     private void UpdateButtonStates()
     {
         int currentCoins = currencyController != null ? currencyController.CurrentCoins : 0;
-
         int sharedUpgradePrice = GetSharedUpgradePrice();
-        SetButtonInteractable(speedButton, currentCoins >= sharedUpgradePrice);
-        SetButtonInteractable(jumpButton, currentCoins >= sharedUpgradePrice);
-        SetButtonInteractable(ammoButton, currentCoins >= sharedUpgradePrice && CanPurchaseAmmo());
-        SetButtonInteractable(healButton, currentCoins >= sharedUpgradePrice && CanPurchaseHeal());
-        SetButtonInteractable(m16Button, CanPurchaseWeapon(M16WeaponId, currentCoins));
-        SetButtonInteractable(akButton, CanPurchaseWeapon(AkWeaponId, currentCoins));
+        bool canPurchaseAmmo = CanPurchaseAmmo();
+        bool canPurchaseHeal = CanPurchaseHeal();
+
+        SetButtonPurchaseState(speedButton, true, currentCoins >= sharedUpgradePrice);
+        SetButtonPurchaseState(jumpButton, true, currentCoins >= sharedUpgradePrice);
+        SetButtonPurchaseState(ammoButton, canPurchaseAmmo, currentCoins >= sharedUpgradePrice);
+        SetButtonPurchaseState(healButton, canPurchaseHeal, currentCoins >= sharedUpgradePrice);
+        SetButtonPurchaseState(m16Button, CanAttemptWeaponPurchase(M16WeaponId), CanAffordWeapon(M16WeaponId, currentCoins));
+        SetButtonPurchaseState(akButton, CanAttemptWeaponPurchase(AkWeaponId), CanAffordWeapon(AkWeaponId, currentCoins));
     }
 
     private int GetSharedUpgradePrice()
@@ -435,7 +456,24 @@ public class PlayerShopController : MonoBehaviour
         return playerHealth != null && playerHealth.IsAlive && playerHealth.CurrentHealth < playerHealth.MaxHealth;
     }
 
-    private bool CanPurchaseWeapon(string weaponId, int currentCoins)
+    private bool CanAttemptWeaponPurchase(string weaponId)
+    {
+        ResolveGameplayReferences();
+
+        if (weaponLoadout == null)
+        {
+            return false;
+        }
+
+        if (!weaponLoadout.TryGetShopEntry(weaponId, out WeaponLoadoutScript.WeaponShopEntry entry))
+        {
+            return false;
+        }
+
+        return !entry.IsUnlocked;
+    }
+
+    private bool CanAffordWeapon(string weaponId, int currentCoins)
     {
         ResolveGameplayReferences();
 
@@ -452,14 +490,70 @@ public class PlayerShopController : MonoBehaviour
         return !entry.IsUnlocked && currentCoins >= entry.Price;
     }
 
-    private void SetButtonInteractable(Button button, bool interactable)
+    private void SetButtonPurchaseState(Button button, bool canAttemptPurchase, bool canAffordPurchase)
     {
         if (button == null)
         {
             return;
         }
 
-        button.interactable = interactable;
+        button.interactable = canAttemptPurchase;
+        SetButtonVisualAlpha(button, ResolveButtonAlpha(canAttemptPurchase, canAffordPurchase));
+    }
+
+    private void SetButtonVisualAlpha(Button button, float alpha)
+    {
+        CanvasGroup group = ResolveButtonCanvasGroup(button);
+
+        if (group == null)
+        {
+            return;
+        }
+
+        group.alpha = Mathf.Clamp01(alpha);
+    }
+
+    private CanvasGroup ResolveButtonCanvasGroup(Button button)
+    {
+        if (button == null)
+        {
+            return null;
+        }
+
+        if (buttonCanvasGroups.TryGetValue(button, out CanvasGroup cachedGroup) && cachedGroup != null)
+        {
+            return cachedGroup;
+        }
+
+        CanvasGroup group = button.GetComponent<CanvasGroup>();
+
+        if (group == null)
+        {
+            group = button.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        buttonCanvasGroups[button] = group;
+        return group;
+    }
+
+    private float ResolveButtonAlpha(bool canAttemptPurchase, bool canAffordPurchase)
+    {
+        if (!canAttemptPurchase)
+        {
+            return DisabledButtonAlpha;
+        }
+
+        return canAffordPurchase ? AvailableButtonAlpha : UnaffordableButtonAlpha;
+    }
+
+    private void PlayShopMusic()
+    {
+        AudioManager.Instance?.PlayShopMusic();
+    }
+
+    private void RestoreGameplayMusic()
+    {
+        AudioManager.Instance?.RestoreGameplayMusic();
     }
 
     private void ResolveGameplayReferences()
