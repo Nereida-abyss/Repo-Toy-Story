@@ -5,10 +5,13 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class PlayerHUDController : MonoBehaviour
 {
+    [Header("HUD Profile")]
+    [SerializeField] private PlayerHudProfile hudProfile;
+
     [Header("Health UI")]
     [SerializeField] private Image healthFillImage;
     [SerializeField] private TMP_Text healthText;
-    [SerializeField] private float healthAnimationSpeed = 2.5f;
+    [HideInInspector] [SerializeField] private float healthAnimationSpeed = 2.5f;
 
     [Header("Ammo UI")]
     [SerializeField] private TMP_Text ammoText;
@@ -19,13 +22,13 @@ public class PlayerHUDController : MonoBehaviour
 
     [Header("Damage Feedback")]
     [SerializeField] private Image damageFlashImage;
-    [SerializeField] private Color damageFlashColor = new Color(0.95f, 0.08f, 0.08f, 0.38f);
-    [SerializeField] private float damageFlashFadeIn = 0.04f;
-    [SerializeField] private float damageFlashHold = 0.05f;
-    [SerializeField] private float damageFlashFadeOut = 0.2f;
-    [SerializeField] private float damageFeedbackMinInterval = 0.04f;
-    [SerializeField] private float healthPulseScale = 1.12f;
-    [SerializeField] private float healthPulseDuration = 0.2f;
+    [HideInInspector] [SerializeField] private Color damageFlashColor = new Color(0.95f, 0.08f, 0.08f, 0.38f);
+    [HideInInspector] [SerializeField] private float damageFlashFadeIn = 0.04f;
+    [HideInInspector] [SerializeField] private float damageFlashHold = 0.05f;
+    [HideInInspector] [SerializeField] private float damageFlashFadeOut = 0.2f;
+    [HideInInspector] [SerializeField] private float damageFeedbackMinInterval = 0.04f;
+    [HideInInspector] [SerializeField] private float healthPulseScale = 1.12f;
+    [HideInInspector] [SerializeField] private float healthPulseDuration = 0.2f;
 
     private PlayerController playerController;
     private PlayerHealthScript playerHealth;
@@ -41,9 +44,11 @@ public class PlayerHUDController : MonoBehaviour
     private int lastKnownHealth = -1;
     private Vector3 healthFillBaseScale = Vector3.one;
     private bool loggedMissingUiReferences;
+    private bool loggedMissingHudProfile;
 
     void Awake()
     {
+        ApplyHudProfile();
         ResolveReferences();
         WarnIfUiReferencesAreMissing();
         BindEvents();
@@ -52,6 +57,7 @@ public class PlayerHUDController : MonoBehaviour
 
     void OnEnable()
     {
+        ApplyHudProfile();
         ResolveReferences();
         BindEvents();
         RefreshAllImmediate();
@@ -65,6 +71,8 @@ public class PlayerHUDController : MonoBehaviour
 
     void OnValidate()
     {
+        ApplyHudProfile();
+
         if (healthFillImage != null)
         {
             healthFillBaseScale = healthFillImage.rectTransform.localScale;
@@ -73,9 +81,27 @@ public class PlayerHUDController : MonoBehaviour
 
     void Update()
     {
-        UpdateHealthAnimation();
-        UpdateDamageFeedbackAnimation();
-        RefreshAmmo();
+        UpdateHealthVisuals();
+        UpdateWeaponVisuals();
+    }
+
+    private void ApplyHudProfile()
+    {
+        if (hudProfile == null)
+        {
+            WarnIfHudProfileIsMissing();
+            return;
+        }
+
+        loggedMissingHudProfile = false;
+        healthAnimationSpeed = hudProfile.HealthAnimationSpeed;
+        damageFlashColor = hudProfile.DamageFlashColor;
+        damageFlashFadeIn = hudProfile.DamageFlashFadeIn;
+        damageFlashHold = hudProfile.DamageFlashHold;
+        damageFlashFadeOut = hudProfile.DamageFlashFadeOut;
+        damageFeedbackMinInterval = hudProfile.DamageFeedbackMinInterval;
+        healthPulseScale = hudProfile.HealthPulseScale;
+        healthPulseDuration = hudProfile.HealthPulseDuration;
     }
 
     // Busca y cachea las piezas de gameplay de las que depende el HUD.
@@ -90,6 +116,20 @@ public class PlayerHUDController : MonoBehaviour
             playerCurrency = playerController.Currency ?? playerController.GetComponent<PlayerCurrencyController>();
             playerAudio = playerController.Audio ?? playerController.GetComponent<PlayerAudioController>();
         }
+    }
+
+    private void WarnIfHudProfileIsMissing()
+    {
+        if (loggedMissingHudProfile)
+        {
+            return;
+        }
+
+        loggedMissingHudProfile = true;
+        GameDebug.Advertencia(
+            "HUD",
+            "PlayerHUDController no tiene PlayerHudProfile asignado. Se usaran los valores locales del componente.",
+            this);
     }
 
     // Lanza una sola advertencia si faltan piezas importantes del HUD.
@@ -256,6 +296,17 @@ public class PlayerHUDController : MonoBehaviour
         RefreshHealthText();
         RefreshAmmo();
         RefreshCoins();
+    }
+
+    private void UpdateHealthVisuals()
+    {
+        UpdateHealthAnimation();
+        UpdateDamageFeedbackAnimation();
+    }
+
+    private void UpdateWeaponVisuals()
+    {
+        RefreshAmmo();
     }
 
     // Hace que la barra de vida persiga el valor real poco a poco para que no pegue saltos secos.

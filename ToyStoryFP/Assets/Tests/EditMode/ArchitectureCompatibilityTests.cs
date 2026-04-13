@@ -142,6 +142,14 @@ public class ArchitectureCompatibilityTests
     }
 
     [Test]
+    public void JuniorFriendlyEditing_KeepsHudDataDriven()
+    {
+        string hudSource = ReadSource("Assets/Project/Scripts/Features/Player/PlayerHUDController.cs");
+        Assert.That(hudSource, Does.Contain("[SerializeField] private PlayerHudProfile hudProfile;"));
+        Assert.That(hudSource, Does.Contain("ApplyHudProfile()"));
+    }
+
+    [Test]
     public void GameplayInputGate_BecomesTheSharedSourceOfGameplayUiBlocking()
     {
         string gateSource = ReadSource("Assets/Project/Scripts/Core/GameplayInputGate.cs");

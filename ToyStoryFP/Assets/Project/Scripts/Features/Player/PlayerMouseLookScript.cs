@@ -34,7 +34,7 @@ public class MouseLookScript : MonoBehaviour
     [SerializeField] private bool restoreCameraLocalPositionOnUnpause = true;
     [SerializeField] private bool clearAngularVelocityOnResume = true;
     [Space]
-    private Vector2 sensitivity = new Vector2(2f, 2f); 
+    private Vector2 sensitivity = new Vector2(2f, 2f);
     [Space]
     public Vector2 smoothing = new Vector2(3f, 3f);
 
@@ -60,10 +60,8 @@ public class MouseLookScript : MonoBehaviour
 
     private Vector2 targetDirection;
     private Vector2 targetCharacterDirection;
-
     private Vector2 _mouseAbsolute;
     private Vector2 _smoothMouse;
-
     private Vector2 mouseDelta;
     private float jumpPreparationPitchOffset;
     private Vector3 baseLocalPosition;
@@ -129,7 +127,6 @@ public class MouseLookScript : MonoBehaviour
         float savedLookSensitivity = PlayerPrefs.GetFloat(LookSensitivityKey, DefaultLookSensitivity);
         SetSensitivity(savedLookSensitivity);
         baseLocalPosition = transform.localPosition;
-
         targetDirection = transform.localRotation.eulerAngles;
 
         if (characterBody)
@@ -189,15 +186,14 @@ public class MouseLookScript : MonoBehaviour
         anticipationDropReturnDuration = tuningProfile.AnticipationDropReturnDuration;
     }
 
-    // Guarda una sensibilidad segura dentro de los límites permitidos.
+    // Guarda una sensibilidad segura dentro de los limites permitidos.
     public void SetSensitivity(float value)
     {
         float clampedSensitivity = Mathf.Clamp(value, MinLookSensitivity, MaxLookSensitivity);
         sensitivity = new Vector2(clampedSensitivity, clampedSensitivity);
     }
 
-
-    // Encierra el cursor para que la cámara no pierda el control al mover el ratón.
+    // Encierra el cursor para que la camara no pierda el control al mover el raton.
     public void LockCursor()
     {
         if (GameplayInputGate.IsBlocked)
@@ -212,6 +208,21 @@ public class MouseLookScript : MonoBehaviour
 
     void Update()
     {
+        if (ShouldSkipLookUpdate())
+        {
+            return;
+        }
+
+        if (!TryReadLookInput())
+        {
+            return;
+        }
+
+        ApplyLookRotation();
+    }
+
+    private bool ShouldSkipLookUpdate()
+    {
         bool pausedNow = GameplayInputGate.IsBlocked;
 
         if (!pauseStateInitialized || pausedNow != lastKnownPauseState)
@@ -221,67 +232,111 @@ public class MouseLookScript : MonoBehaviour
 
         if (pausedNow)
         {
-            return;
+            return true;
         }
 
-        if (postUnpauseLookBlockTimer > 0f)
+        if (postUnpauseLookBlockTimer <= 0f)
         {
-            postUnpauseLookBlockTimer = Mathf.Max(0f, postUnpauseLookBlockTimer - Time.unscaledDeltaTime);
-            return;
+            return false;
         }
 
-        var targetOrientation = Quaternion.Euler(targetDirection);
-        var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
+        postUnpauseLookBlockTimer = Mathf.Max(0f, postUnpauseLookBlockTimer - Time.unscaledDeltaTime);
+        return true;
+    }
 
+    private bool TryReadLookInput()
+    {
         mouseDelta = ProjectInput.GetLookDelta();
 
-        if (postUnpauseSpikeFilterTimer > 0f)
+        if (!PassesPostPauseSpikeFilter(mouseDelta))
         {
-            postUnpauseSpikeFilterTimer = Mathf.Max(0f, postUnpauseSpikeFilterTimer - Time.unscaledDeltaTime);
-            float spikeThreshold = Mathf.Max(0.1f, postUnpauseSpikeThreshold);
-
-            if (mouseDelta.sqrMagnitude > spikeThreshold * spikeThreshold)
-            {
-                // Ignora picos raros del ratón justo al salir de pausa o ajustes.
-                ResetLookInputBuffers();
-                return;
-            }
+            return false;
         }
 
-        mouseDelta = Vector2.Scale(mouseDelta, new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
+        ApplyMouseDelta(mouseDelta);
+        UpdateRecoilOffsets();
+        return true;
+    }
 
-        _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, mouseDelta.x, 1f / smoothing.x);
-        _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, mouseDelta.y, 1f / smoothing.y);
+    private bool PassesPostPauseSpikeFilter(Vector2 rawMouseDelta)
+    {
+        if (postUnpauseSpikeFilterTimer <= 0f)
+        {
+            return true;
+        }
 
+        postUnpauseSpikeFilterTimer = Mathf.Max(0f, postUnpauseSpikeFilterTimer - Time.unscaledDeltaTime);
+        float spikeThreshold = Mathf.Max(0.1f, postUnpauseSpikeThreshold);
+
+        if (rawMouseDelta.sqrMagnitude <= spikeThreshold * spikeThreshold)
+        {
+            return true;
+        }
+
+        // Ignora picos raros del raton justo al salir de pausa o ajustes.
+        ResetLookInputBuffers();
+        return false;
+    }
+
+    private void ApplyMouseDelta(Vector2 rawMouseDelta)
+    {
+        Vector2 scaledMouseDelta = Vector2.Scale(
+            rawMouseDelta,
+            new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
+
+        _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, scaledMouseDelta.x, 1f / smoothing.x);
+        _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, scaledMouseDelta.y, 1f / smoothing.y);
         _mouseAbsolute += _smoothMouse;
+        ClampMouseAbsolute();
+    }
 
-        if (clampInDegrees.x < 360)
+    private void ClampMouseAbsolute()
+    {
+        if (clampInDegrees.x < 360f)
+        {
             _mouseAbsolute.x = Mathf.Clamp(_mouseAbsolute.x, -clampInDegrees.x * 0.5f, clampInDegrees.x * 0.5f);
+        }
 
-        if (clampInDegrees.y < 360)
+        if (clampInDegrees.y < 360f)
+        {
             _mouseAbsolute.y = Mathf.Clamp(_mouseAbsolute.y, -clampInDegrees.y * 0.5f, clampInDegrees.y * 0.5f);
+        }
+    }
 
+    private void UpdateRecoilOffsets()
+    {
         recoilPitchOffset = Mathf.SmoothDamp(recoilPitchOffset, 0f, ref recoilPitchVelocity, Mathf.Max(0.01f, recoilReturnTime));
         recoilYawOffset = Mathf.SmoothDamp(recoilYawOffset, 0f, ref recoilYawVelocity, Mathf.Max(0.01f, recoilReturnTime));
+    }
 
+    private void ApplyLookRotation()
+    {
+        Quaternion targetOrientation = Quaternion.Euler(targetDirection);
+        Quaternion targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
+        ApplyPitchRotation(targetOrientation);
+        ApplyYawRotation(targetCharacterOrientation);
+        UpdateCameraVerticalOffsets();
+    }
+
+    private void ApplyPitchRotation(Quaternion targetOrientation)
+    {
         float combinedPitch = _mouseAbsolute.y + jumpPreparationPitchOffset + recoilPitchOffset;
         Quaternion pitchRotation = Quaternion.AngleAxis(-combinedPitch, targetOrientation * Vector3.right) * targetOrientation;
         Quaternion yawRecoilRotation = Quaternion.AngleAxis(recoilYawOffset, targetOrientation * Vector3.up);
         transform.localRotation = yawRecoilRotation * pitchRotation;
-        UpdateCameraVerticalOffsets();
+    }
 
+    private void ApplyYawRotation(Quaternion targetCharacterOrientation)
+    {
         if (characterBody)
         {
-            var yRotation = Quaternion.AngleAxis(_mouseAbsolute.x, Vector3.up);
+            Quaternion yRotation = Quaternion.AngleAxis(_mouseAbsolute.x, Vector3.up);
             characterBody.transform.localRotation = yRotation * targetCharacterOrientation;
+            return;
         }
 
-        else
-        {
-            var yRotation = Quaternion.AngleAxis(_mouseAbsolute.x, transform.InverseTransformDirection(Vector3.up));
-            transform.localRotation *= yRotation;
-        }
-
+        Quaternion yRotationFallback = Quaternion.AngleAxis(_mouseAbsolute.x, transform.InverseTransformDirection(Vector3.up));
+        transform.localRotation *= yRotationFallback;
     }
 
     // Se engancha al evento de pausa una sola vez para no duplicar avisos.
@@ -308,7 +363,7 @@ public class MouseLookScript : MonoBehaviour
         pauseEventSubscribed = false;
     }
 
-    // Toma una foto inicial del estado de pausa y limpia temporizadores de protección.
+    // Toma una foto inicial del estado de pausa y limpia temporizadores de proteccion.
     private void InitializePauseStateTracking()
     {
         bool pausedNow = GameplayInputGate.IsBlocked;
@@ -329,9 +384,9 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Este bloque decide qué guardar al pausar y qué restaurar al volver.
-    // La idea es que la cámara y el cuerpo vuelvan exactamente al mismo sitio
-    // sin saltos bruscos ni giros raros al cerrar el menú.
+    // Este bloque decide que guardar al pausar y que restaurar al volver.
+    // La idea es que la camara y el cuerpo vuelvan exactamente al mismo sitio
+    // sin saltos bruscos ni giros raros al cerrar el menu.
     private void HandlePauseStateChanged(bool paused)
     {
         if (pauseStateInitialized && paused == lastKnownPauseState)
@@ -375,7 +430,7 @@ public class MouseLookScript : MonoBehaviour
         pausePoseCapturedThisCycle = false;
     }
 
-    // Borra la inercia del ratón y del recoil acumulado para empezar desde un estado limpio.
+    // Borra la inercia del raton y del recoil acumulado para empezar desde un estado limpio.
     private void ResetLookInputBuffers()
     {
         _smoothMouse = Vector2.zero;
@@ -386,7 +441,7 @@ public class MouseLookScript : MonoBehaviour
     }
 
     // Guarda una foto completa de la pose actual antes de pausar:
-    // raíz, cámara, cuerpo y acumuladores de giro.
+    // raiz, camara, cuerpo y acumuladores de giro.
     private void CapturePausePoseSnapshot()
     {
         if (pausePoseCapturedThisCycle)
@@ -410,7 +465,7 @@ public class MouseLookScript : MonoBehaviour
     }
 
     // Restaura la foto guardada al salir de pausa.
-    // Esto evita que la cámara reaparezca descolocada o con física residual.
+    // Esto evita que la camara reaparezca descolocada o con fisica residual.
     private void RestorePausePoseSnapshot()
     {
         if (!pausePoseSnapshot.isValid)
@@ -447,7 +502,7 @@ public class MouseLookScript : MonoBehaviour
         }
     }
 
-    // Decide cuál es la raíz que se debe congelar y restaurar durante la pausa.
+    // Decide cual es la raiz que se debe congelar y restaurar durante la pausa.
     private Transform ResolvePausePoseRoot()
     {
         if (pausePoseRoot != null)
@@ -458,7 +513,7 @@ public class MouseLookScript : MonoBehaviour
         return transform.root != null ? transform.root : transform;
     }
 
-    // Busca el Rigidbody que puede seguir girando mientras el juego está pausado.
+    // Busca el Rigidbody que puede seguir girando mientras el juego esta pausado.
     // Si existe, luego lo frenamos para que la vuelta al juego no pegue un latigazo.
     private Rigidbody ResolvePausePoseRootRigidbody(Transform snapshotRoot)
     {
@@ -482,7 +537,7 @@ public class MouseLookScript : MonoBehaviour
         return pausePoseRootRigidbody;
     }
 
-    // Baja un poco la cámara antes del salto para que el cuerpo parezca coger impulso.
+    // Baja un poco la camara antes del salto para que el cuerpo parezca coger impulso.
     public void PlayJumpPreparationDip(float downwardAngle, float duration)
     {
         if (duration <= 0f)
@@ -505,14 +560,14 @@ public class MouseLookScript : MonoBehaviour
         jumpCameraOffset = 0f;
     }
 
-    // Alias simple para lanzar la animación vertical del salto.
+    // Alias simple para lanzar la animacion vertical del salto.
     public void PlayJumpLift()
     {
         PlayJumpCameraSequence();
     }
 
-    // Hace una pequeña bajada previa al salto.
-    // Piensa en ella como agachar un poco la cámara antes de empujar hacia arriba.
+    // Hace una pequena bajada previa al salto.
+    // Piensa en ella como agachar un poco la camara antes de empujar hacia arriba.
     public void PlayJumpAnticipationDrop(float anticipationDuration)
     {
         if (anticipationDuration <= 0f || anticipationDropHeight <= 0f)
@@ -527,22 +582,22 @@ public class MouseLookScript : MonoBehaviour
         Invoke(nameof(BeginAnticipationDropReturn), anticipationDuration);
     }
 
-    // Suelta la bajada previa y empieza a devolver la cámara a su altura normal.
+    // Suelta la bajada previa y empieza a devolver la camara a su altura normal.
     public void ReleaseJumpAnticipationDrop()
     {
         CancelInvoke(nameof(BeginAnticipationDropReturn));
         BeginAnticipationDropReturn();
     }
 
-    // Suma recoil a cámara en vertical y horizontal.
-    // No mueve la cámara de golpe: deja que luego vuelva suave a su sitio.
+    // Suma recoil a camara en vertical y horizontal.
+    // No mueve la camara de golpe: deja que luego vuelva suave a su sitio.
     public void ApplyRecoil(float pitchKick, float yawKick)
     {
         recoilPitchOffset += pitchKick;
         recoilYawOffset += yawKick;
     }
 
-    // Borra la inclinación previa al salto.
+    // Borra la inclinacion previa al salto.
     private void ResetJumpPreparationDip()
     {
         jumpPreparationPitchOffset = 0f;
@@ -555,8 +610,8 @@ public class MouseLookScript : MonoBehaviour
         anticipationDropSmoothTime = Mathf.Max(0.01f, anticipationDropReturnDuration);
     }
 
-    // Mezcla todos los offsets verticales de salto y anticipación
-    // y los aplica a la posición local de la cámara.
+    // Mezcla todos los offsets verticales de salto y anticipacion
+    // y los aplica a la posicion local de la camara.
     private void UpdateCameraVerticalOffsets()
     {
         anticipationDropOffset = Mathf.SmoothDamp(
@@ -572,7 +627,7 @@ public class MouseLookScript : MonoBehaviour
         transform.localPosition = desiredPosition;
     }
 
-    // Resuelve en qué fase del salto estamos y cuánto debe subir o bajar la cámara.
+    // Resuelve en que fase del salto estamos y cuanto debe subir o bajar la camara.
     private void UpdateJumpCameraOffset()
     {
         if (jumpCameraPhase == JumpCameraPhase.None)

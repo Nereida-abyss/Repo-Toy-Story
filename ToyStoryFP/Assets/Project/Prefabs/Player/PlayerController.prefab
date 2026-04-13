@@ -6943,6 +6943,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9ec1915ef94b4aac5f85d1d778c4b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHUDController
+  hudProfile: {fileID: 11400000, guid: e3ff2bf65cb44a6696bd096cc438dabd, type: 2}
   healthFillImage: {fileID: 5947372840111257056}
   healthText: {fileID: 2179474506871044282}
   healthAnimationSpeed: 2.5

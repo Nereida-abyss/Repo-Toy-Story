@@ -11,6 +11,7 @@ public class ProjectDataValidationTests
     private const string WaveDialogueCatalogAssetPath = "Assets/Project/Data/Dialogue/WaveDialogueCatalog.asset";
     private const string PlayerAudioProfileAssetPath = "Assets/Project/Data/Player/DefaultPlayerAudioProfile.asset";
     private const string UiAudioProfileAssetPath = "Assets/Project/Data/UI/DefaultUiAudioProfile.asset";
+    private const string PlayerHudProfileAssetPath = "Assets/Project/Data/UI/DefaultPlayerHudProfile.asset";
     private const string CreditsProfileAssetPath = "Assets/Project/Data/UI/DefaultCreditsPresentationProfile.asset";
     private const string EnemyAudioProfileAssetPath = "Assets/Project/Data/Enemy/DefaultEnemyAudioProfile.asset";
     private const string DefaultUIButtonFxProfileAssetPath = "Assets/Project/Data/FX/DefaultUIButtonFxProfile.asset";
@@ -120,6 +121,17 @@ public class ProjectDataValidationTests
         Assert.That(profile.ShopPurchaseSuccessVolume, Is.InRange(0f, 1f));
         Assert.That(profile.ShopPurchaseFailedClip, Is.Not.Null);
         Assert.That(profile.ShopPurchaseFailedVolume, Is.InRange(0f, 1f));
+    }
+
+    [Test]
+    public void DefaultPlayerHudProfile_HasReadableFeedbackValues()
+    {
+        PlayerHudProfile profile = AssetDatabase.LoadAssetAtPath<PlayerHudProfile>(PlayerHudProfileAssetPath);
+        Assert.That(profile, Is.Not.Null);
+        Assert.That(profile.HealthAnimationSpeed, Is.GreaterThan(0f));
+        Assert.That(profile.DamageFlashFadeOut, Is.GreaterThan(0f));
+        Assert.That(profile.HealthPulseScale, Is.GreaterThanOrEqualTo(1f));
+        Assert.That(profile.HealthPulseDuration, Is.GreaterThan(0f));
     }
 
     [Test]
