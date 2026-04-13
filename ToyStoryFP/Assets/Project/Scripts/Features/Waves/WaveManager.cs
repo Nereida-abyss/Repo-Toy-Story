@@ -50,10 +50,12 @@ public class WaveManager : MonoBehaviour
     private int spawnAttemptsCompletedThisWave;
     private int enemiesToSpawnThisWave;
     private float roundElapsedTime;
+    private float remainingInitialDelayTime;
     private float remainingIntermissionTime;
     private bool hasLoggedMissingSpawner;
     private bool hasLoggedMissingBalanceProfile;
     private bool isSpawningCurrentWave;
+    private bool isStartingNextWave;
     private WaveRuntimeState currentState = WaveRuntimeState.InitialDelay;
 
     public event Action<int> WaveStarted;
@@ -74,17 +76,7 @@ public class WaveManager : MonoBehaviour
     {
         bool isPaused = UIManager.IsGamePaused;
         PruneDeadEnemies();
-
-        if (currentState == WaveRuntimeState.WaveInProgress)
-        {
-            UpdateWaveProgress(isPaused);
-            return;
-        }
-
-        if (currentState == WaveRuntimeState.Intermission)
-        {
-            UpdateIntermissionProgress(isPaused);
-        }
+        UpdateRuntimeState(isPaused);
     }
 
     void OnDestroy()
@@ -106,14 +98,55 @@ public class WaveManager : MonoBehaviour
     {
         ResetRuntimeState();
         ValidateConfiguration();
-        StartCoroutine(WaveLoop());
+        BeginInitialDelay();
     }
 
-    private IEnumerator WaveLoop()
+    private void BeginInitialDelay()
     {
         currentState = WaveRuntimeState.InitialDelay;
-        yield return new WaitForSeconds(Mathf.Max(0f, GetInitialWaveDelay()));
-        StartNextWave();
+        remainingInitialDelayTime = Mathf.Max(0f, GetInitialWaveDelay());
+    }
+
+    private void UpdateRuntimeState(bool isPaused)
+    {
+        switch (currentState)
+        {
+            case WaveRuntimeState.InitialDelay:
+                UpdateInitialDelayProgress(isPaused);
+                break;
+            case WaveRuntimeState.WaveInProgress:
+                UpdateWaveProgress(isPaused);
+                break;
+            case WaveRuntimeState.Intermission:
+                UpdateIntermissionProgress(isPaused);
+                break;
+        }
+    }
+
+    private void UpdateInitialDelayProgress(bool isPaused)
+    {
+        if (isPaused)
+        {
+            return;
+        }
+
+        TickInitialDelay();
+        TryStartWaveAfterInitialDelay();
+    }
+
+    private void TickInitialDelay()
+    {
+        remainingInitialDelayTime -= Time.deltaTime;
+    }
+
+    private void TryStartWaveAfterInitialDelay()
+    {
+        if (remainingInitialDelayTime > 0f)
+        {
+            return;
+        }
+
+        BeginNextWaveFlow();
     }
 
     private void UpdateWaveProgress(bool isPaused)
@@ -123,10 +156,7 @@ public class WaveManager : MonoBehaviour
             roundElapsedTime += Time.deltaTime;
         }
 
-        if (HasWaveFinished())
-        {
-            BeginIntermission();
-        }
+        TryCompleteCurrentWave();
     }
 
     private void UpdateIntermissionProgress(bool isPaused)
@@ -138,7 +168,7 @@ public class WaveManager : MonoBehaviour
 
         if (ShouldStartNextWaveFromInput())
         {
-            StartNextWave();
+            BeginNextWaveFlow();
             return;
         }
 
@@ -156,20 +186,37 @@ public class WaveManager : MonoBehaviour
 
         if (remainingIntermissionTime <= 0f)
         {
-            StartNextWave();
+            BeginNextWaveFlow();
         }
     }
 
-    private void StartNextWave()
+    private void BeginNextWaveFlow()
     {
-        if (currentState == WaveRuntimeState.WaveInProgress || !HasValidSpawner())
+        if (currentState == WaveRuntimeState.WaveInProgress || isStartingNextWave || !HasValidSpawner())
         {
             return;
         }
 
-        ShowPreWaveDialogueIfNeeded();
+        isStartingNextWave = true;
+        PlayPreWaveDialogueIfNeeded();
+        StartWaveGameplayLoop();
+    }
+
+    private void StartWaveGameplayLoop()
+    {
         PrepareNextWaveState();
+        NotifyWaveStarted();
+        StartWaveSpawnCoroutine();
+        isStartingNextWave = false;
+    }
+
+    private void NotifyWaveStarted()
+    {
         WaveStarted?.Invoke(currentWaveIndex);
+    }
+
+    private void StartWaveSpawnCoroutine()
+    {
         StartCoroutine(SpawnWaveCoroutine(currentWaveIndex));
     }
 
@@ -193,6 +240,16 @@ public class WaveManager : MonoBehaviour
         }
 
         isSpawningCurrentWave = false;
+    }
+
+    private void TryCompleteCurrentWave()
+    {
+        if (!HasWaveFinished())
+        {
+            return;
+        }
+
+        BeginIntermissionState();
     }
 
     private void RegisterSpawnedEnemy(GameObject spawnedEnemy, int waveIndex)
@@ -253,7 +310,7 @@ public class WaveManager : MonoBehaviour
         return Mathf.Max(1, GetBaseEnemyCount() + ((waveIndex - 1) * GetAdditionalEnemiesPerWave()));
     }
 
-    private void ShowPreWaveDialogueIfNeeded()
+    private void PlayPreWaveDialogueIfNeeded()
     {
         if (currentWaveIndex > 0)
         {
@@ -328,7 +385,7 @@ public class WaveManager : MonoBehaviour
             && aliveEnemies.Count == 0;
     }
 
-    private void BeginIntermission()
+    private void BeginIntermissionState()
     {
         currentState = WaveRuntimeState.Intermission;
         remainingIntermissionTime = Mathf.Max(0f, GetIntermissionDuration());
@@ -343,8 +400,10 @@ public class WaveManager : MonoBehaviour
         spawnAttemptsCompletedThisWave = 0;
         enemiesToSpawnThisWave = 0;
         roundElapsedTime = 0f;
+        remainingInitialDelayTime = 0f;
         remainingIntermissionTime = 0f;
         isSpawningCurrentWave = false;
+        isStartingNextWave = false;
         currentState = WaveRuntimeState.InitialDelay;
         aliveEnemies.Clear();
     }

@@ -111,13 +111,8 @@ public class AudioManager : MonoBehaviour
     // Reproduce music.
     public void PlayMusic(int musicIndex)
     {
-        ConfigurableAudioClip configuredAudio = GetMusicEntryFromLegacyIndex(musicIndex);
-        AudioClip clipFromCatalog = GetAudioClip(configuredAudio);
-        float volumeFromCatalog = GetAudioVolume(configuredAudio);
-
-        if (clipFromCatalog != null)
+        if (TryPlayLegacyMappedMusic(musicIndex))
         {
-            PlayMusicClip(clipFromCatalog, volumeFromCatalog);
             return;
         }
 
@@ -149,7 +144,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayGameplayMusic()
     {
-        PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+        PlayConfiguredMusicEntry(GetGameplayMusicEntry(), true);
     }
 
     public void PlayShopMusic()
@@ -310,19 +305,11 @@ public class AudioManager : MonoBehaviour
     // Sincroniza la musica segun la escena activa sin pisar escenas no configuradas.
     private void SyncMusicForScene(string sceneName)
     {
-        AudioSource resolvedMusicSource = ResolveMusicSource();
-
-        if (resolvedMusicSource == null)
+        if (!TryResolveKnownSceneMusic(sceneName, out AudioSource resolvedMusicSource, out AudioClip targetClip, out float targetVolume))
         {
             return;
         }
 
-        if (!IsKnownMusicScene(sceneName))
-        {
-            return;
-        }
-
-        AudioClip targetClip = GetMusicClipForScene(sceneName);
         if (targetClip == null)
         {
             StopShopMusicImmediate();
@@ -330,9 +317,30 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
+        ApplySceneMusic(sceneName, targetClip, targetVolume);
+    }
+
+    private bool TryResolveKnownSceneMusic(string sceneName, out AudioSource resolvedMusicSource, out AudioClip targetClip, out float targetVolume)
+    {
+        resolvedMusicSource = ResolveMusicSource();
+        targetClip = null;
+        targetVolume = 1f;
+
+        if (resolvedMusicSource == null || !IsKnownMusicScene(sceneName))
+        {
+            return false;
+        }
+
+        targetClip = GetMusicClipForScene(sceneName);
+        targetVolume = GetMusicVolumeForScene(sceneName);
+        return true;
+    }
+
+    private void ApplySceneMusic(string sceneName, AudioClip targetClip, float targetVolume)
+    {
         if (sceneName == GamePlaySceneName)
         {
-            PrepareBaseMusicClip(targetClip, GetMusicVolumeForScene(sceneName), true);
+            PrepareBaseMusicClip(targetClip, targetVolume, true);
 
             if (!isShopMusicActive)
             {
@@ -344,7 +352,7 @@ public class AudioManager : MonoBehaviour
 
         isShopMusicActive = false;
         StopShopMusicImmediate();
-        PrepareBaseMusicClip(targetClip, GetMusicVolumeForScene(sceneName), true);
+        PrepareBaseMusicClip(targetClip, targetVolume, true);
     }
 
     private AudioSource ResolveMusicSource()
@@ -468,7 +476,7 @@ public class AudioManager : MonoBehaviour
         {
             if (!enteringShop)
             {
-                PrepareBaseMusicClip(GetSceneMusicClip(activeSceneName), GetSceneMusicVolume(activeSceneName), true);
+                RestoreSceneMusicOutsideGameplay(activeSceneName);
             }
 
             return;
@@ -486,13 +494,13 @@ public class AudioManager : MonoBehaviour
         {
             if (enteringShop)
             {
-                PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+                PlayConfiguredMusicEntry(GetGameplayMusicEntry(), true);
             }
 
             return;
         }
 
-        PrepareBaseMusicClip(GetGameplayMusicClip(), GetGameplayMusicVolume(), true);
+        PlayConfiguredMusicEntry(GetGameplayMusicEntry(), true);
         PrepareShopMusicClip(resolvedShopSource, enteringShop);
         isShopMusicActive = enteringShop;
 
@@ -507,6 +515,35 @@ public class AudioManager : MonoBehaviour
             enteringShop,
             Mathf.Clamp01(musicVolume * GetGameplayMusicVolume()),
             Mathf.Clamp01(musicVolume * GetShopMusicVolume())));
+    }
+
+    private void RestoreSceneMusicOutsideGameplay(string sceneName)
+    {
+        PlaySceneMusic(sceneName);
+    }
+
+    private void PlaySceneMusic(string sceneName)
+    {
+        PlayMusicClip(GetSceneMusicClip(sceneName), GetSceneMusicVolume(sceneName), true);
+    }
+
+    private void PlayConfiguredMusicEntry(ConfigurableAudioClip musicEntry, bool playIfStopped)
+    {
+        PrepareBaseMusicClip(GetAudioClip(musicEntry), GetAudioVolume(musicEntry), playIfStopped);
+    }
+
+    private bool TryPlayLegacyMappedMusic(int musicIndex)
+    {
+        ConfigurableAudioClip configuredAudio = GetMusicEntryFromLegacyIndex(musicIndex);
+        AudioClip clipFromCatalog = GetAudioClip(configuredAudio);
+
+        if (clipFromCatalog == null)
+        {
+            return false;
+        }
+
+        PlayMusicClip(clipFromCatalog, GetAudioVolume(configuredAudio));
+        return true;
     }
 
     private void PrepareBaseMusicClip(AudioClip clip, float clipVolume, bool playIfStopped)

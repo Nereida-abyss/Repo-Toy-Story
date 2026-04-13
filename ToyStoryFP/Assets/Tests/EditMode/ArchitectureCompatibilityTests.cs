@@ -78,6 +78,10 @@ public class ArchitectureCompatibilityTests
         string source = ReadSource("Assets/Project/Scripts/Features/Audio/AudioManager.cs");
         Assert.That(source, Does.Not.Contain("GetLegacyMusicClip("));
         Assert.That(source, Does.Not.Contain("Se usaran los arrays legacy si existen"));
+        Assert.That(source, Does.Contain("TryResolveKnownSceneMusic("));
+        Assert.That(source, Does.Contain("ApplySceneMusic("));
+        Assert.That(source, Does.Contain("PlayConfiguredMusicEntry("));
+        Assert.That(source, Does.Contain("TryPlayLegacyMappedMusic("));
     }
 
     [Test]
@@ -100,12 +104,22 @@ public class ArchitectureCompatibilityTests
     {
         string source = ReadSource("Assets/Project/Scripts/Features/Waves/WaveManager.cs");
         Assert.That(source, Does.Contain("InitializeWaveManager()"));
+        Assert.That(source, Does.Contain("UpdateRuntimeState(bool isPaused)"));
+        Assert.That(source, Does.Contain("UpdateInitialDelayProgress(bool isPaused)"));
+        Assert.That(source, Does.Contain("TickInitialDelay()"));
+        Assert.That(source, Does.Contain("TryStartWaveAfterInitialDelay()"));
         Assert.That(source, Does.Contain("UpdateWaveProgress(bool isPaused)"));
         Assert.That(source, Does.Contain("UpdateIntermissionProgress(bool isPaused)"));
         Assert.That(source, Does.Contain("ShouldStartNextWaveFromInput()"));
         Assert.That(source, Does.Contain("TickIntermissionTimer()"));
+        Assert.That(source, Does.Contain("BeginNextWaveFlow()"));
+        Assert.That(source, Does.Contain("StartWaveGameplayLoop()"));
+        Assert.That(source, Does.Contain("NotifyWaveStarted()"));
+        Assert.That(source, Does.Contain("TryCompleteCurrentWave()"));
+        Assert.That(source, Does.Contain("BeginIntermissionState()"));
         Assert.That(source, Does.Contain("PrepareNextWaveState()"));
         Assert.That(source, Does.Contain("AdvanceDialogueRound()"));
+        Assert.That(source, Does.Contain("PlayPreWaveDialogueIfNeeded()"));
     }
 
     [Test]
@@ -139,6 +153,13 @@ public class ArchitectureCompatibilityTests
         Assert.That(dialogueControllerSource, Does.Contain("SetDialoguePanelVisible(bool isVisible)"));
         Assert.That(dialogueControllerSource, Does.Contain("PauseDialogueFlow()"));
         Assert.That(dialogueControllerSource, Does.Contain("ResumeDialogueFlow()"));
+
+        string weaponLoadoutSource = ReadSource("Assets/Project/Scripts/Features/Player/Weapons/WeaponLoadoutScript.cs");
+        Assert.That(weaponLoadoutSource, Does.Contain("UpdateIdleWeaponState()"));
+        Assert.That(weaponLoadoutSource, Does.Contain("UpdateWeaponSwitchState(float deltaTime)"));
+        Assert.That(weaponLoadoutSource, Does.Contain("ResetLoadoutSelection()"));
+        Assert.That(weaponLoadoutSource, Does.Contain("UnlockDefaultWeapons()"));
+        Assert.That(weaponLoadoutSource, Does.Contain("EnsureAtLeastOneWeaponIsUnlocked()"));
     }
 
     [Test]

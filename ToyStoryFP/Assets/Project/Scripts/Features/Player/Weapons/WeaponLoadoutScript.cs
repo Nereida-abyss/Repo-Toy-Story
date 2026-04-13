@@ -81,42 +81,28 @@ public partial class WeaponLoadoutScript : MonoBehaviour
     {
         if (!IsSwitchingWeapon)
         {
-            EnsureEquippedWeaponVisible();
+            UpdateIdleWeaponState();
             return;
         }
 
-        float deltaTime = Time.deltaTime;
-
-        switch (switchState)
-        {
-            case WeaponSwitchState.Lowering:
-                UpdateLowering(deltaTime);
-                break;
-            case WeaponSwitchState.Raising:
-                UpdateRaising(deltaTime);
-                break;
-        }
+        UpdateWeaponSwitchState(Time.deltaTime);
     }
 
     public void RefreshWeapons()
     {
         CacheConfiguration();
 
-        if (!runLoadoutInitialized)
+        if (ShouldResetLoadoutBecauseRunHasNotStarted())
         {
-            ResetCurrentSelection();
-            DeactivateAllWeapons();
-            CurrentWeaponChanged?.Invoke(null);
+            ResetLoadoutSelection();
             return;
         }
 
         RebuildUnlockedWeapons();
 
-        if (unlockedWeapons.Length == 0)
+        if (ShouldResetLoadoutBecauseNothingIsUnlocked())
         {
-            ResetCurrentSelection();
-            DeactivateAllWeapons();
-            CurrentWeaponChanged?.Invoke(null);
+            ResetLoadoutSelection();
             return;
         }
 
@@ -134,38 +120,15 @@ public partial class WeaponLoadoutScript : MonoBehaviour
         ResetCurrentSelection();
         DeactivateAllWeapons();
         unlockedWeaponIds.Clear();
-
-        for (int i = 0; i < configuredDefinitions.Count; i++)
-        {
-            ConfiguredWeaponDefinition definition = configuredDefinitions[i];
-            if (definition == null || definition.Weapon == null || !definition.UnlockedByDefault)
-            {
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(definition.WeaponId))
-            {
-                unlockedWeaponIds.Add(definition.WeaponId);
-            }
-        }
-
-        if (unlockedWeaponIds.Count == 0)
-        {
-            string fallbackWeaponId = GetFirstConfiguredWeaponId();
-            if (!string.IsNullOrEmpty(fallbackWeaponId))
-            {
-                unlockedWeaponIds.Add(fallbackWeaponId);
-            }
-        }
+        UnlockDefaultWeapons();
+        EnsureAtLeastOneWeaponIsUnlocked();
 
         runLoadoutInitialized = true;
         RebuildUnlockedWeapons();
 
-        if (unlockedWeapons.Length == 0)
+        if (ShouldResetLoadoutBecauseNothingIsUnlocked())
         {
-            ResetCurrentSelection();
-            DeactivateAllWeapons();
-            CurrentWeaponChanged?.Invoke(null);
+            ResetLoadoutSelection();
             return;
         }
 
@@ -230,6 +193,72 @@ public partial class WeaponLoadoutScript : MonoBehaviour
         if (switchPhaseTimer <= 0f)
         {
             CompleteLowering();
+        }
+    }
+
+    private void UpdateIdleWeaponState()
+    {
+        EnsureEquippedWeaponVisible();
+    }
+
+    private void UpdateWeaponSwitchState(float deltaTime)
+    {
+        switch (switchState)
+        {
+            case WeaponSwitchState.Lowering:
+                UpdateLowering(deltaTime);
+                break;
+            case WeaponSwitchState.Raising:
+                UpdateRaising(deltaTime);
+                break;
+        }
+    }
+
+    private bool ShouldResetLoadoutBecauseRunHasNotStarted()
+    {
+        return !runLoadoutInitialized;
+    }
+
+    private bool ShouldResetLoadoutBecauseNothingIsUnlocked()
+    {
+        return unlockedWeapons.Length == 0;
+    }
+
+    private void ResetLoadoutSelection()
+    {
+        ResetCurrentSelection();
+        DeactivateAllWeapons();
+        CurrentWeaponChanged?.Invoke(null);
+    }
+
+    private void UnlockDefaultWeapons()
+    {
+        for (int i = 0; i < configuredDefinitions.Count; i++)
+        {
+            ConfiguredWeaponDefinition definition = configuredDefinitions[i];
+            if (definition == null || definition.Weapon == null || !definition.UnlockedByDefault)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(definition.WeaponId))
+            {
+                unlockedWeaponIds.Add(definition.WeaponId);
+            }
+        }
+    }
+
+    private void EnsureAtLeastOneWeaponIsUnlocked()
+    {
+        if (unlockedWeaponIds.Count > 0)
+        {
+            return;
+        }
+
+        string fallbackWeaponId = GetFirstConfiguredWeaponId();
+        if (!string.IsNullOrEmpty(fallbackWeaponId))
+        {
+            unlockedWeaponIds.Add(fallbackWeaponId);
         }
     }
 
