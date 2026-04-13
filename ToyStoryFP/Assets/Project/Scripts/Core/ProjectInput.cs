@@ -9,6 +9,7 @@ public static class ProjectInput
     private const string MouseScrollWheelAxis = "Mouse ScrollWheel";
     private const string PrimaryFireButton = "Fire1";
     private static int ignorePauseToggleUntilFrame = -1;
+    private static bool ignorePrimaryFireUntilRelease;
 
     public static Vector2 GetMoveInput()
     {
@@ -41,6 +42,16 @@ public static class ProjectInput
 
     public static bool IsPrimaryFireHeld()
     {
+        if (ignorePrimaryFireUntilRelease)
+        {
+            if (!Input.GetButton(PrimaryFireButton))
+            {
+                ignorePrimaryFireUntilRelease = false;
+            }
+
+            return false;
+        }
+
         return Input.GetButton(PrimaryFireButton);
     }
 
@@ -62,6 +73,11 @@ public static class ProjectInput
     public static void ConsumePauseToggleForCurrentFrame()
     {
         ignorePauseToggleUntilFrame = Time.frameCount;
+    }
+
+    public static void ConsumePrimaryFireUntilRelease()
+    {
+        ignorePrimaryFireUntilRelease = true;
     }
 
     public static bool WasUiClosePressed(KeyCode closeKey)

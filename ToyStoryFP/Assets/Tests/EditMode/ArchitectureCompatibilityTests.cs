@@ -192,9 +192,12 @@ public class ArchitectureCompatibilityTests
         Assert.That(controllerSource, Does.Contain("GetSentencePauseDuration()"));
         Assert.That(controllerSource, Does.Contain("WaitForDialogueAdvanceInput()"));
         Assert.That(controllerSource, Does.Contain("ProjectInput.WasDialogueAdvancePressed()"));
+        Assert.That(controllerSource, Does.Contain("ProjectInput.ConsumePrimaryFireUntilRelease();"));
 
         string inputSource = ReadSource("Assets/Project/Scripts/Core/ProjectInput.cs");
         Assert.That(inputSource, Does.Contain("public static bool WasDialogueAdvancePressed()"));
+        Assert.That(inputSource, Does.Contain("public static void ConsumePrimaryFireUntilRelease()"));
+        Assert.That(inputSource, Does.Contain("if (ignorePrimaryFireUntilRelease)"));
     }
 
     private static string ReadSource(string relativePath)

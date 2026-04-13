@@ -135,6 +135,8 @@ public class RoundDialogueController : MonoBehaviour
         {
             yield return null;
         }
+
+        ProjectInput.ConsumePrimaryFireUntilRelease();
     }
 
     private bool HasRequiredUiReferences()
