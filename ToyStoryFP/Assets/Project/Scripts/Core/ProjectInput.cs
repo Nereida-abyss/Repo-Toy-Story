@@ -88,4 +88,9 @@ public static class ProjectInput
     {
         return WasUiBackPressed() || Input.GetMouseButtonDown(0);
     }
+
+    public static bool WasDialogueAdvancePressed()
+    {
+        return Input.GetMouseButtonDown(0);
+    }
 }

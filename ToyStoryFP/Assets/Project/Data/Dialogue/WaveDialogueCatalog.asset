@@ -16,6 +16,7 @@ MonoBehaviour:
   repeatRoundDialogues: 0
   npcName: Buzz Lightyear
   useRandomGeneratedSentences: 1
+  sentencePauseDuration: 1.8
   introTemplate: 'ROUND {round}: {npc} says: ''To infinity and beyond!'''
   reusableSentences:
   - The battle is heating up!

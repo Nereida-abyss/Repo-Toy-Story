@@ -5,6 +5,8 @@ using TMPro;
 
 public class RoundDialogueController : MonoBehaviour
 {
+    private const string DialogueInputGateOwner = "RoundDialogueController.Dialogue";
+
     [Header("UI References")]
     public TMP_Text npcNameText;
     public TMP_Text sentenceText;
@@ -12,12 +14,12 @@ public class RoundDialogueController : MonoBehaviour
 
     [Header("Dialogue Settings")]
     public float typingSpeed = 0.05f;
-    public float timeBetweenSentences = 1.5f;
     public bool pauseGameDuringDialogue = true;
 
     [Header("Dependencies")]
     [SerializeField] private RoundDialogueManager dialogueManager;
     private bool hasLoggedMissingManager;
+    private bool hasAcquiredInputGate;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,6 +27,16 @@ public class RoundDialogueController : MonoBehaviour
         ResolveDialogueManager();
 
         SetDialoguePanelVisible(false);
+    }
+
+    void OnDisable()
+    {
+        EndDialogueFlow();
+    }
+
+    void OnDestroy()
+    {
+        EndDialogueFlow();
     }
 
     public IEnumerator ShowDialogueAndWait()
@@ -47,23 +59,64 @@ public class RoundDialogueController : MonoBehaviour
             yield break;
         }
 
-        PauseDialogueFlow();
+        BeginDialogueFlow();
 
-        SetDialoguePanelVisible(true);
-        npcNameText.text = dialogue.npcName;
-
-        for (int i = 0; i < dialogue.sentences.Length; i++)
+        try
         {
-            yield return StartCoroutine(TypeSentence(dialogue.sentences[i]));
+            SetDialoguePanelVisible(true);
+            npcNameText.text = dialogue.npcName;
 
-            if (i < dialogue.sentences.Length - 1)
+            for (int i = 0; i < dialogue.sentences.Length; i++)
             {
-                yield return new WaitForSecondsRealtime(timeBetweenSentences);
+                yield return StartCoroutine(TypeSentence(dialogue.sentences[i]));
+
+                if (i < dialogue.sentences.Length - 1)
+                {
+                    yield return new WaitForSecondsRealtime(GetSentencePauseDuration());
+                }
             }
+
+            yield return WaitForDialogueAdvanceInput();
+        }
+        finally
+        {
+            EndDialogueFlow();
+        }
+    }
+
+    private void BeginDialogueFlow()
+    {
+        AcquireInputGateIfNeeded();
+        PauseDialogueFlow();
+    }
+
+    private void EndDialogueFlow()
+    {
+        SetDialoguePanelVisible(false);
+        ReleaseInputGateIfNeeded();
+        ResumeDialogueFlow();
+    }
+
+    private void AcquireInputGateIfNeeded()
+    {
+        if (hasAcquiredInputGate)
+        {
+            return;
         }
 
-        SetDialoguePanelVisible(false);
-        ResumeDialogueFlow();
+        GameplayInputGate.Acquire(DialogueInputGateOwner);
+        hasAcquiredInputGate = true;
+    }
+
+    private void ReleaseInputGateIfNeeded()
+    {
+        if (!hasAcquiredInputGate)
+        {
+            return;
+        }
+
+        GameplayInputGate.Release(DialogueInputGateOwner);
+        hasAcquiredInputGate = false;
     }
 
     private IEnumerator TypeSentence(string sentence)
@@ -75,6 +128,15 @@ public class RoundDialogueController : MonoBehaviour
             yield return new WaitForSecondsRealtime(typingSpeed);
         }
     }
+
+    private IEnumerator WaitForDialogueAdvanceInput()
+    {
+        while (!ProjectInput.WasDialogueAdvancePressed())
+        {
+            yield return null;
+        }
+    }
+
     private bool HasRequiredUiReferences()
     {
         return npcNameText != null && sentenceText != null && dialoguePanel != null;
@@ -103,6 +165,11 @@ public class RoundDialogueController : MonoBehaviour
         }
 
         return false;
+    }
+
+    private float GetSentencePauseDuration()
+    {
+        return ResolveDialogueManager() ? dialogueManager.GetSentencePauseDuration() : 1.5f;
     }
 
     private void SetDialoguePanelVisible(bool isVisible)

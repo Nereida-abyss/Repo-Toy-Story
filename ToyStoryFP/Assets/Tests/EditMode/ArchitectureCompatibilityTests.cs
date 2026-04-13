@@ -170,6 +170,31 @@ public class ArchitectureCompatibilityTests
         string settingsSource = ReadSource("Assets/Project/Scripts/Features/UI/SettingsPanelController.cs");
         Assert.That(settingsSource, Does.Contain("GameplayInputGate.Acquire(SettingsInputGateOwner);"));
         Assert.That(settingsSource, Does.Contain("GameplayInputGate.Release(SettingsInputGateOwner);"));
+
+        string dialogueSource = ReadSource("Assets/Project/Scripts/Features/Dialogue/RoundDialogueController.cs");
+        Assert.That(dialogueSource, Does.Contain("GameplayInputGate.Acquire(DialogueInputGateOwner);"));
+        Assert.That(dialogueSource, Does.Contain("GameplayInputGate.Release(DialogueInputGateOwner);"));
+        Assert.That(dialogueSource, Does.Not.Contain("canShoot"));
+    }
+
+    [Test]
+    public void DialogueFlow_UsesCatalogTiming_And_ClickToCloseLastSentence()
+    {
+        string catalogSource = ReadSource("Assets/Project/Scripts/Features/Dialogue/WaveDialogueCatalog.cs");
+        Assert.That(catalogSource, Does.Contain("sentencePauseDuration"));
+        Assert.That(catalogSource, Does.Contain("public float SentencePauseDuration"));
+
+        string managerSource = ReadSource("Assets/Project/Scripts/Features/Dialogue/RoundDialogueManager.cs");
+        Assert.That(managerSource, Does.Contain("public float GetSentencePauseDuration()"));
+        Assert.That(managerSource, Does.Contain("return dialogueCatalog.SentencePauseDuration;"));
+
+        string controllerSource = ReadSource("Assets/Project/Scripts/Features/Dialogue/RoundDialogueController.cs");
+        Assert.That(controllerSource, Does.Contain("GetSentencePauseDuration()"));
+        Assert.That(controllerSource, Does.Contain("WaitForDialogueAdvanceInput()"));
+        Assert.That(controllerSource, Does.Contain("ProjectInput.WasDialogueAdvancePressed()"));
+
+        string inputSource = ReadSource("Assets/Project/Scripts/Core/ProjectInput.cs");
+        Assert.That(inputSource, Does.Contain("public static bool WasDialogueAdvancePressed()"));
     }
 
     private static string ReadSource(string relativePath)

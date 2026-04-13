@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WaveDialogueCatalog", menuName = "Dialogue/Wave Dialogue Catalog")]
 public class WaveDialogueCatalog : ScriptableObject
 {
+    private const float DefaultSentencePauseDuration = 1.5f;
+
     private static readonly string[] DefaultReusableSentences =
     {
         "The battle is heating up!",
@@ -29,9 +31,12 @@ public class WaveDialogueCatalog : ScriptableObject
     [Header("Generated Dialogue")]
     [SerializeField] private string npcName = "Buzz Lightyear";
     [SerializeField] private bool useRandomGeneratedSentences = true;
+    [SerializeField] private float sentencePauseDuration = DefaultSentencePauseDuration;
     [SerializeField] private string introTemplate = "ROUND {round}: {npc} says: 'To infinity and beyond!'";
     [SerializeField, TextArea(2, 4)] private string[] reusableSentences = (string[])DefaultReusableSentences.Clone();
     [SerializeField, TextArea(2, 4)] private string[] orderedFallbackSentences = (string[])DefaultOrderedSentences.Clone();
+
+    public float SentencePauseDuration => sentencePauseDuration > 0f ? sentencePauseDuration : DefaultSentencePauseDuration;
 
     public Dialogue GetRoundDialogue(int roundIndex)
     {

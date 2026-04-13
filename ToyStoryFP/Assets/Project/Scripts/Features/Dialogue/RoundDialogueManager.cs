@@ -47,6 +47,18 @@ public class RoundDialogueManager : MonoBehaviour
         return currentRound;
     }
 
+    public float GetSentencePauseDuration()
+    {
+        if (dialogueCatalog == null)
+        {
+            WarnIfMissingCatalog();
+            return 1.5f;
+        }
+
+        hasLoggedMissingCatalog = false;
+        return dialogueCatalog.SentencePauseDuration;
+    }
+
     private void WarnIfMissingCatalog()
     {
         if (hasLoggedMissingCatalog)
