@@ -22,6 +22,14 @@ public class MovementScript : MonoBehaviour
     [SerializeField] private float jumpGroundLockTime = 0.1f;
     [SerializeField] private float jumpPreparationCameraDip = 6f;
 
+    [Header("Dash Settings")]
+    [SerializeField] private float dashSpeed = 9.5f;
+    [SerializeField] private float dashDuration = 0.14f;
+    [SerializeField] private float dashCooldown = 0.8f;
+    [SerializeField] private float dashTurnSpeed = 1800f;
+    [SerializeField] private bool dashCancelsPlanarVelocity = true;
+    [SerializeField] private float dashInputThreshold = 0.2f;
+
     [Header("Visual Model")]
     [SerializeField] private Transform visualModelRoot;
     [SerializeField] private Animator modelAnimator;
@@ -45,13 +53,19 @@ public class MovementScript : MonoBehaviour
     private bool hasExternalAnimationInput;
     private bool externalTranslationDriven;
     private bool baseMovementStatsCached;
+    private bool isDashing;
+    private bool hasAirDashAvailable = true;
     private float jumpDelayTimer;
     private float jumpBufferTimer;
     private float groundedLockTimer;
     private float baseWalkSpeed;
     private float baseJumpForce;
+    private float dashTimer;
+    private float dashCooldownTimer;
+    private Vector3 dashDirection;
 
     public bool IsGrounded => isGrounded;
+    public bool IsDashing => isDashing;
     public float VerticalSpeed => rb != null ? rb.linearVelocity.y : 0f;
     public float BaseWalkSpeed => baseMovementStatsCached ? baseWalkSpeed : Mathf.Max(0.01f, WalkSpeed);
     public float BaseJumpForce => baseMovementStatsCached ? baseJumpForce : Mathf.Max(0.01f, JumpForce);
@@ -80,6 +94,21 @@ public class MovementScript : MonoBehaviour
             groundedLockTimer -= Time.deltaTime;
         }
 
+        if (dashCooldownTimer > 0f)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+
+        if (isDashing)
+        {
+            dashTimer -= Time.deltaTime;
+
+            if (dashTimer <= 0f)
+            {
+                StopDash();
+            }
+        }
+
         if (jumpQueued)
         {
             jumpDelayTimer -= Time.deltaTime;
@@ -100,7 +129,20 @@ public class MovementScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (rb == null || rb.isKinematic || externalTranslationDriven)
+        EnsureRuntimeReferences();
+
+        if (rb == null || rb.isKinematic)
+        {
+            return;
+        }
+
+        if (isDashing)
+        {
+            ApplyDashVelocity();
+            return;
+        }
+
+        if (externalTranslationDriven)
         {
             return;
         }
@@ -216,6 +258,69 @@ public class MovementScript : MonoBehaviour
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, appliedTurnSpeed * Time.deltaTime);
     }
 
+    public bool TryStartDash(Vector2 requestedMoveInput)
+    {
+        EnsureRuntimeReferences();
+
+        if (rb == null || rb.isKinematic || externalTranslationDriven)
+        {
+            return false;
+        }
+
+        if (isDashing || dashCooldownTimer > 0f)
+        {
+            return false;
+        }
+
+        bool groundedForDash = isGrounded;
+
+        if (!groundedForDash && !hasAirDashAvailable)
+        {
+            return false;
+        }
+
+        Vector3 resolvedDashDirection = ResolveDashWorldDirection(requestedMoveInput);
+
+        if (resolvedDashDirection.sqrMagnitude <= 0.0001f)
+        {
+            return false;
+        }
+
+        dashDirection = resolvedDashDirection.normalized;
+        isDashing = true;
+        dashTimer = Mathf.Max(0.01f, dashDuration);
+        dashCooldownTimer = Mathf.Max(0f, dashCooldown);
+        groundedLockTimer = Mathf.Max(groundedLockTimer, 0.05f);
+
+        if (!groundedForDash)
+        {
+            hasAirDashAvailable = false;
+        }
+
+        if (dashCancelsPlanarVelocity)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
+
+        FaceDirection(dashDirection, dashTurnSpeed);
+        transform.rotation = Quaternion.LookRotation(dashDirection, Vector3.up);
+        ApplyDashVelocity();
+        return true;
+    }
+
+    public Vector3 ResolveDashWorldDirection(Vector2 requestedMoveInput)
+    {
+        Vector2 clampedInput = Vector2.ClampMagnitude(requestedMoveInput, 1f);
+
+        if (clampedInput.sqrMagnitude >= dashInputThreshold * dashInputThreshold)
+        {
+            Vector3 movementDirection = transform.TransformDirection(new Vector3(clampedInput.x, 0f, clampedInput.y));
+            return Vector3.ProjectOnPlane(movementDirection, Vector3.up).normalized;
+        }
+
+        return Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+    }
+
     Vector3 CalculateMovement()
     {
         Vector3 targetVelocity = transform.TransformDirection(new Vector3(moveInput.x, 0f, moveInput.y)) * WalkSpeed;
@@ -253,6 +358,7 @@ public class MovementScript : MonoBehaviour
 
         ignoreGroundingWhileAscending = false;
         isGrounded = true;
+        hasAirDashAvailable = true;
     }
 
     // Gestiona preparar externo movimiento estado.
@@ -261,6 +367,12 @@ public class MovementScript : MonoBehaviour
         externalTranslationDriven = true;
         externalPlanarVelocity = Vector3.ProjectOnPlane(worldPlanarVelocity, Vector3.up);
         isGrounded = grounded;
+
+        if (grounded)
+        {
+            hasAirDashAvailable = true;
+        }
+
         return transform.InverseTransformDirection(externalPlanarVelocity);
     }
 
@@ -336,8 +448,9 @@ public class MovementScript : MonoBehaviour
             return;
         }
 
-        modelAnimator.SetFloat(HorizontalHash, animationInput.x);
-        modelAnimator.SetFloat(VerticalHash, animationInput.y);
+        Vector2 effectiveAnimationInput = isDashing ? ResolveDashAnimationInput() : animationInput;
+        modelAnimator.SetFloat(HorizontalHash, effectiveAnimationInput.x);
+        modelAnimator.SetFloat(VerticalHash, effectiveAnimationInput.y);
 
         if (hasGroundedParameter)
         {
@@ -570,5 +683,45 @@ public class MovementScript : MonoBehaviour
         {
             ignoreGroundingWhileAscending = false;
         }
+    }
+
+    private void EnsureRuntimeReferences()
+    {
+        rb ??= GetComponent<Rigidbody>();
+        mouseLook ??= GetComponentInChildren<MouseLookScript>(true);
+        playerAudio ??= GetComponent<PlayerAudioController>();
+    }
+
+    private void ApplyDashVelocity()
+    {
+        float currentVerticalVelocity = rb.linearVelocity.y;
+        Vector3 dashVelocity = dashDirection * dashSpeed;
+        rb.linearVelocity = new Vector3(dashVelocity.x, currentVerticalVelocity, dashVelocity.z);
+    }
+
+    private void StopDash()
+    {
+        if (!isDashing)
+        {
+            return;
+        }
+
+        isDashing = false;
+        dashTimer = 0f;
+
+        if (rb == null)
+        {
+            return;
+        }
+
+        Vector3 targetPlanarVelocity = transform.TransformDirection(new Vector3(moveInput.x, 0f, moveInput.y)) * WalkSpeed;
+        rb.linearVelocity = new Vector3(targetPlanarVelocity.x, rb.linearVelocity.y, targetPlanarVelocity.z);
+    }
+
+    private Vector2 ResolveDashAnimationInput()
+    {
+        Vector3 localDashDirection = transform.InverseTransformDirection(dashDirection);
+        Vector2 dashBlend = new Vector2(localDashDirection.x, localDashDirection.z);
+        return Vector2.ClampMagnitude(dashBlend, 1f);
     }
 }

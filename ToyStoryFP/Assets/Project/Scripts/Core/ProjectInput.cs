@@ -35,6 +35,11 @@ public static class ProjectInput
         return Input.GetKeyDown(KeyCode.Space);
     }
 
+    public static bool WasDashPressed()
+    {
+        return Input.GetKeyDown(KeyCode.LeftShift);
+    }
+
     public static bool WasReloadPressed()
     {
         return Input.GetKeyDown(KeyCode.R);

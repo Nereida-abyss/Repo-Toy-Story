@@ -539,7 +539,6 @@ MonoBehaviour:
   sentenceText: {fileID: 474571745}
   dialoguePanel: {fileID: 1406011385}
   typingSpeed: 0.05
-  timeBetweenSentences: 1.5
   pauseGameDuringDialogue: 1
   dialogueManager: {fileID: 178004227}
 --- !u!114 &276302039
@@ -3092,6 +3091,10 @@ PrefabInstance:
       propertyPath: waveManager
       value: 
       objectReference: {fileID: 920100000000000003}
+    - target: {fileID: 1966027077784214151, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: dashSpeed
+      value: 6.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2117941058062852358, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0

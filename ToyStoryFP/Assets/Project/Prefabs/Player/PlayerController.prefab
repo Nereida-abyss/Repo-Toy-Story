@@ -4640,6 +4640,12 @@ MonoBehaviour:
   jumpInputBuffer: 0.15
   jumpGroundLockTime: 0.1
   jumpPreparationCameraDip: 0
+  dashSpeed: 9.5
+  dashDuration: 0.14
+  dashCooldown: 0.8
+  dashTurnSpeed: 1800
+  dashCancelsPlanarVelocity: 1
+  dashInputThreshold: 0.2
   visualModelRoot: {fileID: 92394765825684867}
   modelAnimator: {fileID: 7377379211404358086}
   visualModelNameHint: PlayerModelo

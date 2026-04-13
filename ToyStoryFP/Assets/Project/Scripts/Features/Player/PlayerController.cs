@@ -69,6 +69,11 @@ public class PlayerController : MonoBehaviour
         Vector2 moveInput = ProjectInput.GetMoveInput().normalized;
         movementScript.SetMoveInput(moveInput);
 
+        if (ProjectInput.WasDashPressed())
+        {
+            movementScript.TryStartDash(moveInput);
+        }
+
         if (ProjectInput.WasJumpPressed())
         {
             movementScript.RequestJump();
