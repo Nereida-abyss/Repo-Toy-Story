@@ -163,6 +163,24 @@ public class ArchitectureCompatibilityTests
     }
 
     [Test]
+    public void PlayerShooting_IsQueuedInUpdate_AndResolvedInLateUpdate()
+    {
+        string playerControllerSource = ReadSource("Assets/Project/Scripts/Features/Player/PlayerController.cs");
+        string normalizedPlayerControllerSource = NormalizeLineEndings(playerControllerSource);
+        Assert.That(playerControllerSource, Does.Contain("void LateUpdate()"));
+        Assert.That(playerControllerSource, Does.Contain("ProcessQueuedWeaponInput()"));
+        Assert.That(playerControllerSource, Does.Contain("queuedPrimaryFire = true;"));
+        Assert.That(playerControllerSource, Does.Contain("weaponLoadout.CurrentWeapon?.TryFire();"));
+        Assert.That(normalizedPlayerControllerSource, Does.Not.Contain("if (ProjectInput.IsPrimaryFireHeld())\n        {\n            weaponLoadout.CurrentWeapon?.TryFire();"));
+
+        string weaponSource = ReadSource("Assets/Project/Scripts/Features/Player/Weapons/WeaponScript.cs");
+        Assert.That(weaponSource, Does.Contain("WarnIfMissingPlayerCamera()"));
+
+        string weaponLoadoutConfigSource = ReadSource("Assets/Project/Scripts/Features/Player/Weapons/WeaponLoadoutScript.Configuration.cs");
+        Assert.That(weaponLoadoutConfigSource, Does.Contain("WarnIfPlayerWeaponCameraSetupIsInvalid("));
+    }
+
+    [Test]
     public void JuniorFriendlyEditing_KeepsHudDataDriven()
     {
         string hudSource = ReadSource("Assets/Project/Scripts/Features/Player/PlayerHUDController.cs");
@@ -234,5 +252,10 @@ public class ArchitectureCompatibilityTests
         string fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
         Assert.That(File.Exists(fullPath), Is.True, $"El archivo '{relativePath}' debe existir.");
         return File.ReadAllText(fullPath);
+    }
+
+    private static string NormalizeLineEndings(string source)
+    {
+        return source.Replace("\r\n", "\n");
     }
 }

@@ -48,6 +48,7 @@ public class WeaponScript : MonoBehaviour
     private bool hasWarnedMissingPlayerAudio;
     private bool hasWarnedMissingEnemyAudio;
     private bool hasWarnedMissingPresentationProfile;
+    private bool hasWarnedMissingPlayerCamera;
     private Vector3 baseLocalPosition;
     private Vector3 baseLocalEulerAngles;
     private Vector3 recoilPositionOffset;
@@ -340,6 +341,8 @@ public class WeaponScript : MonoBehaviour
         {
             return _camera.transform;
         }
+
+        WarnIfMissingPlayerCamera();
 
         return fireOrigin != null ? fireOrigin : transform;
     }
@@ -730,5 +733,19 @@ public class WeaponScript : MonoBehaviour
 
         hasWarnedMissingPresentationProfile = true;
         GameDebug.Advertencia("Armas", $"El arma '{name}' no tiene WeaponPresentationProfile asignado desde su WeaponStatsProfile.", this);
+    }
+
+    private void WarnIfMissingPlayerCamera()
+    {
+        if (!playerOwnedWeapon || _camera != null || hasWarnedMissingPlayerCamera)
+        {
+            return;
+        }
+
+        hasWarnedMissingPlayerCamera = true;
+        GameDebug.Advertencia(
+            "Armas",
+            $"El arma del jugador '{name}' no tiene camera asignada. El disparo usara fireOrigin o el transform del arma como respaldo.",
+            this);
     }
 }

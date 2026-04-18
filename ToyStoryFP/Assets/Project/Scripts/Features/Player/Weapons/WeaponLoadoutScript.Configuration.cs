@@ -204,6 +204,7 @@ public partial class WeaponLoadoutScript
                 resolvedWeapon._camera = weaponCamera;
                 resolvedWeapon.ConfigureAudioControllers(playerAudio, null);
                 resolvedWeapon.SetPlayerOwned(true);
+                WarnIfPlayerWeaponCameraSetupIsInvalid(weaponId, resolvedWeapon);
             }
         }
 
@@ -429,6 +430,39 @@ public partial class WeaponLoadoutScript
         }
 
         return matchedWeapon;
+    }
+
+    private void WarnIfPlayerWeaponCameraSetupIsInvalid(string weaponId, WeaponScript weapon)
+    {
+        if (weapon == null)
+        {
+            return;
+        }
+
+        if (weaponCamera == null)
+        {
+            GameDebug.Advertencia(
+                "Armas",
+                $"El arma '{weaponId}' no puede validar su apuntado porque WeaponLoadoutScript no tiene weaponCamera asignada.",
+                this);
+            return;
+        }
+
+        if (!weapon.transform.IsChildOf(weaponCamera.transform))
+        {
+            GameDebug.Advertencia(
+                "Armas",
+                $"El arma '{weaponId}' debe estar bajo la weaponCamera del jugador para alinear correctamente el disparo.",
+                weapon);
+        }
+
+        if (weapon._camera != weaponCamera)
+        {
+            GameDebug.Advertencia(
+                "Armas",
+                $"El arma '{weaponId}' no tiene sincronizada la camera de apuntado del jugador.",
+                weapon);
+        }
     }
 
     private void DeactivateUnexpectedWeapons()

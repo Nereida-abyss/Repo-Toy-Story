@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerShopController shopController;
 
     private bool hasLoggedMissingDependencies;
+    private bool queuedPrimaryFire;
+    private bool shouldSkipQueuedPrimaryFire;
 
     public PlayerHealthScript Health => healthScript;
     public PlayerCurrencyController Currency => currencyController;
@@ -53,6 +55,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        ResetQueuedWeaponActions();
+
         if (movementScript == null)
         {
             ResolveDependencies();
@@ -82,6 +86,11 @@ public class PlayerController : MonoBehaviour
         HandleWeaponInput();
     }
 
+    void LateUpdate()
+    {
+        ProcessQueuedWeaponInput();
+    }
+
     private void HandleWeaponInput()
     {
         if (weaponLoadout == null)
@@ -95,16 +104,17 @@ public class PlayerController : MonoBehaviour
 
         if (scroll > 0f)
         {
-            weaponLoadout.TryCycleWeapon(1);
+            shouldSkipQueuedPrimaryFire = weaponLoadout.TryCycleWeapon(1);
         }
         else if (scroll < 0f)
         {
-            weaponLoadout.TryCycleWeapon(-1);
+            shouldSkipQueuedPrimaryFire = weaponLoadout.TryCycleWeapon(-1);
         }
 
         if (ProjectInput.WasReloadPressed())
         {
-            weaponLoadout.CurrentWeapon?.TryReload();
+            bool reloadStarted = weaponLoadout.CurrentWeapon?.TryReload() ?? false;
+            shouldSkipQueuedPrimaryFire |= reloadStarted;
         }
 
         if (weaponLoadout.IsSwitchingWeapon)
@@ -114,8 +124,35 @@ public class PlayerController : MonoBehaviour
 
         if (ProjectInput.IsPrimaryFireHeld())
         {
+            queuedPrimaryFire = true;
+        }
+    }
+
+    private void ProcessQueuedWeaponInput()
+    {
+        if (!queuedPrimaryFire)
+        {
+            return;
+        }
+
+        bool canProcessQueuedShot =
+            !shouldSkipQueuedPrimaryFire &&
+            !GameplayInputGate.IsBlocked &&
+            weaponLoadout != null &&
+            !weaponLoadout.IsSwitchingWeapon;
+
+        if (canProcessQueuedShot)
+        {
             weaponLoadout.CurrentWeapon?.TryFire();
         }
+
+        ResetQueuedWeaponActions();
+    }
+
+    private void ResetQueuedWeaponActions()
+    {
+        queuedPrimaryFire = false;
+        shouldSkipQueuedPrimaryFire = false;
     }
 
     private void ResolveDependencies()
