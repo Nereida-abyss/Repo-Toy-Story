@@ -15,7 +15,7 @@ MonoBehaviour:
   defaultVolume: 0.5
   defaultLookSensitivity: 0
   minLookSensitivity: 0
-  maxLookSensitivity: 5
+  maxLookSensitivity: 2
   defaultWindowedWidth: 1920
   defaultWindowedHeight: 1080
   minimumWindowedDimension: 1920

@@ -35,17 +35,12 @@ public class SettingsPanelController : MonoBehaviour
     [SerializeField] private TMP_Text lookSensitivityValueText;
     [SerializeField] private GameObject previousPanelToHide;
 
-    private static SettingsDefaultsProfile activeDefaultsProfile;
-    private static SettingsDefaultsProfile runtimeFallbackDefaultsProfile;
-
     private float masterVolume = 1f;
     private float lookSensitivity = 2f;
     private bool masterMuted;
     private bool isFullscreen;
     private bool hasLoggedMissingDefaultsProfile;
     private bool hasAcquiredInputGate;
-    private static bool hasLoggedRuntimeFallbackWarning;
-
     private void Awake()
     {
         RegisterDefaultsProfile();
@@ -149,7 +144,10 @@ public class SettingsPanelController : MonoBehaviour
 
     public void OnLookSensitivityChanged(float value)
     {
-        lookSensitivity = Mathf.Clamp(value, GetConfiguredMinLookSensitivity(), GetConfiguredMaxLookSensitivity());
+        lookSensitivity = Mathf.Clamp(
+            value,
+            SettingsDefaultsUtility.GetMinLookSensitivity(),
+            SettingsDefaultsUtility.GetMaxLookSensitivity());
         PlayerPrefs.SetFloat(LookSensitivityKey, lookSensitivity);
         PlayerPrefs.Save();
 
@@ -161,7 +159,7 @@ public class SettingsPanelController : MonoBehaviour
     public static void ApplySavedSettings()
     {
         bool fullscreen = ResolveFullscreenPreference();
-        float volume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, GetConfiguredDefaultVolume()));
+        float volume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, SettingsDefaultsUtility.GetDefaultVolume()));
         bool muted = PlayerPrefs.GetInt(MasterMutedKey, 0) == 1;
 
         ApplyFullscreenState(fullscreen, FullscreenChangeOrigin.Startup, savePreference: false, logChange: true);
@@ -171,12 +169,22 @@ public class SettingsPanelController : MonoBehaviour
     private void LoadSavedSettings()
     {
         isFullscreen = ResolveFullscreenPreference();
-        masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, GetConfiguredDefaultVolume()));
+        masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumeKey, SettingsDefaultsUtility.GetDefaultVolume()));
         masterMuted = PlayerPrefs.GetInt(MasterMutedKey, 0) == 1;
+        float savedLookSensitivity = PlayerPrefs.GetFloat(
+            LookSensitivityKey,
+            SettingsDefaultsUtility.GetDefaultLookSensitivity());
+
         lookSensitivity = Mathf.Clamp(
-            PlayerPrefs.GetFloat(LookSensitivityKey, GetConfiguredDefaultLookSensitivity()),
-            GetConfiguredMinLookSensitivity(),
-            GetConfiguredMaxLookSensitivity());
+            savedLookSensitivity,
+            SettingsDefaultsUtility.GetMinLookSensitivity(),
+            SettingsDefaultsUtility.GetMaxLookSensitivity());
+
+        if (!Mathf.Approximately(savedLookSensitivity, lookSensitivity))
+        {
+            PlayerPrefs.SetFloat(LookSensitivityKey, lookSensitivity);
+            PlayerPrefs.Save();
+        }
     }
 
     private void ApplyCurrentSettings()
@@ -212,6 +220,8 @@ public class SettingsPanelController : MonoBehaviour
 
         if (lookSensitivitySlider != null)
         {
+            lookSensitivitySlider.minValue = SettingsDefaultsUtility.GetMinLookSensitivity();
+            lookSensitivitySlider.maxValue = SettingsDefaultsUtility.GetMaxLookSensitivity();
             lookSensitivitySlider.SetValueWithoutNotify(lookSensitivity);
         }
 
@@ -298,8 +308,8 @@ public class SettingsPanelController : MonoBehaviour
             Resolution desktopResolution = Screen.currentResolution;
             Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
             Screen.SetResolution(
-                Mathf.Max(GetConfiguredDefaultWindowedWidth(), desktopResolution.width),
-                Mathf.Max(GetConfiguredDefaultWindowedHeight(), desktopResolution.height),
+                Mathf.Max(SettingsDefaultsUtility.GetDefaultWindowedWidth(), desktopResolution.width),
+                Mathf.Max(SettingsDefaultsUtility.GetDefaultWindowedHeight(), desktopResolution.height),
                 FullScreenMode.FullScreenWindow);
             return;
         }
@@ -319,7 +329,8 @@ public class SettingsPanelController : MonoBehaviour
         int currentWidth = Mathf.Max(Screen.width, 0);
         int currentHeight = Mathf.Max(Screen.height, 0);
 
-        if (currentWidth < GetConfiguredMinimumWindowedDimension() || currentHeight < GetConfiguredMinimumWindowedDimension())
+        if (currentWidth < SettingsDefaultsUtility.GetMinimumWindowedDimension() ||
+            currentHeight < SettingsDefaultsUtility.GetMinimumWindowedDimension())
         {
             return;
         }
@@ -331,17 +342,17 @@ public class SettingsPanelController : MonoBehaviour
 
     private static Vector2Int ResolveWindowedSize()
     {
-        int width = PlayerPrefs.GetInt(WindowedWidthKey, GetConfiguredDefaultWindowedWidth());
-        int height = PlayerPrefs.GetInt(WindowedHeightKey, GetConfiguredDefaultWindowedHeight());
+        int width = PlayerPrefs.GetInt(WindowedWidthKey, SettingsDefaultsUtility.GetDefaultWindowedWidth());
+        int height = PlayerPrefs.GetInt(WindowedHeightKey, SettingsDefaultsUtility.GetDefaultWindowedHeight());
 
-        if (width < GetConfiguredMinimumWindowedDimension())
+        if (width < SettingsDefaultsUtility.GetMinimumWindowedDimension())
         {
-            width = GetConfiguredDefaultWindowedWidth();
+            width = SettingsDefaultsUtility.GetDefaultWindowedWidth();
         }
 
-        if (height < GetConfiguredMinimumWindowedDimension())
+        if (height < SettingsDefaultsUtility.GetMinimumWindowedDimension())
         {
-            height = GetConfiguredDefaultWindowedHeight();
+            height = SettingsDefaultsUtility.GetDefaultWindowedHeight();
         }
 
         return new Vector2Int(width, height);
@@ -351,7 +362,7 @@ public class SettingsPanelController : MonoBehaviour
     {
         if (defaultsProfile != null)
         {
-            activeDefaultsProfile = defaultsProfile;
+            SettingsDefaultsUtility.RegisterDefaultsProfile(defaultsProfile);
             hasLoggedMissingDefaultsProfile = false;
             return;
         }
@@ -363,42 +374,6 @@ public class SettingsPanelController : MonoBehaviour
 
         hasLoggedMissingDefaultsProfile = true;
         GameDebug.Advertencia("Settings", "SettingsPanelController no tiene SettingsDefaultsProfile asignado. Se usara el perfil temporal de seguridad hasta asignar uno en escena.", this);
-    }
-
-    private static float GetConfiguredDefaultVolume()
-    {
-        return Mathf.Clamp01(ResolveActiveDefaultsProfile().DefaultVolume);
-    }
-
-    private static float GetConfiguredDefaultLookSensitivity()
-    {
-        return ResolveActiveDefaultsProfile().DefaultLookSensitivity;
-    }
-
-    private static float GetConfiguredMinLookSensitivity()
-    {
-        return ResolveActiveDefaultsProfile().MinLookSensitivity;
-    }
-
-    private static float GetConfiguredMaxLookSensitivity()
-    {
-        SettingsDefaultsProfile profile = ResolveActiveDefaultsProfile();
-        return Mathf.Max(GetConfiguredMinLookSensitivity(), profile.MaxLookSensitivity);
-    }
-
-    private static int GetConfiguredDefaultWindowedWidth()
-    {
-        return Mathf.Max(1, ResolveActiveDefaultsProfile().DefaultWindowedWidth);
-    }
-
-    private static int GetConfiguredDefaultWindowedHeight()
-    {
-        return Mathf.Max(1, ResolveActiveDefaultsProfile().DefaultWindowedHeight);
-    }
-
-    private static int GetConfiguredMinimumWindowedDimension()
-    {
-        return Mathf.Max(1, ResolveActiveDefaultsProfile().MinimumWindowedDimension);
     }
 
     private void RefreshFullscreenUi()
@@ -434,9 +409,20 @@ public class SettingsPanelController : MonoBehaviour
             return mouseLook;
         }
 
+        if (playerController == null)
+        {
+            playerController = PlayerController.Instance;
+        }
+
         if (playerController != null && playerController.MouseLook != null)
         {
             mouseLook = playerController.MouseLook;
+            return mouseLook;
+        }
+
+        if (MouseLookScript.Instance != null)
+        {
+            mouseLook = MouseLookScript.Instance;
             return mouseLook;
         }
 
@@ -463,23 +449,5 @@ public class SettingsPanelController : MonoBehaviour
 
         GameplayInputGate.Release(SettingsInputGateOwner);
         hasAcquiredInputGate = false;
-    }
-
-    private static SettingsDefaultsProfile ResolveActiveDefaultsProfile()
-    {
-        if (activeDefaultsProfile != null)
-        {
-            return activeDefaultsProfile;
-        }
-
-        runtimeFallbackDefaultsProfile ??= ScriptableObject.CreateInstance<SettingsDefaultsProfile>();
-
-        if (!hasLoggedRuntimeFallbackWarning)
-        {
-            hasLoggedRuntimeFallbackWarning = true;
-            GameDebug.Advertencia("Settings", "No hay SettingsDefaultsProfile registrado. Se usara un perfil temporal de seguridad hasta que la escena registre uno.");
-        }
-
-        return runtimeFallbackDefaultsProfile;
     }
 }

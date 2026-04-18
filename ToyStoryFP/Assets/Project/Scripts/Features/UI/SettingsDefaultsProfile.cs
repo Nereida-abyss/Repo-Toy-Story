@@ -4,8 +4,8 @@ using UnityEngine;
 public class SettingsDefaultsProfile : ScriptableObject
 {
     [SerializeField] [Range(0f, 1f)] private float defaultVolume = 1f;
-    [SerializeField] private float defaultLookSensitivity = 2f;
-    [SerializeField] private float minLookSensitivity = 0.5f;
+    [SerializeField] private float defaultLookSensitivity = 0.01f;
+    [SerializeField] private float minLookSensitivity = 0f;
     [SerializeField] private float maxLookSensitivity = 5f;
     [SerializeField] private int defaultWindowedWidth = 1024;
     [SerializeField] private int defaultWindowedHeight = 768;
