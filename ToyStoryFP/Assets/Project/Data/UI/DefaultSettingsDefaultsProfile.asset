@@ -18,4 +18,4 @@ MonoBehaviour:
   maxLookSensitivity: 5
   defaultWindowedWidth: 1920
   defaultWindowedHeight: 1080
-  minimumWindowedDimension: 720
+  minimumWindowedDimension: 1920
