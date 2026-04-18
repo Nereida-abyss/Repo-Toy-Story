@@ -3368,6 +3368,10 @@ PrefabInstance:
       propertyPath: waveManager
       value: 
       objectReference: {fileID: 920100000000000003}
+    - target: {fileID: 1017103518327394351, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: clampInDegrees.y
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 1142213344556677889, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: waveManager
       value: 
