@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83713ddb2df74df8bf43fa50f2a16c9e, type: 3}
   m_Name: DefaultMouseLookTuningProfile
   m_EditorClassIdentifier: 
-  clampInDegrees: {x: 360, y: 38}
+  clampInDegrees: {x: 360, y: 60}
   lockCursor: 1
   postUnpauseLookBlockDuration: 0.08
   pauseInputResetOnOpen: 1

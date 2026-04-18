@@ -3436,6 +3436,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerController
       objectReference: {fileID: 0}
+    - target: {fileID: 5948915681959067437, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5975369471569124276, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 0
