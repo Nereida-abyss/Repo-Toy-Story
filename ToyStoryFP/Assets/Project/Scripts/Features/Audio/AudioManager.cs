@@ -29,9 +29,6 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private bool keepMainMenuMusicInAllScenes = true;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.05f;
 
-    [Header("Debug")]
-    [SerializeField] private bool debugShopAudio = false;
-
     private bool hasLoggedMissingCatalog;
     private bool hasLoggedMissingMusicSource;
     private bool hasLoggedMissingShopMusicSource;
@@ -154,13 +151,11 @@ public class AudioManager : MonoBehaviour
 
     public void PlayShopMusic()
     {
-        LogShopAudio("PLAY_SHOP_MUSIC_REQUEST", true);
         StartShopMusicBlend(true);
     }
 
     public void RestoreGameplayMusic()
     {
-        LogShopAudio("RESTORE_GAMEPLAY_MUSIC_REQUEST", false);
         StartShopMusicBlend(false);
     }
 
@@ -473,12 +468,10 @@ public class AudioManager : MonoBehaviour
 
     private void StartShopMusicBlend(bool enteringShop)
     {
-        LogShopAudio("START_BLEND_REQUEST", enteringShop);
         string activeSceneName = GetActiveSceneName();
 
         if (activeSceneName != GamePlaySceneName)
         {
-            LogShopAudio("START_BLEND_SKIPPED_NON_GAMEPLAY", enteringShop);
             if (!enteringShop)
             {
                 RestoreSceneMusicOutsideGameplay(activeSceneName);
@@ -489,7 +482,6 @@ public class AudioManager : MonoBehaviour
 
         if (isShopMusicActive == enteringShop && shopMusicBlendCoroutine == null)
         {
-            LogShopAudio("START_BLEND_SKIPPED_ALREADY_AT_TARGET", enteringShop);
             return;
         }
 
@@ -497,7 +489,6 @@ public class AudioManager : MonoBehaviour
             && hasPendingShopMusicBlendTarget
             && pendingShopMusicBlendTarget == enteringShop)
         {
-            LogShopAudio("START_BLEND_SKIPPED_PENDING_MATCH", enteringShop);
             return;
         }
 
@@ -506,13 +497,11 @@ public class AudioManager : MonoBehaviour
 
         if (resolvedBaseSource == null)
         {
-            LogShopAudio("START_BLEND_ABORTED_NO_BASE_SOURCE", enteringShop, resolvedBaseSource, resolvedShopSource);
             return;
         }
 
         if (resolvedShopSource == null)
         {
-            LogShopAudio("START_BLEND_ABORTED_NO_SHOP_SOURCE", enteringShop, resolvedBaseSource, resolvedShopSource);
             if (enteringShop)
             {
                 EnsureGameplayMusicPrepared();
@@ -526,11 +515,9 @@ public class AudioManager : MonoBehaviour
         isShopMusicActive = enteringShop;
         hasPendingShopMusicBlendTarget = true;
         pendingShopMusicBlendTarget = enteringShop;
-        LogShopAudio("START_BLEND_APPLIED", enteringShop, resolvedBaseSource, resolvedShopSource);
 
         if (shopMusicBlendCoroutine != null)
         {
-            LogShopAudio("START_BLEND_STOP_PREVIOUS", enteringShop, resolvedBaseSource, resolvedShopSource);
             StopCoroutine(shopMusicBlendCoroutine);
         }
 
@@ -596,7 +583,6 @@ public class AudioManager : MonoBehaviour
             resolvedMusicSource.Play();
         }
 
-        LogShopAudio("PREPARE_BASE_CLIP", isShopMusicActive, resolvedMusicSource, ResolveShopMusicSource(false));
     }
 
     private void PrepareShopMusicClip(AudioSource resolvedShopSource, bool enteringShop)
@@ -611,7 +597,6 @@ public class AudioManager : MonoBehaviour
         if (shopClip == null)
         {
             StopShopMusicImmediate();
-            LogShopAudio("PREPARE_SHOP_CLIP_ABORTED_NO_CLIP", enteringShop, ResolveMusicSource(), resolvedShopSource);
             return;
         }
 
@@ -627,7 +612,6 @@ public class AudioManager : MonoBehaviour
         {
             resolvedShopSource.volume = 0f;
             resolvedShopSource.Play();
-            LogShopAudio("PREPARE_SHOP_CLIP_STARTED", enteringShop, ResolveMusicSource(), resolvedShopSource);
             return;
         }
 
@@ -635,13 +619,10 @@ public class AudioManager : MonoBehaviour
         {
             resolvedShopSource.volume = 0f;
         }
-
-        LogShopAudio("PREPARE_SHOP_CLIP", enteringShop, ResolveMusicSource(), resolvedShopSource);
     }
 
     private IEnumerator BlendShopMusicCoroutine(AudioSource baseSource, AudioSource shopSource, bool enteringShop, float gameplayTargetVolume, float shopTargetVolume)
     {
-        LogShopAudio("BLEND_COROUTINE_BEGIN", enteringShop, baseSource, shopSource);
         float duration = Mathf.Max(0.01f, ShopMusicCrossfadeDuration);
         float elapsed = 0f;
         float startBaseVolume = baseSource != null ? baseSource.volume : 0f;
@@ -680,7 +661,6 @@ public class AudioManager : MonoBehaviour
 
         shopMusicBlendCoroutine = null;
         hasPendingShopMusicBlendTarget = false;
-        LogShopAudio("BLEND_COROUTINE_END", enteringShop, baseSource, shopSource);
     }
 
     private void StopShopMusicImmediate()
@@ -708,8 +688,6 @@ public class AudioManager : MonoBehaviour
         {
             resolvedShopSource.Stop();
         }
-
-        LogShopAudio("STOP_SHOP_MUSIC_IMMEDIATE", isShopMusicActive, ResolveMusicSource(), resolvedShopSource);
     }
 
     private void EnsureGameplayMusicPrepared()
@@ -853,34 +831,4 @@ public class AudioManager : MonoBehaviour
         return audio != null ? audio.Volume : 1f;
     }
 
-    public void SetShopAudioDebugEnabled(bool enabled)
-    {
-        debugShopAudio = enabled;
-    }
-
-    private void LogShopAudio(string eventName, bool enteringShop, AudioSource baseSource = null, AudioSource shopSource = null)
-    {
-        if (!debugShopAudio)
-        {
-            return;
-        }
-
-        AudioSource resolvedBaseSource = baseSource != null ? baseSource : ResolveMusicSource();
-        AudioSource resolvedShopSource = shopSource != null ? shopSource : ResolveShopMusicSource(false);
-        GameDebug.Advertencia(
-            "SHOP_AUDIO",
-            $"frame={Time.frameCount} event={eventName} timeScale={Time.timeScale:0.###} enteringShop={enteringShop} active={isShopMusicActive} pending={hasPendingShopMusicBlendTarget} pendingTarget={(hasPendingShopMusicBlendTarget ? pendingShopMusicBlendTarget.ToString() : "none")} coroutineActive={shopMusicBlendCoroutine != null} base={DescribeAudioSource(resolvedBaseSource)} shop={DescribeAudioSource(resolvedShopSource)}",
-            this);
-    }
-
-    private static string DescribeAudioSource(AudioSource source)
-    {
-        if (source == null)
-        {
-            return "source=null";
-        }
-
-        string clipName = source.clip != null ? source.clip.name : "null";
-        return $"name={source.name},clip={clipName},playing={source.isPlaying},volume={source.volume:0.###}";
-    }
 }

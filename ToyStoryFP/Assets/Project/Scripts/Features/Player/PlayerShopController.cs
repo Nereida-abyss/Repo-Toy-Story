@@ -37,13 +37,10 @@ public class PlayerShopController : MonoBehaviour
     [SerializeField] private Button m16Button;
     [SerializeField] private Button akButton;
 
-    [Header("Debug")]
-    [SerializeField] private bool debugShopFlow = false;
     [SerializeField] private bool debugDisableShopPanelAudio;
     [SerializeField] private bool debugDisableShopFreeze;
     [SerializeField] private bool debugForceShopPanelLocalAudioSource;
     [SerializeField] private AudioSource debugShopPanelLocalAudioSource;
-    [SerializeField] private bool autoEnableShopDiagnostics = false;
 
     private PlayerController playerController;
     private PlayerCurrencyController currencyController;
@@ -101,17 +98,13 @@ public class PlayerShopController : MonoBehaviour
 
     public void SetInsideShopZone(bool isInside)
     {
-        LogShopFlow(isInside ? "ZONE_ENTER_REQUEST" : "ZONE_EXIT_REQUEST");
-
         if (isInsideShopZone == isInside)
         {
-            LogShopFlow(isInside ? "ZONE_ENTER_IGNORED" : "ZONE_EXIT_IGNORED");
             RefreshShopPrompt();
             return;
         }
 
         isInsideShopZone = isInside;
-        LogShopFlow(isInsideShopZone ? "ZONE_ENTER_APPLIED" : "ZONE_EXIT_APPLIED");
 
         if (isInsideShopZone)
         {
@@ -147,7 +140,6 @@ public class PlayerShopController : MonoBehaviour
     {
         WarnIfMissingShopBalanceProfile();
         ResolveGameplayReferences();
-        SyncShopDiagnostics();
         ApplyShopPanelDebugOverrides();
         BindButtonListeners();
         RefreshUi();
@@ -161,7 +153,6 @@ public class PlayerShopController : MonoBehaviour
 
     private void OpenShop()
     {
-        LogShopFlow("SHOP_OPEN_REQUEST");
         ResolveGameplayReferences();
 
         if (panelShop == null)
@@ -175,18 +166,15 @@ public class PlayerShopController : MonoBehaviour
         BeginShopSession();
         HideShopPrompt();
         RefreshUi();
-        LogShopFlow("SHOP_OPEN_APPLIED");
 
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(speedButton != null ? speedButton.gameObject : null);
-            LogShopFlow($"SHOP_SELECTION_APPLIED selected={(EventSystem.current.currentSelectedGameObject != null ? EventSystem.current.currentSelectedGameObject.name : "null")}");
         }
     }
 
     private void CloseShop()
     {
-        LogShopFlow("SHOP_CLOSE_REQUEST");
         bool wasShopOpen = IsShopOpen;
 
         if (panelShop != null)
@@ -201,12 +189,10 @@ public class PlayerShopController : MonoBehaviour
 
         EndShopInputSession();
         RefreshShopPrompt();
-        LogShopFlow("SHOP_CLOSE_APPLIED");
 
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
-            LogShopFlow("SHOP_SELECTION_CLEARED");
         }
     }
 
@@ -270,14 +256,12 @@ public class PlayerShopController : MonoBehaviour
 
     private void BeginShopSession()
     {
-        LogShopFlow("SHOP_SESSION_BEGIN");
         AcquireShopInputGateIfNeeded();
         FreezeGameplayForShopIfNeeded();
     }
 
     private void EndShopInputSession()
     {
-        LogShopFlow("SHOP_SESSION_END");
         ReleaseShopInputGateIfNeeded();
         UnfreezeGameplayIfNeeded();
     }
@@ -306,33 +290,25 @@ public class PlayerShopController : MonoBehaviour
 
     private void FreezeGameplayForShopIfNeeded()
     {
-        LogShopFlow("FREEZE_REQUEST");
-
         if (debugDisableShopFreeze)
         {
-            LogShopFlow("FREEZE_DEBUG_DISABLED");
             return;
         }
 
         if (hasFrozenGameplay || UIManager.IsGamePaused)
         {
-            LogShopFlow("FREEZE_SKIPPED");
             return;
         }
 
         Time.timeScale = 0f;
         hasFrozenGameplay = true;
         IsGameplayFrozenByShop = true;
-        LogShopFlow("FREEZE_APPLIED");
     }
 
     private void UnfreezeGameplayIfNeeded()
     {
-        LogShopFlow("UNFREEZE_REQUEST");
-
         if (!hasFrozenGameplay)
         {
-            LogShopFlow("UNFREEZE_SKIPPED");
             return;
         }
 
@@ -343,8 +319,6 @@ public class PlayerShopController : MonoBehaviour
         {
             Time.timeScale = 1f;
         }
-
-        LogShopFlow("UNFREEZE_APPLIED");
     }
 
     private void RestoreGameplayMusicIfOutsideZone()
@@ -943,39 +917,22 @@ public class PlayerShopController : MonoBehaviour
     {
         if (hasAcquiredInputGate)
         {
-            LogShopFlow("INPUT_GATE_ACQUIRE_SKIPPED");
             return;
         }
 
         GameplayInputGate.Acquire(ShopInputGateOwner);
         hasAcquiredInputGate = true;
-        LogShopFlow("INPUT_GATE_ACQUIRED");
     }
 
     private void ReleaseShopInputGateIfNeeded()
     {
         if (!hasAcquiredInputGate)
         {
-            LogShopFlow("INPUT_GATE_RELEASE_SKIPPED");
             return;
         }
 
         GameplayInputGate.Release(ShopInputGateOwner);
         hasAcquiredInputGate = false;
-        LogShopFlow("INPUT_GATE_RELEASED");
-    }
-
-    private void LogShopFlow(string eventName)
-    {
-        if (!debugShopFlow)
-        {
-            return;
-        }
-
-        GameDebug.Advertencia(
-            "SHOP_FLOW",
-            $"frame={Time.frameCount} event={eventName} timeScale={Time.timeScale:0.###} insideZone={isInsideShopZone} shopOpen={IsShopOpen} paused={UIManager.IsGamePaused} inputBlocked={IsInputBlocked} frozenByShop={hasFrozenGameplay}",
-            this);
     }
 
     private void ApplyShopPanelDebugOverrides()
@@ -996,34 +953,5 @@ public class PlayerShopController : MonoBehaviour
         bool? overrideUseSharedAudioSource = debugForceShopPanelLocalAudioSource ? false : (bool?)null;
         AudioSource overrideAudioSource = debugForceShopPanelLocalAudioSource ? debugShopPanelLocalAudioSource : null;
         panelFx.ApplyDebugAudioOverrides(overrideAudioEnabled, overrideUseSharedAudioSource, overrideAudioSource);
-
-        if (debugShopFlow && (overrideAudioEnabled.HasValue || overrideUseSharedAudioSource.HasValue || overrideAudioSource != null))
-        {
-            string localSourceName = overrideAudioSource != null ? overrideAudioSource.name : "null";
-            GameDebug.Advertencia(
-                "SHOP_FLOW",
-                $"frame={Time.frameCount} event=SHOP_PANEL_DEBUG_OVERRIDES audioDisabled={debugDisableShopPanelAudio} freezeDisabled={debugDisableShopFreeze} forceLocalAudio={debugForceShopPanelLocalAudioSource} localSource={localSourceName}",
-                this);
-        }
-    }
-
-    private void SyncShopDiagnostics()
-    {
-        AudioManager resolvedAudioManager = ResolveAudioManager();
-        resolvedAudioManager?.SetShopAudioDebugEnabled(autoEnableShopDiagnostics);
-
-        if (panelShop != null)
-        {
-            UIPanelFx panelFx = panelShop.GetComponent<UIPanelFx>();
-            panelFx?.SetPanelAudioDebugEnabled(autoEnableShopDiagnostics);
-        }
-
-        if (!autoEnableShopDiagnostics)
-        {
-            debugShopFlow = false;
-            return;
-        }
-
-        debugShopFlow = true;
     }
 }

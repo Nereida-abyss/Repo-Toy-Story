@@ -915,8 +915,8 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03466288, y: 5.3274565, z: 8.983996}
-  m_Center: {x: 2.7, y: 0.020887256, z: 0.26293117}
+  m_Size: {x: 0.38959813, y: 5.3274565, z: 8.983996}
+  m_Center: {x: 2.5225313, y: 0.020887256, z: 0.26293117}
 --- !u!1 &474571742
 GameObject:
   m_ObjectHideFlags: 0
@@ -1518,7 +1518,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
@@ -2361,18 +2361,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 1.25
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1105586088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1105586084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97f150b4ac40489fa2dc0fb6920decb0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopTriggerZone
 --- !u!1 &1105586086 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6311903895279481301, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
@@ -2400,6 +2388,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 7336222472559230297, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
+--- !u!114 &1105586088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1105586084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97f150b4ac40489fa2dc0fb6920decb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopTriggerZone
 --- !u!1 &1129788927
 GameObject:
   m_ObjectHideFlags: 0
@@ -2728,8 +2728,8 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03466288, y: 5.3274565, z: 8.983996}
-  m_Center: {x: 2.7, y: 0.020887256, z: 0.26293117}
+  m_Size: {x: 0.42517096, y: 5.3274565, z: 8.983996}
+  m_Center: {x: 2.8952503, y: 0.020887256, z: 0.26293117}
 --- !u!1 &1214555002
 GameObject:
   m_ObjectHideFlags: 0
@@ -2813,8 +2813,8 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03466288, y: 5.3274565, z: 8.983996}
-  m_Center: {x: 2.64, y: 0.020887256, z: 0.26293117}
+  m_Size: {x: 0.7198194, y: 5.3274565, z: 8.983996}
+  m_Center: {x: 2.9825883, y: 0.020887256, z: 0.26293117}
 --- !u!1 &1406011385
 GameObject:
   m_ObjectHideFlags: 0
@@ -3374,7 +3374,7 @@ PrefabInstance:
       objectReference: {fileID: 920100000000000003}
     - target: {fileID: 1966027077784214151, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: dashSpeed
-      value: 6.5
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 2117941058062852358, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_AnchorMax.x
@@ -5549,7 +5549,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
   enemyPrefab: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
-  spawnTelegraphProfile: {fileID: 11400000, guid: 7def3f97dfdf422e8c73d1c8292fca8a, type: 2}
   spawnPoints:
   - {fileID: 920100000000000013}
   - {fileID: 920100000000000023}
@@ -5559,6 +5558,7 @@ MonoBehaviour:
   - {fileID: 920100000000000063}
   target: {fileID: 1905847329}
   tacticsCoordinator: {fileID: 920100000000000006}
+  spawnTelegraphProfile: {fileID: 11400000, guid: 7def3f97dfdf422e8c73d1c8292fca8a, type: 2}
   navMeshSampleDistance: 2
 --- !u!1 &920100000000000011
 GameObject:
@@ -10240,8 +10240,8 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03466288, y: 5.3274565, z: 8.983996}
-  m_Center: {x: -5.2879753, y: 0.020887256, z: 0.26293117}
+  m_Size: {x: 0.7545646, y: 5.3274565, z: 8.983996}
+  m_Center: {x: -5.647936, y: 0.020887256, z: 0.26293117}
 --- !u!4 &4649609980589325290
 Transform:
   m_ObjectHideFlags: 0
@@ -15521,7 +15521,7 @@ BoxCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 7.980092, y: 0.0049999994, z: 9.125589}

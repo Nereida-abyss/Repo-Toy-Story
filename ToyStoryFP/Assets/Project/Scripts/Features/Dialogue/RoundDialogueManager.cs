@@ -39,7 +39,6 @@ public class RoundDialogueManager : MonoBehaviour
     public void AdvanceToNextRound()
     {
         currentRound++;
-        Debug.Log($"Round {currentRound} - Next dialogue ready");
     }
 
     public int GetCurrentRound()

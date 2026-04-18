@@ -27,9 +27,6 @@ public class UIPanelFx : MonoBehaviour
     [SerializeField] private float openVolume = 0.5f;
     [SerializeField] private float closeVolume = 0.38f;
 
-    [Header("Debug")]
-    [SerializeField] private bool debugPanelAudio = false;
-
     private RectTransform rectTransform;
     private Coroutine activeRoutine;
     private Vector2 baseAnchoredPosition;
@@ -136,11 +133,6 @@ public class UIPanelFx : MonoBehaviour
         }
 
         ApplyPersistentAudioOverrides();
-    }
-
-    public void SetPanelAudioDebugEnabled(bool enabled)
-    {
-        debugPanelAudio = enabled;
     }
 
     private void ApplyProfile()
@@ -252,14 +244,12 @@ public class UIPanelFx : MonoBehaviour
     public void PlayOpen()
     {
         InitializeIfNeeded();
-        LogPanelAudio("PANEL_OPEN");
         isTransitioningOpen = true;
         isTransitioningClose = false;
 
         if (!gameObject.activeInHierarchy)
         {
             isTransitioningOpen = false;
-            LogPanelAudio("PANEL_OPEN_SKIPPED_INACTIVE");
             return;
         }
 
@@ -328,7 +318,6 @@ public class UIPanelFx : MonoBehaviour
     // Corrutina de cierre: revierte la apertura y decide cuándo bloquear interacción.
     private IEnumerator PlayCloseRoutine()
     {
-        LogPanelAudio("PANEL_CLOSE_BEGIN");
         float duration = Mathf.Max(0.01f, closeDuration);
         float elapsed = 0f;
         Vector2 startPosition = rectTransform.anchoredPosition;
@@ -357,7 +346,6 @@ public class UIPanelFx : MonoBehaviour
         gameObject.SetActive(false);
         isTransitioningClose = false;
         activeRoutine = null;
-        LogPanelAudio("PANEL_CLOSE_END");
     }
 
     // Fuerza el estado visual final sin animación, útil para sincronizar o reparar el panel.
@@ -428,11 +416,8 @@ public class UIPanelFx : MonoBehaviour
     // Reproduce el sonido del panel usando la mejor fuente disponible.
     private void PlayPanelSound(AudioClip clip, float volume)
     {
-        LogPanelAudio("PANEL_SOUND_REQUEST", clip, volume, ResolveAudioSource());
-
         if (!enableAudio || clip == null)
         {
-            LogPanelAudio("PANEL_SOUND_SKIPPED", clip, volume, ResolveAudioSource());
             return;
         }
 
@@ -440,12 +425,10 @@ public class UIPanelFx : MonoBehaviour
 
         if (source == null)
         {
-            LogPanelAudio("PANEL_SOUND_ABORTED_NO_SOURCE", clip, volume, source);
             return;
         }
 
         source.PlayOneShot(clip, Mathf.Clamp01(volume));
-        LogPanelAudio("PANEL_SOUND_PLAYED", clip, volume, source);
     }
 
     // Busca un AudioSource local o uno compartido para poder lanzar sonidos UI.
@@ -653,20 +636,4 @@ public class UIPanelFx : MonoBehaviour
         return audioManager;
     }
 
-    private void LogPanelAudio(string eventName, AudioClip clip = null, float requestedVolume = -1f, AudioSource source = null)
-    {
-        if (!debugPanelAudio)
-        {
-            return;
-        }
-
-        AudioSource resolvedSource = source != null ? source : audioSource;
-        string clipName = clip != null ? clip.name : "null";
-        string sourceName = resolvedSource != null ? resolvedSource.name : "null";
-        string sourceState = resolvedSource != null ? $"playing={resolvedSource.isPlaying},volume={resolvedSource.volume:0.###}" : "playing=n/a,volume=n/a";
-        GameDebug.Advertencia(
-            "SHOP_PANEL_AUDIO",
-            $"frame={Time.frameCount} event={eventName} timeScale={Time.timeScale:0.###} panel={name} clip={clipName} requestedVolume={requestedVolume:0.###} source={sourceName} {sourceState}",
-            this);
-    }
 }
