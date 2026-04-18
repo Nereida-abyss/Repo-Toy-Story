@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System;
+using System.Collections;
 
 [DisallowMultipleComponent]
 public class WaveSpawner : MonoBehaviour
@@ -12,12 +14,14 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private EnemySpawnPoint[] spawnPoints = System.Array.Empty<EnemySpawnPoint>();
     [SerializeField] private Transform target;
     [SerializeField] private EnemyTacticsCoordinator tacticsCoordinator;
+    [SerializeField] private SpawnTelegraphProfile spawnTelegraphProfile;
     [SerializeField] private float navMeshSampleDistance = 2f;
 
     private bool hasLoggedMissingSpawnPoints;
     private bool hasLoggedMissingEnemyPrefab;
     private bool hasLoggedInvalidSpawnPosition;
     private bool hasLoggedMissingTarget;
+    private bool hasLoggedInvalidTelegraphVfx;
 
     public bool TrySpawnEnemy(out GameObject spawnedEnemy)
     {
@@ -43,6 +47,36 @@ public class WaveSpawner : MonoBehaviour
         spawnedEnemy = Instantiate(enemyPrefab, spawnPosition, spawnPoint.Rotation);
         ConfigureSpawnedEnemy(spawnedEnemy);
         return spawnedEnemy != null;
+    }
+
+    public IEnumerator SpawnEnemyWithTelegraph(Action<GameObject> onEnemySpawned)
+    {
+        GameObject spawnedEnemy = null;
+
+        if (!HasValidEnemyPrefab() || !HasSpawnPoints())
+        {
+            onEnemySpawned?.Invoke(null);
+            yield break;
+        }
+
+        if (!TryResolveSpawnPosition(out Vector3 spawnPosition, out EnemySpawnPoint spawnPoint))
+        {
+            if (!hasLoggedInvalidSpawnPosition)
+            {
+                hasLoggedInvalidSpawnPosition = true;
+                GameDebug.Advertencia("Oleadas", "WaveSpawner no encontro una posicion valida en NavMesh para generar enemigo.", this);
+            }
+
+            onEnemySpawned?.Invoke(null);
+            yield break;
+        }
+
+        hasLoggedInvalidSpawnPosition = false;
+        PlaySpawnTelegraph(spawnPosition);
+        yield return new WaitForSeconds(GetTelegraphDuration());
+        spawnedEnemy = Instantiate(enemyPrefab, spawnPosition, spawnPoint.Rotation);
+        ConfigureSpawnedEnemy(spawnedEnemy);
+        onEnemySpawned?.Invoke(spawnedEnemy);
     }
 
     private bool HasSpawnPoints()
@@ -145,7 +179,60 @@ public class WaveSpawner : MonoBehaviour
             return null;
         }
 
-        int index = Random.Range(0, spawnPoints.Length);
+        int index = UnityEngine.Random.Range(0, spawnPoints.Length);
         return spawnPoints[index];
+    }
+
+    private void PlaySpawnTelegraph(Vector3 spawnPosition)
+    {
+        if (spawnTelegraphProfile == null)
+        {
+            return;
+        }
+
+        if (spawnTelegraphProfile.TelegraphVfxPrefab != null)
+        {
+            try
+            {
+                UnityEngine.Object instantiatedObject = Instantiate(
+                    spawnTelegraphProfile.TelegraphVfxPrefab,
+                    spawnPosition,
+                    Quaternion.identity);
+
+                if (instantiatedObject is GameObject telegraphVfx)
+                {
+                    hasLoggedInvalidTelegraphVfx = false;
+                    Destroy(telegraphVfx, spawnTelegraphProfile.TelegraphLifetime);
+                }
+                else if (!hasLoggedInvalidTelegraphVfx)
+                {
+                    hasLoggedInvalidTelegraphVfx = true;
+                    GameDebug.Advertencia("Oleadas", "El VFX de telegraph asignado no se pudo instanciar como GameObject. El spawn continuara sin efecto visual.", this);
+                }
+            }
+            catch (Exception exception)
+            {
+                if (!hasLoggedInvalidTelegraphVfx)
+                {
+                    hasLoggedInvalidTelegraphVfx = true;
+                    GameDebug.Advertencia("Oleadas", $"Fallo al instanciar el VFX de telegraph. El spawn continuara sin efecto visual. Detalle: {exception.Message}", this);
+                }
+            }
+        }
+
+        if (spawnTelegraphProfile.TelegraphSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(
+                spawnTelegraphProfile.TelegraphSfx,
+                spawnPosition,
+                spawnTelegraphProfile.TelegraphVolume);
+        }
+    }
+
+    private float GetTelegraphDuration()
+    {
+        return spawnTelegraphProfile != null
+            ? spawnTelegraphProfile.TelegraphDuration
+            : 0.01f;
     }
 }

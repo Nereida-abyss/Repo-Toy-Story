@@ -2323,6 +2323,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1105586085}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1105586088}
     - targetCorrespondingSourceObject: {fileID: 6311903895279481301, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1105586087}
@@ -2358,6 +2361,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 1.25
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1105586088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1105586084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97f150b4ac40489fa2dc0fb6920decb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopTriggerZone
 --- !u!1 &1105586086 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6311903895279481301, guid: c3c263c03c35f2a46937b9b34456194c, type: 3}
@@ -5534,6 +5549,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
   enemyPrefab: {fileID: 615743669959847170, guid: 0c477606bdeb629418516db0806869dd, type: 3}
+  spawnTelegraphProfile: {fileID: 11400000, guid: 7def3f97dfdf422e8c73d1c8292fca8a, type: 2}
   spawnPoints:
   - {fileID: 920100000000000013}
   - {fileID: 920100000000000023}

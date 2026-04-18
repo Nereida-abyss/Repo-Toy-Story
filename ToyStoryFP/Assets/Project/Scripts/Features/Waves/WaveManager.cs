@@ -136,7 +136,7 @@ public class WaveManager : MonoBehaviour
 
     private void TickInitialDelay()
     {
-        remainingInitialDelayTime -= Time.deltaTime;
+        remainingInitialDelayTime -= GetGameplayTimerDelta();
     }
 
     private void TryStartWaveAfterInitialDelay()
@@ -153,7 +153,7 @@ public class WaveManager : MonoBehaviour
     {
         if (!isPaused)
         {
-            roundElapsedTime += Time.deltaTime;
+            roundElapsedTime += GetGameplayTimerDelta();
         }
 
         TryCompleteCurrentWave();
@@ -182,7 +182,7 @@ public class WaveManager : MonoBehaviour
 
     private void TickIntermissionTimer()
     {
-        remainingIntermissionTime -= Time.deltaTime;
+        remainingIntermissionTime -= GetGameplayTimerDelta();
 
         if (remainingIntermissionTime <= 0f)
         {
@@ -228,9 +228,9 @@ public class WaveManager : MonoBehaviour
         {
             spawnAttemptsCompletedThisWave++;
 
-            if (waveSpawner != null && waveSpawner.TrySpawnEnemy(out GameObject spawnedEnemy))
+            if (waveSpawner != null)
             {
-                RegisterSpawnedEnemy(spawnedEnemy, waveIndex);
+                yield return waveSpawner.SpawnEnemyWithTelegraph(spawnedEnemy => RegisterSpawnedEnemy(spawnedEnemy, waveIndex));
             }
 
             if (i < spawnCount - 1)
@@ -477,6 +477,11 @@ public class WaveManager : MonoBehaviour
     private void AdvanceDialogueRound()
     {
         dialogueManager?.AdvanceToNextRound();
+    }
+
+    private float GetGameplayTimerDelta()
+    {
+        return PlayerShopController.IsGameplayFrozenByShop ? Time.unscaledDeltaTime : Time.deltaTime;
     }
 
     private float GetInitialWaveDelay() => balanceProfile != null ? balanceProfile.InitialWaveDelay : initialWaveDelay;

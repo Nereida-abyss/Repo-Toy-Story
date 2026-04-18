@@ -124,6 +124,7 @@ public partial class EnemyController : MonoBehaviour
     private bool hasLoggedMissingTarget;
     private bool hasLoggedMissingAlertIndicator;
     private bool hasLoggedMissingBehaviorProfile;
+    private bool wasGameplayFrozenByShop;
     private AIState currentState = AIState.Patrol;
     private CombatMovementMode currentCombatMovementMode = CombatMovementMode.StrafeRight;
 
@@ -196,6 +197,11 @@ public partial class EnemyController : MonoBehaviour
 
     void Update()
     {
+        if (HandleShopFreezeState())
+        {
+            return;
+        }
+
         bool hasTarget = TryResolveTarget();
         Vector3 flatDirection = Vector3.zero;
         float flatDistance = float.PositiveInfinity;
@@ -231,5 +237,47 @@ public partial class EnemyController : MonoBehaviour
                 HandlePatrol();
                 return;
         }
+    }
+
+    private bool HandleShopFreezeState()
+    {
+        bool isGameplayFrozenByShop = PlayerShopController.IsGameplayFrozenByShop;
+
+        if (isGameplayFrozenByShop)
+        {
+            if (!wasGameplayFrozenByShop)
+            {
+                EnterShopFreezeState();
+            }
+
+            return true;
+        }
+
+        if (wasGameplayFrozenByShop)
+        {
+            ExitShopFreezeState();
+        }
+
+        return false;
+    }
+
+    private void EnterShopFreezeState()
+    {
+        wasGameplayFrozenByShop = true;
+        StopNavigation();
+        ResetMeasuredMotion();
+        movementScript.SetMoveInput(Vector2.zero);
+        movementScript.SetExternalMovementAnimation(
+            Vector3.zero,
+            false,
+            GetAnimationSpeedReference(),
+            GetMinimumMoveBlend(),
+            GetAnimationMoveThreshold());
+    }
+
+    private void ExitShopFreezeState()
+    {
+        wasGameplayFrozenByShop = false;
+        ResetMeasuredMotion();
     }
 }

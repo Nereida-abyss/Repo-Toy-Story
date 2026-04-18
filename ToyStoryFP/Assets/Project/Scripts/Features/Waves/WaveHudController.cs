@@ -30,6 +30,7 @@ public class WaveHudController : MonoBehaviour
             return;
         }
 
+        SyncIntermissionPromptVisibility();
         UpdateAnnouncementTimer();
         waveTimersUi?.Refresh(waveManager.CurrentState, waveManager.RoundElapsedTime, waveManager.RemainingIntermissionTime);
     }
@@ -85,7 +86,7 @@ public class WaveHudController : MonoBehaviour
 
         remainingAnnouncementTime = 0f;
         waveAnnouncementUi.HideWave();
-        waveIntermissionUi.ShowPrompt();
+        SyncIntermissionPromptVisibility();
     }
 
     private void UpdateAnnouncementTimer()
@@ -116,7 +117,7 @@ public class WaveHudController : MonoBehaviour
 
         if (waveManager.CurrentState == WaveManager.WaveRuntimeState.Intermission)
         {
-            waveIntermissionUi?.ShowPrompt();
+            SyncIntermissionPromptVisibility();
         }
     }
 
@@ -126,6 +127,22 @@ public class WaveHudController : MonoBehaviour
         waveAnnouncementUi?.HideWave();
         waveIntermissionUi?.HidePrompt();
         waveTimersUi?.Refresh(WaveManager.WaveRuntimeState.InitialDelay, 0f, 0f);
+    }
+
+    private void SyncIntermissionPromptVisibility()
+    {
+        if (waveManager == null || waveIntermissionUi == null)
+        {
+            return;
+        }
+
+        if (waveManager.CurrentState == WaveManager.WaveRuntimeState.Intermission && !PlayerShopController.IsShopPromptVisible)
+        {
+            waveIntermissionUi.ShowPrompt();
+            return;
+        }
+
+        waveIntermissionUi.HidePrompt();
     }
 
     private bool HasUiReferences()

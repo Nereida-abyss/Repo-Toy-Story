@@ -26,6 +26,7 @@ public class PlayerShopController : MonoBehaviour
 
     [Header("Shop UI")]
     [SerializeField] private GameObject panelShop;
+    [SerializeField] private ShopPromptUI shopPromptUi;
     [SerializeField] private TMP_Text moneyText;
     [SerializeField] private TMP_Text speedStatText;
     [SerializeField] private TMP_Text jumpStatText;
@@ -35,6 +36,14 @@ public class PlayerShopController : MonoBehaviour
     [SerializeField] private Button jumpButton;
     [SerializeField] private Button m16Button;
     [SerializeField] private Button akButton;
+
+    [Header("Debug")]
+    [SerializeField] private bool debugShopFlow = false;
+    [SerializeField] private bool debugDisableShopPanelAudio;
+    [SerializeField] private bool debugDisableShopFreeze;
+    [SerializeField] private bool debugForceShopPanelLocalAudioSource;
+    [SerializeField] private AudioSource debugShopPanelLocalAudioSource;
+    [SerializeField] private bool autoEnableShopDiagnostics = false;
 
     private PlayerController playerController;
     private PlayerCurrencyController currencyController;
@@ -48,10 +57,14 @@ public class PlayerShopController : MonoBehaviour
     private bool hasLoggedMissingReferences;
     private bool hasLoggedMissingShopBalanceProfile;
     private bool hasAcquiredInputGate;
+    private bool hasFrozenGameplay;
+    private bool isInsideShopZone;
     private static ShopBalanceProfile runtimeFallbackShopBalanceProfile;
     private readonly Dictionary<Button, CanvasGroup> buttonCanvasGroups = new Dictionary<Button, CanvasGroup>();
 
     private bool IsShopOpen => panelShop != null && panelShop.activeSelf;
+    public static bool IsShopPromptVisible { get; private set; }
+    public static bool IsGameplayFrozenByShop { get; private set; }
 
     private void Awake()
     {
@@ -66,6 +79,7 @@ public class PlayerShopController : MonoBehaviour
     private void Update()
     {
         RefreshOpenShopUi();
+        RefreshShopPrompt();
 
         if (ShouldForceShopClosed())
         {
@@ -78,8 +92,37 @@ public class PlayerShopController : MonoBehaviour
 
     private void OnDestroy()
     {
+        HideShopPrompt();
+        RestoreGameplayMusicIfOutsideZone();
+        UnfreezeGameplayIfNeeded();
         UnbindButtonListeners();
         ReleaseShopInputGateIfNeeded();
+    }
+
+    public void SetInsideShopZone(bool isInside)
+    {
+        LogShopFlow(isInside ? "ZONE_ENTER_REQUEST" : "ZONE_EXIT_REQUEST");
+
+        if (isInsideShopZone == isInside)
+        {
+            LogShopFlow(isInside ? "ZONE_ENTER_IGNORED" : "ZONE_EXIT_IGNORED");
+            RefreshShopPrompt();
+            return;
+        }
+
+        isInsideShopZone = isInside;
+        LogShopFlow(isInsideShopZone ? "ZONE_ENTER_APPLIED" : "ZONE_EXIT_APPLIED");
+
+        if (isInsideShopZone)
+        {
+            PlayShopMusic();
+        }
+        else
+        {
+            RestoreGameplayMusicIfOutsideZone();
+        }
+
+        RefreshShopPrompt();
     }
 
     private void ToggleShop()
@@ -104,6 +147,8 @@ public class PlayerShopController : MonoBehaviour
     {
         WarnIfMissingShopBalanceProfile();
         ResolveGameplayReferences();
+        SyncShopDiagnostics();
+        ApplyShopPanelDebugOverrides();
         BindButtonListeners();
         RefreshUi();
         WarnIfReferencesAreMissing();
@@ -116,6 +161,7 @@ public class PlayerShopController : MonoBehaviour
 
     private void OpenShop()
     {
+        LogShopFlow("SHOP_OPEN_REQUEST");
         ResolveGameplayReferences();
 
         if (panelShop == null)
@@ -124,18 +170,23 @@ public class PlayerShopController : MonoBehaviour
             return;
         }
 
+        ApplyShopPanelDebugOverrides();
         UIFxUtility.SetPanelActive(panelShop, true);
         BeginShopSession();
+        HideShopPrompt();
         RefreshUi();
+        LogShopFlow("SHOP_OPEN_APPLIED");
 
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(speedButton != null ? speedButton.gameObject : null);
+            LogShopFlow($"SHOP_SELECTION_APPLIED selected={(EventSystem.current.currentSelectedGameObject != null ? EventSystem.current.currentSelectedGameObject.name : "null")}");
         }
     }
 
     private void CloseShop()
     {
+        LogShopFlow("SHOP_CLOSE_REQUEST");
         bool wasShopOpen = IsShopOpen;
 
         if (panelShop != null)
@@ -146,14 +197,16 @@ public class PlayerShopController : MonoBehaviour
         if (wasShopOpen)
         {
             ProjectInput.ConsumePauseToggleForCurrentFrame();
-            EndShopAudioSession();
         }
 
         EndShopInputSession();
+        RefreshShopPrompt();
+        LogShopFlow("SHOP_CLOSE_APPLIED");
 
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
+            LogShopFlow("SHOP_SELECTION_CLEARED");
         }
     }
 
@@ -165,6 +218,8 @@ public class PlayerShopController : MonoBehaviour
         }
 
         ReleaseShopInputGateIfNeeded();
+        UnfreezeGameplayIfNeeded();
+        RefreshShopPrompt();
     }
 
     private void RefreshOpenShopUi()
@@ -177,7 +232,7 @@ public class PlayerShopController : MonoBehaviour
 
     private bool ShouldForceShopClosed()
     {
-        return UIManager.IsGamePaused || !IsIntermissionActive();
+        return UIManager.IsGamePaused;
     }
 
     private void CloseShopIfNeeded()
@@ -198,7 +253,10 @@ public class PlayerShopController : MonoBehaviour
 
         if (ProjectInput.WasShopTogglePressed())
         {
-            ToggleShop();
+            if (isInsideShopZone)
+            {
+                ToggleShop();
+            }
         }
     }
 
@@ -212,23 +270,91 @@ public class PlayerShopController : MonoBehaviour
 
     private void BeginShopSession()
     {
-        PlayShopMusic();
+        LogShopFlow("SHOP_SESSION_BEGIN");
         AcquireShopInputGateIfNeeded();
-    }
-
-    private void EndShopAudioSession()
-    {
-        RestoreGameplayMusic();
+        FreezeGameplayForShopIfNeeded();
     }
 
     private void EndShopInputSession()
     {
+        LogShopFlow("SHOP_SESSION_END");
         ReleaseShopInputGateIfNeeded();
+        UnfreezeGameplayIfNeeded();
     }
 
-    private bool IsIntermissionActive()
+    private void RefreshShopPrompt()
     {
-        return waveManager != null && waveManager.CurrentState == WaveManager.WaveRuntimeState.Intermission;
+        bool shouldShowPrompt = isInsideShopZone
+            && !IsShopOpen
+            && !UIManager.IsGamePaused;
+
+        if (shouldShowPrompt)
+        {
+            shopPromptUi?.ShowPrompt();
+            IsShopPromptVisible = shopPromptUi != null && shopPromptUi.IsVisible;
+            return;
+        }
+
+        HideShopPrompt();
+    }
+
+    private void HideShopPrompt()
+    {
+        shopPromptUi?.HidePrompt();
+        IsShopPromptVisible = false;
+    }
+
+    private void FreezeGameplayForShopIfNeeded()
+    {
+        LogShopFlow("FREEZE_REQUEST");
+
+        if (debugDisableShopFreeze)
+        {
+            LogShopFlow("FREEZE_DEBUG_DISABLED");
+            return;
+        }
+
+        if (hasFrozenGameplay || UIManager.IsGamePaused)
+        {
+            LogShopFlow("FREEZE_SKIPPED");
+            return;
+        }
+
+        Time.timeScale = 0f;
+        hasFrozenGameplay = true;
+        IsGameplayFrozenByShop = true;
+        LogShopFlow("FREEZE_APPLIED");
+    }
+
+    private void UnfreezeGameplayIfNeeded()
+    {
+        LogShopFlow("UNFREEZE_REQUEST");
+
+        if (!hasFrozenGameplay)
+        {
+            LogShopFlow("UNFREEZE_SKIPPED");
+            return;
+        }
+
+        hasFrozenGameplay = false;
+        IsGameplayFrozenByShop = false;
+
+        if (!UIManager.IsGamePaused)
+        {
+            Time.timeScale = 1f;
+        }
+
+        LogShopFlow("UNFREEZE_APPLIED");
+    }
+
+    private void RestoreGameplayMusicIfOutsideZone()
+    {
+        if (isInsideShopZone)
+        {
+            return;
+        }
+
+        RestoreGameplayMusic();
     }
 
     private void HandleAmmoPurchase()
@@ -687,6 +813,11 @@ public class PlayerShopController : MonoBehaviour
             missing += "PanelShop, ";
         }
 
+        if (shopPromptUi == null)
+        {
+            missing += "ShopPromptUI, ";
+        }
+
         if (moneyText == null)
         {
             missing += "MoneyText, ";
@@ -812,21 +943,87 @@ public class PlayerShopController : MonoBehaviour
     {
         if (hasAcquiredInputGate)
         {
+            LogShopFlow("INPUT_GATE_ACQUIRE_SKIPPED");
             return;
         }
 
         GameplayInputGate.Acquire(ShopInputGateOwner);
         hasAcquiredInputGate = true;
+        LogShopFlow("INPUT_GATE_ACQUIRED");
     }
 
     private void ReleaseShopInputGateIfNeeded()
     {
         if (!hasAcquiredInputGate)
         {
+            LogShopFlow("INPUT_GATE_RELEASE_SKIPPED");
             return;
         }
 
         GameplayInputGate.Release(ShopInputGateOwner);
         hasAcquiredInputGate = false;
+        LogShopFlow("INPUT_GATE_RELEASED");
+    }
+
+    private void LogShopFlow(string eventName)
+    {
+        if (!debugShopFlow)
+        {
+            return;
+        }
+
+        GameDebug.Advertencia(
+            "SHOP_FLOW",
+            $"frame={Time.frameCount} event={eventName} timeScale={Time.timeScale:0.###} insideZone={isInsideShopZone} shopOpen={IsShopOpen} paused={UIManager.IsGamePaused} inputBlocked={IsInputBlocked} frozenByShop={hasFrozenGameplay}",
+            this);
+    }
+
+    private void ApplyShopPanelDebugOverrides()
+    {
+        if (panelShop == null)
+        {
+            return;
+        }
+
+        UIPanelFx panelFx = panelShop.GetComponent<UIPanelFx>();
+
+        if (panelFx == null)
+        {
+            return;
+        }
+
+        bool? overrideAudioEnabled = debugDisableShopPanelAudio ? false : (bool?)null;
+        bool? overrideUseSharedAudioSource = debugForceShopPanelLocalAudioSource ? false : (bool?)null;
+        AudioSource overrideAudioSource = debugForceShopPanelLocalAudioSource ? debugShopPanelLocalAudioSource : null;
+        panelFx.ApplyDebugAudioOverrides(overrideAudioEnabled, overrideUseSharedAudioSource, overrideAudioSource);
+
+        if (debugShopFlow && (overrideAudioEnabled.HasValue || overrideUseSharedAudioSource.HasValue || overrideAudioSource != null))
+        {
+            string localSourceName = overrideAudioSource != null ? overrideAudioSource.name : "null";
+            GameDebug.Advertencia(
+                "SHOP_FLOW",
+                $"frame={Time.frameCount} event=SHOP_PANEL_DEBUG_OVERRIDES audioDisabled={debugDisableShopPanelAudio} freezeDisabled={debugDisableShopFreeze} forceLocalAudio={debugForceShopPanelLocalAudioSource} localSource={localSourceName}",
+                this);
+        }
+    }
+
+    private void SyncShopDiagnostics()
+    {
+        AudioManager resolvedAudioManager = ResolveAudioManager();
+        resolvedAudioManager?.SetShopAudioDebugEnabled(autoEnableShopDiagnostics);
+
+        if (panelShop != null)
+        {
+            UIPanelFx panelFx = panelShop.GetComponent<UIPanelFx>();
+            panelFx?.SetPanelAudioDebugEnabled(autoEnableShopDiagnostics);
+        }
+
+        if (!autoEnableShopDiagnostics)
+        {
+            debugShopFlow = false;
+            return;
+        }
+
+        debugShopFlow = true;
     }
 }
