@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultSettingsDefaultsProfile
   m_EditorClassIdentifier: 
   defaultVolume: 0.5
-  defaultLookSensitivity: 1
+  defaultLookSensitivity: 0
   minLookSensitivity: 0
   maxLookSensitivity: 5
   defaultWindowedWidth: 1920
