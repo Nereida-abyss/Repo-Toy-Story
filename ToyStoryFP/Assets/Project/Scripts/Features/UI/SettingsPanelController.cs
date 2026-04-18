@@ -50,12 +50,14 @@ public class SettingsPanelController : MonoBehaviour
     {
         RegisterDefaultsProfile();
         ValidateReferences();
+        BindListeners();
     }
 
     private void OnEnable()
     {
         AcquireInputGateIfNeeded();
         RegisterDefaultsProfile();
+        BindListeners();
         LoadSavedSettings();
         ApplyCurrentSettings();
         RefreshUI();
@@ -63,7 +65,21 @@ public class SettingsPanelController : MonoBehaviour
 
     private void OnDisable()
     {
+        UnbindListeners();
         ReleaseInputGateIfNeeded();
+    }
+
+    private void Update()
+    {
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+
+        if (ProjectInput.WasUiBackPressed())
+        {
+            ClosePanel();
+        }
     }
 
     public void ApplySavedSettingsFromProfileOrDefaults()
@@ -217,6 +233,27 @@ public class SettingsPanelController : MonoBehaviour
         {
             GameDebug.Advertencia("Settings", "Faltan una o mas referencias UI en SettingsPanelController.", this);
         }
+    }
+
+    private void BindListeners()
+    {
+        if (closeButton == null)
+        {
+            return;
+        }
+
+        closeButton.onClick.RemoveListener(ClosePanel);
+        closeButton.onClick.AddListener(ClosePanel);
+    }
+
+    private void UnbindListeners()
+    {
+        if (closeButton == null)
+        {
+            return;
+        }
+
+        closeButton.onClick.RemoveListener(ClosePanel);
     }
 
     private void ToggleFullscreen(FullscreenChangeOrigin origin)

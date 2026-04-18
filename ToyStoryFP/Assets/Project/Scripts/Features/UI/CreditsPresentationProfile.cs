@@ -45,6 +45,7 @@ public class CreditsPresentationProfile : ScriptableObject, ISerializationCallba
     [SerializeField] private float targetCreditsDurationMax = 9f;
     [SerializeField] private float introBeatDuration = 0.75f;
     [SerializeField] private float perNameRevealDuration = 0.55f;
+    [SerializeField] private float perNameHoldDuration = 1f;
     [SerializeField] private float perNameGap = 0.14f;
     [SerializeField] private float comboHoldDuration = 0.65f;
     [SerializeField] private float finalStingerDuration = 1.45f;
@@ -103,6 +104,7 @@ public class CreditsPresentationProfile : ScriptableObject, ISerializationCallba
     public float TargetCreditsDurationMax => targetCreditsDurationMax;
     public float IntroBeatDuration => introBeatDuration;
     public float PerNameRevealDuration => perNameRevealDuration;
+    public float PerNameHoldDuration => perNameHoldDuration;
     public float PerNameGap => perNameGap;
     public float ComboHoldDuration => comboHoldDuration;
     public float FinalStingerDuration => finalStingerDuration;

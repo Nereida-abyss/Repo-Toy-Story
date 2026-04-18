@@ -46,6 +46,8 @@ public partial class PanelController
             entry.RectTransform.anchoredPosition = entry.OriginalAnchoredPosition;
         }
 
+        HideAllCreditImages();
+
         PlayCreditsAudio(creditsProfile != null ? creditsProfile.IntroWhooshClip : null, creditsProfile != null ? creditsProfile.IntroWhooshVolume : 1f);
         yield return AnimateIntroBeat(animatedRoot, baseRootScale, Mathf.Max(0.01f, introBeatDuration), Mathf.Max(0.01f, introStartScale), clampedPulseAmount, allowSkip, skipAllowedAtTime, skipAction);
 
@@ -61,10 +63,11 @@ public partial class PanelController
         }
 
         float scaledNameRevealDuration = Mathf.Max(0.01f, perNameRevealDuration);
+        float scaledNameHoldDuration = Mathf.Max(0f, perNameHoldDuration);
         float scaledNameGap = Mathf.Max(0f, perNameGap);
         float scaledComboHold = Mathf.Max(0f, comboHoldDuration);
         float scaledFinalDuration = Mathf.Max(0.01f, finalStingerDuration);
-        ApplyHypeDurationScaling(names.Count, ref scaledNameRevealDuration, ref scaledNameGap, ref scaledComboHold, ref scaledFinalDuration);
+        ApplyHypeDurationScaling(names.Count, ref scaledNameRevealDuration, scaledNameHoldDuration, ref scaledNameGap, ref scaledComboHold, ref scaledFinalDuration);
 
         for (int i = 0; i < names.Count; i++)
         {
@@ -72,6 +75,7 @@ public partial class PanelController
             SetTextAlpha(currentName, 0f);
             currentName.RectTransform.localScale = Vector3.one;
             currentName.RectTransform.anchoredPosition = currentName.OriginalAnchoredPosition + Vector2.up * Mathf.Max(0f, nameStartYOffset);
+            ShowCreditImageForEntry(currentName);
 
             PlayCreditsAudio(creditsProfile != null ? creditsProfile.NameHitClip : null, creditsProfile != null ? creditsProfile.NameHitVolume : 1f);
             float elapsed = 0f;
@@ -121,6 +125,16 @@ public partial class PanelController
             }
 
             animatedRoot.localScale = baseRootScale;
+
+            if (scaledNameHoldDuration > 0f)
+            {
+                yield return HoldDuration(scaledNameHoldDuration, allowSkip, skipAllowedAtTime, skipAction);
+            }
+
+            if (localSkipRequested)
+            {
+                break;
+            }
 
             if (scaledNameGap > 0f && i < names.Count - 1)
             {
@@ -177,6 +191,7 @@ public partial class PanelController
             finalEntry.RectTransform.localScale = Vector3.one;
             finalEntry.RectTransform.anchoredPosition = finalEntry.OriginalAnchoredPosition + Vector2.up * Mathf.Max(nameStartYOffset, sectionStartYOffset * 0.45f);
             SetTextAlpha(finalEntry, 0f);
+            ShowCreditImageForEntry(finalEntry);
             PlayCreditsAudio(creditsProfile != null ? creditsProfile.FinalStingClip : null, creditsProfile != null ? creditsProfile.FinalStingVolume : 1f);
             float elapsed = 0f;
 

@@ -15,6 +15,7 @@ public partial class PanelController : MonoBehaviour
     [Header("CrÃ©ditos (Opcional)")]
     [SerializeField] private Button creditsButton;
     [SerializeField] private Transform creditsTextRoot;
+    [SerializeField] private List<CreditImageBinding> creditImageBindings = new List<CreditImageBinding>();
 
     [Header("Score (Opcional)")]
     [SerializeField] private ScorePanelController scorePanelController;
@@ -54,6 +55,7 @@ public partial class PanelController : MonoBehaviour
     [SerializeField] private float targetCreditsDurationMax = 9f;
     [SerializeField] private float introBeatDuration = 0.75f;
     [SerializeField] private float perNameRevealDuration = 0.55f;
+    [SerializeField] private float perNameHoldDuration = 1f;
     [SerializeField] private float perNameGap = 0.14f;
     [SerializeField] private float comboHoldDuration = 0.65f;
     [SerializeField] private float finalStingerDuration = 1.45f;
@@ -93,5 +95,15 @@ public partial class PanelController : MonoBehaviour
         public Transform Root;
         public Vector3 OriginalLocalScale;
         public List<CreditTextEntry> Entries;
+    }
+
+    [System.Serializable]
+    private sealed class CreditImageBinding
+    {
+        public string MatchText;
+        public Image TargetImage;
+        public Sprite Sprite;
+        public bool PreserveAspect = true;
+        public bool SetNativeSize;
     }
 }

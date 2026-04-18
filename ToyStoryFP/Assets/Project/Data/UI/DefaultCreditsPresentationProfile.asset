@@ -39,6 +39,7 @@ MonoBehaviour:
   targetCreditsDurationMax: 9
   introBeatDuration: 0.75
   perNameRevealDuration: 0.55
+  perNameHoldDuration: 1
   perNameGap: 0.14
   comboHoldDuration: 0.65
   finalStingerDuration: 1.45

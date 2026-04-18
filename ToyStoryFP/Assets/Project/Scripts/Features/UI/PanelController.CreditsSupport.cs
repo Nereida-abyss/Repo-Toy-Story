@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public partial class PanelController
 {
@@ -119,6 +120,8 @@ public partial class PanelController
             entry.Text.color = entry.OriginalColor;
             entry.Text.enabled = true;
         }
+
+        HideAllCreditImages();
     }
 
     private void RestoreCreditSections(List<CreditSection> sections)
@@ -280,6 +283,7 @@ public partial class PanelController
     private void ApplyHypeDurationScaling(
         int namesCount,
         ref float revealDuration,
+        float holdDuration,
         ref float revealGap,
         ref float comboHold,
         ref float finalDuration)
@@ -289,6 +293,7 @@ public partial class PanelController
         float totalDuration =
             Mathf.Max(0f, introBeatDuration) +
             (Mathf.Max(0, namesCount) * revealDuration) +
+            (Mathf.Max(0, namesCount) * holdDuration) +
             (Mathf.Max(0, namesCount - 1) * revealGap) +
             comboHold +
             finalDuration +
@@ -319,6 +324,68 @@ public partial class PanelController
         revealGap = Mathf.Max(0f, revealGap * scale);
         comboHold = Mathf.Max(0f, comboHold * scale);
         finalDuration = Mathf.Max(0.01f, finalDuration * scale);
+    }
+
+    private void ShowCreditImageForEntry(CreditTextEntry entry)
+    {
+        HideAllCreditImages();
+
+        if (entry == null || entry.Text == null)
+        {
+            return;
+        }
+
+        string normalizedEntryText = NormalizeCreditBindingKey(entry.Text.text);
+
+        if (string.IsNullOrEmpty(normalizedEntryText))
+        {
+            return;
+        }
+
+        for (int i = 0; i < creditImageBindings.Count; i++)
+        {
+            CreditImageBinding binding = creditImageBindings[i];
+
+            if (binding == null ||
+                binding.TargetImage == null ||
+                NormalizeCreditBindingKey(binding.MatchText) != normalizedEntryText)
+            {
+                continue;
+            }
+
+            binding.TargetImage.sprite = binding.Sprite;
+            binding.TargetImage.preserveAspect = binding.PreserveAspect;
+
+            if (binding.SetNativeSize)
+            {
+                binding.TargetImage.SetNativeSize();
+            }
+
+            binding.TargetImage.enabled = true;
+            return;
+        }
+    }
+
+    private void HideAllCreditImages()
+    {
+        for (int i = 0; i < creditImageBindings.Count; i++)
+        {
+            CreditImageBinding binding = creditImageBindings[i];
+
+            if (binding?.TargetImage == null)
+            {
+                continue;
+            }
+
+            binding.TargetImage.enabled = false;
+        }
+    }
+
+    private static string NormalizeCreditBindingKey(string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Trim().Replace("\r", string.Empty).Replace("\n", string.Empty).ToLowerInvariant();
     }
 
     private void PlayCreditsAudio(AudioClip clip, float volume = 1f)

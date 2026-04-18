@@ -71,6 +71,7 @@ public partial class PanelController
         targetCreditsDurationMax = creditsProfile.TargetCreditsDurationMax;
         introBeatDuration = creditsProfile.IntroBeatDuration;
         perNameRevealDuration = creditsProfile.PerNameRevealDuration;
+        perNameHoldDuration = creditsProfile.PerNameHoldDuration;
         perNameGap = creditsProfile.PerNameGap;
         comboHoldDuration = creditsProfile.ComboHoldDuration;
         finalStingerDuration = creditsProfile.FinalStingerDuration;
