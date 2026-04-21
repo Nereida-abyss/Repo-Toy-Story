@@ -353,7 +353,11 @@ public partial class PanelController
                 continue;
             }
 
-            binding.TargetImage.sprite = binding.Sprite;
+            if (binding.Sprite != null)
+            {
+                binding.TargetImage.sprite = binding.Sprite;
+            }
+
             binding.TargetImage.preserveAspect = binding.PreserveAspect;
 
             if (binding.SetNativeSize)
