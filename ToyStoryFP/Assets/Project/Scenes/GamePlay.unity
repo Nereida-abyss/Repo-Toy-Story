@@ -3501,6 +3501,10 @@ PrefabInstance:
       propertyPath: waveManager
       value: 
       objectReference: {fileID: 920100000000000003}
+    - target: {fileID: 1574091573887124914, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_text
+      value: $100
+      objectReference: {fileID: 0}
     - target: {fileID: 1966027077784214151, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: dashSpeed
       value: 4.5
@@ -3544,6 +3548,12 @@ PrefabInstance:
     - target: {fileID: 2117941058062852440, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2150208025943159541, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
+      propertyPath: m_text
+      value: '$50
+
+'
       objectReference: {fileID: 0}
     - target: {fileID: 2852006045536350014, guid: 4fbf06099fe66294dbe14f202f836e50, type: 3}
       propertyPath: m_IsActive
